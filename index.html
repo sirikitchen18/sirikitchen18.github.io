@@ -1752,28 +1752,64 @@ function sendInvoiceEmail(toEmail, order){
   +'</div>' // end card
   +'</body></html>';
 
+  // Build items_html for template
+  var itemsHtml = items.map(function(x){
+    return "<tr>"
+      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333'>"+x.qty+"</td>"
+      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333'>"+x.name+"</td>"
+      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$ "+x.price.toFixed(2)+"</td>"
+      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$ "+(x.qty*x.price).toFixed(2)+"</td>"
+      +"</tr>";
+  }).join("");
+
   var params = {
-    to_email:      toEmail,
-    reply_to:      "sirikitchen18@gmail.com",
-    name:          "Siri Kitchen",
-    email:         toEmail,
-    title:         invNum||("Invoice - "+invName),
-    customer_name: invName,
-    invoice_html:  emailHtml
+    to_email:       toEmail,
+    reply_to:       "sirikitchen18@gmail.com",
+    name:           "Siri Kitchen",
+    email:          toEmail,
+    title:          invNum||("Invoice - "+invName),
+    customer_name:  invName,
+    customer_phone: invPhone||"—",
+    address:        invAddr||"Pickup from Tarneit",
+    order_date:     receiptDate,
+    delivery_date:  invDate||"TBC",
+    delivery_time:  fmtTime||invTime||"",
+    service_type:   delType==="delivery"?"Delivery to: "+invAddr:"Pickup from Tarneit",
+    notes:          invNote||"",
+    items_html:     itemsHtml,
+    total:          tot.toFixed(2),
+    advance:        adv.toFixed(2),
+    remaining:      rem.toFixed(2),
+    invoice_html:   emailHtml
   };
 
   console.log("Sending invoice email to:", toEmail, "items:", items.length);
 
-  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
-    .then(function(){
-      alert("Invoice sent to "+toEmail+" successfully!");
+  // Send via EmailJS REST API directly (bypasses template variable escaping)
+  fetch("https://api.emailjs.com/api/v1.0/email/send", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      service_id:  EMAILJS_SERVICE_ID,
+      template_id: EMAILJS_INVOICE_TEMPLATE_ID,
+      user_id:     EMAILJS_PUBLIC_KEY,
+      template_params: params
     })
-    .catch(function(err){
-      console.error("Invoice email error:", JSON.stringify(err));
-      var sub2 = encodeURIComponent("Your Order is Confirmed - Siri Kitchen - "+invNum);
-      var body2 = encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nInvoice: "+invNum+"\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
-      window.open("mailto:"+toEmail+"?subject="+sub2+"&body="+body2,"_blank");
-    });
+  })
+  .then(function(res){
+    if(res.ok){
+      alert("Invoice sent to "+toEmail+" successfully!");
+    } else {
+      return res.text().then(function(t){throw new Error(t);});
+    }
+  })
+  .catch(function(err){
+    console.error("Invoice email error:", err);
+    // Fallback mailto
+    var sub2 = encodeURIComponent("Your Order is Confirmed - Siri Kitchen - "+invNum);
+    var body2 = encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nInvoice: "+invNum+"\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
+    window.open("mailto:"+toEmail+"?subject="+sub2+"&body="+body2,"_blank");
+  });
 }
 
 function sendDeclineWA(){
