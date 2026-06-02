@@ -672,7 +672,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
     <!-- Customer Details -->
     <div class="section-hdr">Customer Details</div>
-      <input type="hidden" id="inv-comm-mode" value="wa">
+      <input type="hidden" id="inv-comm-mode" value="">
       <input type="hidden" id="inv-cust-email" value="">
     <div class="fgrid">
       <div class="fg"><label class="fl">Customer Name</label><input class="fi" id="c-name" placeholder="e.g. Poorvi Kumar" oninput="updateInvNum()"></div>
@@ -2751,9 +2751,11 @@ function sendInvoiceSmart(){
     }
   }catch(e){}
 
-  // Priority: form fields > URL params > order object > default wa
-  var commMode  = formComm  || urlComm  || (custOrder&&custOrder.commMode) || "wa";
-  var custEmail = formEmail || urlEmail || (custOrder&&custOrder.email)    || "";
+  // Priority: URL params > order object > form fields > default wa
+  // (form fields default to "wa" so check URL/order first)
+  var commMode  = urlComm  || (custOrder&&custOrder.commMode) || formComm  || "wa";
+  var custEmail = urlEmail || (custOrder&&custOrder.email)    || formEmail || "";
+  console.log("sendInvoiceSmart sources: formComm="+formComm+" urlComm="+urlComm+" orderComm="+(custOrder&&custOrder.commMode)+" -> final="+commMode);
   var custPhone = (document.getElementById("c-phone")||{}).value||"";
   console.log("sendInvoiceSmart: mode="+commMode+" email="+custEmail);
 
@@ -2825,10 +2827,14 @@ function updateInvSendBtn(){
   var commMode  = (document.getElementById("inv-comm-mode")||{}).value || "";
   var custEmail = (document.getElementById("inv-cust-email")||{}).value || "";
 
-  if(!commMode){
-    var urlParams = new URLSearchParams(window.location.search);
-    commMode  = urlParams.get("cm") || "";
-    custEmail = urlParams.get("em") || "";
+  // Check URL params first (most reliable when coming from email Approve link)
+  var urlParams2 = new URLSearchParams(window.location.search);
+  if(!commMode || commMode==="wa"){
+    var urlC = urlParams2.get("cm") || "";
+    if(urlC) commMode = urlC;
+  }
+  if(!custEmail){
+    custEmail = urlParams2.get("em") || "";
   }
   if(!commMode){
     try{
