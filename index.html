@@ -1622,78 +1622,55 @@ function sendAcceptWA(){
   },500);
 }
 
-function sendInvoiceEmail(toEmail,order){
+function sendInvoiceEmail(toEmail, order){
   if(!toEmail||toEmail.indexOf("@")<0){alert("No customer email found.");return;}
 
-  // Try to get data from invoice generator form (already filled by loadFromStorage)
-  var invName  = (document.getElementById("c-name")||{}).value  || (order&&order.name) || "";
-  var invPhone = (document.getElementById("c-phone")||{}).value || (order&&order.phone)|| "";
-  var invAddr  = (document.getElementById("c-addr")||{}).value  || (order&&order.addr) || "";
-  var invDate  = (document.getElementById("d-date")||{}).value  || (order&&order.date) || "";
-  var invTime  = (document.getElementById("d-time")||{}).value  || (order&&order.time) || "";
-  var invNote  = (document.getElementById("inv-note")||{}).value|| (order&&order.notes)|| "";
-  var delType2 = (document.getElementById("del-type")||{}).value|| (order&&order.delType)||"pickup";
-  var delChg   = parseFloat((document.getElementById("del-charge")||{}).value||0)||(order&&order.delCharge)||0;
+  // Get the generated invoice HTML directly from the DOM
+  var invContent = document.getElementById("inv-content");
+  if(!invContent){alert("Please generate invoice first.");return;}
 
-  // Get items from invoice table rows
-  // Get items from GENERATED invoice table (most accurate)
-  var items = [];
-  document.querySelectorAll("#inv-items-body tr").forEach(function(row){
-    var cells = row.querySelectorAll("td");
-    if(cells.length>=4){
-      var qty   = parseInt(cells[0].textContent)||0;
-      var desc  = (cells[1].textContent||"").trim();
-      var total = parseFloat((cells[3].textContent||"0").replace(/[^0-9.]/g,""))||0;
-      var unitPrice = qty>0 ? total/qty : total;
-      if(qty&&desc) items.push({qty:qty, name:desc, size:"", price:unitPrice});
-    }
-  });
-  // Fallback to invoice form rows
-  if(!items.length){
-    document.querySelectorAll("#items-body tr").forEach(function(row){
-      var rid = row.id; if(!rid) return;
-      var qty   = parseFloat((document.getElementById(rid+"-qty")||{}).value)||0;
-      var desc  = (document.getElementById(rid+"-desc")||{}).value||"";
-      var price = parseFloat((document.getElementById(rid+"-price")||{}).value)||0;
-      if(qty&&desc) items.push({qty:qty, name:desc, size:"", price:price});
-    });
-  }
-  // Final fallback to order object
-  if(!items.length && order&&order.items) items=order.items;
+  // Get invoice number and customer name for subject
+  var invNum  = (document.getElementById("inv-num-display")||{}).textContent || "";
+  var invName = (document.getElementById("c-name")||{}).value || (order&&order.name) || "Customer";
+  var invDate = (document.getElementById("d-date")||{}).value || (order&&order.date) || "";
 
-  console.log("sendInvoiceEmail items:", items.length, items);
+  // Capture full invoice HTML with inline styles
+  var invoiceHtml = invContent.outerHTML;
 
-  var sub = items.reduce(function(s,x){return s+x.qty*x.price;},0);
-  // Get totals from generated invoice if available
-  var invSubEl = document.getElementById("inv-sub");
-  var invTotEl = document.getElementById("inv-total");
-  var invAdvEl = document.getElementById("inv-adv");
-  if(invSubEl) sub = parseFloat(invSubEl.textContent.replace(/[^0-9.]/g,""))||sub;
-  var tot = sub+delChg;
-  if(invTotEl) tot = parseFloat(invTotEl.textContent.replace(/[^0-9.]/g,""))||tot;
-  var adv = tot*0.4;
-  if(invAdvEl) adv = parseFloat(invAdvEl.textContent.replace(/[^0-9.]/g,""))||adv;
-  var lines = items.map(function(x){return x.qty+"x "+x.name+(x.size||"")+" - $"+(x.qty*x.price).toFixed(2);}).join("\n");
-  var params={
-    title:order.name+" - "+(order.date||"TBC"),
-    name:order.name, email:toEmail,
-    to_email:toEmail,  // Send directly to customer
-    reply_to:"sirikitchen18@gmail.com",
-    order_id:order.id||"",
-    customer_name:order.name, customer_phone:order.phone||"", customer_email:toEmail,
-    service_type:order.delType==="delivery"?"Delivery to: "+order.addr:"Pickup from Tarneit",
-    delivery_date:order.date||"TBC",delivery_time:order.time||"",
-    address:order.addr||"",notes:order.notes||"None",
-    items:(order.items||[]).map(function(x){return{name:x.name+(x.size||""),qty:String(x.qty),price:(x.qty*x.price).toFixed(2)};}),
-    items_text:lines,total:tot.toFixed(2),advance:adv.toFixed(2),
-    approval_link:"#",reject_link:"#"
+  // Wrap in a proper email-friendly container
+  var fullHtml = '<div style="font-family:Arial,sans-serif;max-width:700px;margin:auto;background:#fff;padding:20px">'
+    + invoiceHtml
+    + '</div>';
+
+  var params = {
+    to_email:       toEmail,
+    reply_to:       "sirikitchen18@gmail.com",
+    name:           "Siri Kitchen",
+    email:          toEmail,
+    title:          invNum || ("Invoice - "+invName),
+    customer_name:  invName,
+    invoice_html:   fullHtml
   };
-  emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_INVOICE_TEMPLATE_ID,params)
-    .then(function(){alert("Invoice sent to "+toEmail);})
+
+  console.log("Sending invoice email to:", toEmail, "inv:", invNum);
+
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
+    .then(function(){
+      alert("Invoice sent to "+toEmail+" successfully!");
+    })
     .catch(function(err){
-      console.error("Invoice email error:",err);
-      var body="Dear "+order.name+",\n\nYour order is confirmed!\n\nItems:\n"+lines+"\n\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPay via PayID: 0435 772 552 (Ishrat Parween)\nSend screenshot to sirikitchen18@gmail.com\n\nSiri Kitchen - 0432 237 104";
-      window.open("mailto:"+toEmail+"?subject="+encodeURIComponent("Your Order is Confirmed - Siri Kitchen")+"&body="+encodeURIComponent(body),"_blank");
+      console.error("Invoice email error:", JSON.stringify(err));
+      // Fallback: open mailto with plain text
+      var sub = encodeURIComponent("Your Order is Confirmed - Siri Kitchen - "+invNum);
+      var body = encodeURIComponent(
+        "Dear "+invName+",\n\nYour order has been confirmed!\n\n"+
+        "Invoice: "+invNum+"\n"+
+        "Date: "+invDate+"\n\n"+
+        "Please pay the 40% advance via PayID: 0435 772 552 (Ishrat Parween)\n\n"+
+        "Siri Kitchen\n0432 237 104"
+      );
+      window.open("mailto:"+toEmail+"?subject="+sub+"&body="+body,"_blank");
+      alert("EmailJS failed — opened email client as fallback. Error: "+(err.text||err.status||"unknown"));
     });
 }
 
