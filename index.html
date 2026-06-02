@@ -1588,9 +1588,19 @@ function showOrderActions(){
 
 function sendAcceptWA(){
   var custOrder=null;
-  try{var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");custOrder=q.find(function(o){return o.status==="processing";});}catch(e){}
+  try{
+    // First try processing order in queue
+    var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
+    custOrder=q.find(function(o){return o.status==="processing";});
+    // Fallback to pending order (set by URL param handler)
+    if(!custOrder){
+      var raw=localStorage.getItem("sk_pending_order");
+      if(raw) custOrder=JSON.parse(raw);
+    }
+  }catch(e){}
   var commMode=custOrder?(custOrder.commMode||"wa"):"wa";
   var custEmail=custOrder?(custOrder.email||""):"";
+  console.log("sendAcceptWA: commMode="+commMode+" email="+custEmail);
   if(commMode==="email"&&custEmail&&custEmail.indexOf("@")>0){
     if(typeof generateInvoice==="function")generateInvoice();
     setTimeout(function(){
