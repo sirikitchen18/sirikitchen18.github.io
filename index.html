@@ -2138,6 +2138,7 @@ function generateInvoice(){
 
   // Show invoice
   document.getElementById('invoice-preview').style.display='block';
+  updateInvSendBtn();
   setTimeout(()=>document.getElementById('invoice-preview').scrollIntoView({behavior:'smooth'}),100);
 }
 
@@ -2666,6 +2667,70 @@ function sendEmail(){
       alert("Email error: " + errMsg + "\nPlease try WhatsApp or call 0432 237 104.");
     });
 }
+
+function sendInvoiceSmart(){
+  // Detect comm mode from multiple sources
+  var urlParams = new URLSearchParams(window.location.search);
+  var urlComm   = urlParams.get("cm") || "";
+  var urlEmail  = urlParams.get("em") || "";
+
+  var custOrder = null;
+  try{
+    var q = JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
+    custOrder = q.find(function(o){return o.status==="processing";});
+    if(!custOrder){
+      var raw = localStorage.getItem("sk_pending_order");
+      if(raw) custOrder = JSON.parse(raw);
+    }
+  }catch(e){}
+
+  var commMode  = urlComm  || (custOrder&&custOrder.commMode)  || "wa";
+  var custEmail = urlEmail || (custOrder&&custOrder.email)      || "";
+  var custPhone = (document.getElementById("c-phone")||{}).value||"";
+
+  if(commMode==="email" && custEmail && custEmail.indexOf("@")>0){
+    // Send via EmailJS
+    sendInvoiceEmail(custEmail, custOrder);
+    // Update status
+    if(custOrder){updateOrderStatus(custOrder.id,"accepted");updateSheetStatus(custOrder.id,"Accepted");}
+  } else {
+    // Send via WhatsApp
+    if(typeof sendInvoiceWA==="function") sendInvoiceWA();
+    if(custOrder){updateOrderStatus(custOrder.id,"accepted");updateSheetStatus(custOrder.id,"Accepted");}
+  }
+}
+
+// Update invoice send button label based on comm mode
+function updateInvSendBtn(){
+  var urlParams = new URLSearchParams(window.location.search);
+  var commMode  = urlParams.get("cm") || "";
+  var custEmail = urlParams.get("em") || "";
+
+  if(!commMode){
+    try{
+      var q = JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
+      var o = q.find(function(x){return x.status==="processing";});
+      if(!o){ var r=localStorage.getItem("sk_pending_order"); if(r) o=JSON.parse(r); }
+      if(o){ commMode=o.commMode||"wa"; custEmail=o.email||""; }
+    }catch(e){}
+  }
+
+  var btn   = document.getElementById("inv-send-btn");
+  var label = document.getElementById("inv-send-label");
+  var icon  = document.getElementById("inv-send-icon");
+  if(!btn) return;
+
+  if(commMode==="email" && custEmail){
+    btn.style.background  = "#8b2500";
+    if(label) label.textContent = "Send Invoice via Email";
+    if(icon)  icon.textContent  = "📧";
+  } else {
+    btn.style.background  = "#25D366";
+    if(label) label.textContent = "Send Invoice via WhatsApp";
+    if(icon)  icon.textContent  = "📱";
+  }
+}
+
 </script>
 </body>
 </html>
