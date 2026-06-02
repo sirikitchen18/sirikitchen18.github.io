@@ -1642,9 +1642,10 @@ function sendInvoiceEmail(toEmail,order){
     var cells = row.querySelectorAll("td");
     if(cells.length>=4){
       var qty   = parseInt(cells[0].textContent)||0;
-      var desc  = cells[1].textContent||"";
-      var price = parseFloat((cells[3].textContent||"0").replace(/[^0-9.]/g,""))||0;
-      if(qty&&desc) items.push({qty:qty, name:desc, size:"", price:price});
+      var desc  = (cells[1].textContent||"").trim();
+      var total = parseFloat((cells[3].textContent||"0").replace(/[^0-9.]/g,""))||0;
+      var unitPrice = qty>0 ? total/qty : total;
+      if(qty&&desc) items.push({qty:qty, name:desc, size:"", price:unitPrice});
     }
   });
   // Fallback to invoice form rows
