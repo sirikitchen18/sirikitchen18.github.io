@@ -1636,22 +1636,42 @@ function sendInvoiceEmail(toEmail,order){
   var delChg   = parseFloat((document.getElementById("del-charge")||{}).value||0)||(order&&order.delCharge)||0;
 
   // Get items from invoice table rows
+  // Get items from GENERATED invoice table (most accurate)
   var items = [];
-  document.querySelectorAll("#items-body tr").forEach(function(row){
-    var rid = row.id;
-    if(!rid) return;
-    var qty   = parseFloat((document.getElementById(rid+"-qty")||{}).value)||0;
-    var desc  = (document.getElementById(rid+"-desc")||{}).value||"";
-    var price = parseFloat((document.getElementById(rid+"-price")||{}).value)||0;
-    if(qty&&desc) items.push({qty:qty, name:desc, size:"", price:price});
+  document.querySelectorAll("#inv-items-body tr").forEach(function(row){
+    var cells = row.querySelectorAll("td");
+    if(cells.length>=4){
+      var qty   = parseInt(cells[0].textContent)||0;
+      var desc  = cells[1].textContent||"";
+      var price = parseFloat((cells[3].textContent||"0").replace(/[^0-9.]/g,""))||0;
+      if(qty&&desc) items.push({qty:qty, name:desc, size:"", price:price});
+    }
   });
-
-  // Fallback to order object items
+  // Fallback to invoice form rows
+  if(!items.length){
+    document.querySelectorAll("#items-body tr").forEach(function(row){
+      var rid = row.id; if(!rid) return;
+      var qty   = parseFloat((document.getElementById(rid+"-qty")||{}).value)||0;
+      var desc  = (document.getElementById(rid+"-desc")||{}).value||"";
+      var price = parseFloat((document.getElementById(rid+"-price")||{}).value)||0;
+      if(qty&&desc) items.push({qty:qty, name:desc, size:"", price:price});
+    });
+  }
+  // Final fallback to order object
   if(!items.length && order&&order.items) items=order.items;
 
+  console.log("sendInvoiceEmail items:", items.length, items);
+
   var sub = items.reduce(function(s,x){return s+x.qty*x.price;},0);
+  // Get totals from generated invoice if available
+  var invSubEl = document.getElementById("inv-sub");
+  var invTotEl = document.getElementById("inv-total");
+  var invAdvEl = document.getElementById("inv-adv");
+  if(invSubEl) sub = parseFloat(invSubEl.textContent.replace(/[^0-9.]/g,""))||sub;
   var tot = sub+delChg;
+  if(invTotEl) tot = parseFloat(invTotEl.textContent.replace(/[^0-9.]/g,""))||tot;
   var adv = tot*0.4;
+  if(invAdvEl) adv = parseFloat(invAdvEl.textContent.replace(/[^0-9.]/g,""))||adv;
   var lines = items.map(function(x){return x.qty+"x "+x.name+(x.size||"")+" - $"+(x.qty*x.price).toFixed(2);}).join("\n");
   var params={
     title:order.name+" - "+(order.date||"TBC"),
