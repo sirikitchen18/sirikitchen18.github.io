@@ -672,6 +672,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
     <!-- Customer Details -->
     <div class="section-hdr">Customer Details</div>
+      <input type="hidden" id="inv-comm-mode" value="wa">
+      <input type="hidden" id="inv-cust-email" value="">
     <div class="fgrid">
       <div class="fg"><label class="fl">Customer Name</label><input class="fi" id="c-name" placeholder="e.g. Poorvi Kumar" oninput="updateInvNum()"></div>
       <div class="fg"><label class="fl">Phone Number</label><input class="fi" id="c-phone" placeholder="04xx xxx xxx"></div>
@@ -1866,6 +1868,8 @@ function loadFromStorage() {
   setVal("c-name",    od.name);
   setVal("c-phone",   od.phone);
   setVal("c-addr",    od.addr);
+  setVal("inv-comm-mode",  od.commMode||"wa");
+  setVal("inv-cust-email", od.email||"");
   setVal("d-date",    od.date);
   setVal("d-time",    od.time);
   setVal("inv-note",  od.notes);
@@ -2662,7 +2666,11 @@ function sendEmail(){
 }
 
 function sendInvoiceSmart(){
-  // Detect comm mode from multiple sources
+  // Read from hidden form fields (most reliable - set by loadFromStorage)
+  var formComm  = (document.getElementById("inv-comm-mode")||{}).value || "";
+  var formEmail = (document.getElementById("inv-cust-email")||{}).value || "";
+
+  // Also check URL params and localStorage as fallback
   var urlParams = new URLSearchParams(window.location.search);
   var urlComm   = urlParams.get("cm") || "";
   var urlEmail  = urlParams.get("em") || "";
@@ -2677,9 +2685,11 @@ function sendInvoiceSmart(){
     }
   }catch(e){}
 
-  var commMode  = urlComm  || (custOrder&&custOrder.commMode)  || "wa";
-  var custEmail = urlEmail || (custOrder&&custOrder.email)      || "";
+  // Priority: form fields > URL params > order object > default wa
+  var commMode  = formComm  || urlComm  || (custOrder&&custOrder.commMode) || "wa";
+  var custEmail = formEmail || urlEmail || (custOrder&&custOrder.email)    || "";
   var custPhone = (document.getElementById("c-phone")||{}).value||"";
+  console.log("sendInvoiceSmart: mode="+commMode+" email="+custEmail);
 
   if(commMode==="email" && custEmail && custEmail.indexOf("@")>0){
     // Send via EmailJS
@@ -2687,18 +2697,73 @@ function sendInvoiceSmart(){
     // Update status
     if(custOrder){updateOrderStatus(custOrder.id,"accepted");updateSheetStatus(custOrder.id,"Accepted");}
   } else {
-    // Send via WhatsApp
-    if(typeof sendInvoiceWA==="function") sendInvoiceWA();
+    // WhatsApp: screenshot invoice then open WA with short message
+    sendInvoiceViaWhatsApp(custPhone, custOrder);
     if(custOrder){updateOrderStatus(custOrder.id,"accepted");updateSheetStatus(custOrder.id,"Accepted");}
+  }
+}
+
+function sendInvoiceViaWhatsApp(phone, order){
+  var name  = (document.getElementById("c-name")||{}).value || (order&&order.name) || "";
+  var date  = (document.getElementById("d-date")||{}).value || (order&&order.date) || "";
+  var time  = (document.getElementById("d-time")||{}).value || (order&&order.time) || "";
+  var sub   = typeof getSubtotal==="function" ? getSubtotal() : 0;
+  var del   = parseFloat((document.getElementById("del-charge")||{}).value)||0;
+  var tot   = sub+del;
+  var adv   = tot*0.4;
+  var invNum= makeInvNum(name, date);
+
+  var msg = [
+    "✅ *Order Confirmed - Siri Kitchen*","",
+    "Hi "+name+"! Your order has been accepted.",
+    "*Invoice:* "+invNum,
+    "*Date:* "+date+" at "+time,
+    "*Total:* $"+tot.toFixed(2),
+    "*Advance (40%):* $"+adv.toFixed(2),
+    "",
+    "Please pay the advance via PayID:",
+    "*0435 772 552 (Ishrat Parween)*",
+    "",
+    "_Invoice image attached. Send payment screenshot to confirm._"
+  ].filter(Boolean).join("\n");
+
+  var waNum = phone ? phone.replace(/\D/g,"").replace(/^0/,"61") : "61432237104";
+
+  // Screenshot invoice first, then open WhatsApp
+  var invEl = document.getElementById("inv-content");
+  if(invEl && typeof html2canvas !== "undefined"){
+    html2canvas(invEl, {scale:2, backgroundColor:"#ffffff", logging:false})
+      .then(function(canvas){
+        // Download screenshot
+        var link = document.createElement("a");
+        link.download = "Invoice-"+invNum+".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        // Then open WhatsApp after short delay
+        setTimeout(function(){
+          window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
+        }, 800);
+      })
+      .catch(function(){
+        // If screenshot fails, just open WhatsApp
+        window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
+      });
+  } else {
+    window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
   }
 }
 
 // Update invoice send button label based on comm mode
 function updateInvSendBtn(){
-  var urlParams = new URLSearchParams(window.location.search);
-  var commMode  = urlParams.get("cm") || "";
-  var custEmail = urlParams.get("em") || "";
+  // Read from hidden fields first (most reliable)
+  var commMode  = (document.getElementById("inv-comm-mode")||{}).value || "";
+  var custEmail = (document.getElementById("inv-cust-email")||{}).value || "";
 
+  if(!commMode){
+    var urlParams = new URLSearchParams(window.location.search);
+    commMode  = urlParams.get("cm") || "";
+    custEmail = urlParams.get("em") || "";
+  }
   if(!commMode){
     try{
       var q = JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
