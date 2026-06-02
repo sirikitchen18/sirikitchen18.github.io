@@ -1591,44 +1591,73 @@ function showOrderActions(){
 function sendAcceptWA(){
   var custOrder=null;
   try{
-    // Try processing order in queue first
     var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
     custOrder=q.find(function(o){return o.status==="processing";});
-    // Fallback to pending order
     if(!custOrder){
       var raw=localStorage.getItem("sk_pending_order");
       if(raw) custOrder=JSON.parse(raw);
     }
   }catch(e){}
-  // Also check URL params as final fallback (when coming from email Approve link)
+
+  // Get commMode - check all sources in priority order
   var urlParams=new URLSearchParams(window.location.search);
-  var urlComm=urlParams.get("cm")||urlParams.get("comm")||"";
-  var urlEmail=urlParams.get("em")||urlParams.get("email")||"";
-  var commMode=urlComm||(custOrder?(custOrder.commMode||"wa"):"wa");
-  var custEmail=urlEmail||(custOrder?(custOrder.email||""):"");
-  console.log("sendAcceptWA: commMode="+commMode+" email="+custEmail);
-  if(commMode==="email"&&custEmail&&custEmail.indexOf("@")>0){
-    if(typeof generateInvoice==="function")generateInvoice();
-    setTimeout(function(){
-      sendInvoiceEmail(custEmail,custOrder);
-      if(custOrder){updateOrderStatus(custOrder.id,"accepted");updateSheetStatus(custOrder.id,"Accepted");}
-    },300);
-  } else {
-    if(typeof generateInvoice==="function")generateInvoice();
-    setTimeout(function(){
-      if(typeof sendInvoiceWA==="function")sendInvoiceWA();
-      if(custOrder){updateOrderStatus(custOrder.id,"accepted");updateSheetStatus(custOrder.id,"Accepted");}
-    },300);
-  }
+  var urlComm  = urlParams.get("cm")||"";
+  var urlEmail = urlParams.get("em")||"";
+  var commMode = urlComm || (custOrder&&custOrder.commMode) || "wa";
+  var custEmail= urlEmail|| (custOrder&&custOrder.email)   || "";
+
+  console.log("sendAcceptWA: mode="+commMode+" email="+custEmail+" order=",custOrder);
+
+  // Generate invoice preview first
+  if(typeof generateInvoice==="function") generateInvoice();
+
+  setTimeout(function(){
+    if(commMode==="email" && custEmail && custEmail.indexOf("@")>0){
+      // Send invoice via EmailJS to customer email
+      sendInvoiceEmail(custEmail, custOrder);
+    } else {
+      // Send invoice via WhatsApp
+      if(typeof sendInvoiceWA==="function") sendInvoiceWA();
+    }
+    // Update status
+    if(custOrder){
+      updateOrderStatus(custOrder.id,"accepted");
+      updateSheetStatus(custOrder.id,"Accepted");
+    }
+  },500);
 }
 
 function sendInvoiceEmail(toEmail,order){
-  if(!order){alert("No order data.");return;}
-  var sub=(order.items||[]).reduce(function(s,x){return s+x.qty*x.price;},0);
-  var del=order.delCharge||0;
-  var tot=sub+del;
-  var adv=tot*0.4;
-  var lines=(order.items||[]).map(function(x){return x.qty+"x "+x.name+(x.size||"")+" - $"+(x.qty*x.price).toFixed(2);}).join("\n");
+  if(!toEmail||toEmail.indexOf("@")<0){alert("No customer email found.");return;}
+
+  // Try to get data from invoice generator form (already filled by loadFromStorage)
+  var invName  = (document.getElementById("c-name")||{}).value  || (order&&order.name) || "";
+  var invPhone = (document.getElementById("c-phone")||{}).value || (order&&order.phone)|| "";
+  var invAddr  = (document.getElementById("c-addr")||{}).value  || (order&&order.addr) || "";
+  var invDate  = (document.getElementById("d-date")||{}).value  || (order&&order.date) || "";
+  var invTime  = (document.getElementById("d-time")||{}).value  || (order&&order.time) || "";
+  var invNote  = (document.getElementById("inv-note")||{}).value|| (order&&order.notes)|| "";
+  var delType2 = (document.getElementById("del-type")||{}).value|| (order&&order.delType)||"pickup";
+  var delChg   = parseFloat((document.getElementById("del-charge")||{}).value||0)||(order&&order.delCharge)||0;
+
+  // Get items from invoice table rows
+  var items = [];
+  document.querySelectorAll("#items-body tr").forEach(function(row){
+    var rid = row.id;
+    if(!rid) return;
+    var qty   = parseFloat((document.getElementById(rid+"-qty")||{}).value)||0;
+    var desc  = (document.getElementById(rid+"-desc")||{}).value||"";
+    var price = parseFloat((document.getElementById(rid+"-price")||{}).value)||0;
+    if(qty&&desc) items.push({qty:qty, name:desc, size:"", price:price});
+  });
+
+  // Fallback to order object items
+  if(!items.length && order&&order.items) items=order.items;
+
+  var sub = items.reduce(function(s,x){return s+x.qty*x.price;},0);
+  var tot = sub+delChg;
+  var adv = tot*0.4;
+  var lines = items.map(function(x){return x.qty+"x "+x.name+(x.size||"")+" - $"+(x.qty*x.price).toFixed(2);}).join("\n");
   var params={
     title:order.name+" - "+(order.date||"TBC"),
     name:order.name, email:toEmail,
