@@ -1625,98 +1625,144 @@ function sendAcceptWA(){
 function sendInvoiceEmail(toEmail, order){
   if(!toEmail||toEmail.indexOf("@")<0){alert("No customer email found.");return;}
 
-  // Get the generated invoice HTML directly from the DOM
-  var invContent = document.getElementById("inv-content");
-  if(!invContent){alert("Please generate invoice first.");return;}
+  // Read data from generated invoice
+  var invNum   = (document.getElementById("inv-num-display")||{}).textContent||"";
+  var invName  = (document.getElementById("c-name")||{}).value||(order&&order.name)||"Customer";
+  var invPhone = (document.getElementById("c-phone")||{}).value||(order&&order.phone)||"";
+  var invAddr  = (document.getElementById("c-addr")||{}).value||(order&&order.addr)||"";
+  var invDate  = (document.getElementById("d-date")||{}).value||(order&&order.date)||"";
+  var invTime  = (document.getElementById("d-time")||{}).value||(order&&order.time)||"";
+  var delType  = (document.getElementById("del-type")||{}).value||(order&&order.delType)||"pickup";
+  var delChg   = parseFloat((document.getElementById("del-charge")||{}).value||0)||(order&&order.delCharge)||0;
+  var invNote  = (document.getElementById("inv-note")||{}).value||(order&&order.notes)||"";
+  var receiptDate = new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"});
 
-  // Get invoice number and customer name for subject
-  var invNum  = (document.getElementById("inv-num-display")||{}).textContent || "";
-  var invName = (document.getElementById("c-name")||{}).value || (order&&order.name) || "Customer";
-  var invDate = (document.getElementById("d-date")||{}).value || (order&&order.date) || "";
+  // Read items from invoice table
+  var items = [];
+  document.querySelectorAll("#items-body tr").forEach(function(row){
+    var rid=row.id; if(!rid)return;
+    var qty  =parseFloat((document.getElementById(rid+"-qty")||{}).value)||0;
+    var desc =(document.getElementById(rid+"-desc")||{}).value||"";
+    var price=parseFloat((document.getElementById(rid+"-price")||{}).value)||0;
+    if(qty&&desc) items.push({qty:qty,name:desc,price:price});
+  });
+  if(!items.length&&order&&order.items) items=order.items;
 
-  // Capture full invoice HTML
-  var invoiceHtml = invContent.outerHTML;
+  var sub = items.reduce(function(s,x){return s+x.qty*x.price;},0);
+  var tot = sub+delChg;
+  var adv = tot*0.4;
+  var rem = tot-adv;
 
-  // Extract and inline all CSS from the page that applies to invoice
-  var styleSheets = document.styleSheets;
-  var cssText = "";
-  try{
-    for(var i=0;i<styleSheets.length;i++){
-      var rules = styleSheets[i].cssRules || styleSheets[i].rules || [];
-      for(var j=0;j<rules.length;j++){
-        var sel = rules[j].selectorText||"";
-        // Only include invoice-related styles
-        if(sel && (sel.indexOf("inv")<0 && sel.indexOf("bill")<0 && 
-           sel.indexOf("table")<0 && sel.indexOf("td")<0 && sel.indexOf("th")<0)) continue;
-        cssText += rules[j].cssText+" ";
-      }
-    }
-  }catch(e){}
+  // Build fully inline-styled email HTML
+  var itemRows = items.map(function(x){
+    return '<tr>'
+      +'<td style="padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333">'+x.qty+'</td>'
+      +'<td style="padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333">'+x.name+'</td>'
+      +'<td style="padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right">$ '+x.price.toFixed(2)+'</td>'
+      +'<td style="padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right">$ '+(x.qty*x.price).toFixed(2)+'</td>'
+      +'</tr>';
+  }).join("");
 
-  // Wrap with email-optimised styles
-  var fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
-    + '<style>'
-    + 'body{margin:0;padding:20px;background:#f0ebe3;font-family:Arial,Helvetica,sans-serif}'
-    // Outer wrapper
-    + '#inv-content{max-width:640px!important;margin:0 auto!important;background:#fff!important;border-radius:12px!important;overflow:hidden!important;box-shadow:0 4px 20px rgba(0,0,0,0.12)!important}'
-    // Header - bigger, bolder
-    + '.inv-hdr{background:linear-gradient(135deg,#5a1000 0%,#8b2500 50%,#5a1000 100%)!important;padding:28px 2rem 40px!important;text-align:center!important;color:#fff!important;position:relative!important}'
-    + '.inv-hdr .inv-title{font-size:28px!important;font-weight:900!important;letter-spacing:2px!important;margin:0 0 6px!important;display:block!important}'
-    + '.inv-hdr .inv-sub{font-size:13px!important;opacity:0.85!important;margin:4px 0!important;display:block!important}'
-    + '.inv-hdr .inv-contact{font-size:12px!important;opacity:0.75!important;margin:4px 0!important;display:block!important}'
-    + '.inv-hdr .inv-delivery{font-size:11px!important;opacity:0.7!important;margin:8px 0 0!important;display:block!important}'
-    // Invoice number - small pill bottom right, NOT full width
-    + '.inv-num{position:absolute!important;bottom:10px!important;right:16px!important;width:auto!important;display:inline-block!important;background:#fff!important;color:#8b2500!important;font-size:10px!important;font-weight:800!important;padding:3px 12px!important;border-radius:20px!important;box-shadow:0 1px 4px rgba(0,0,0,0.2)!important;white-space:nowrap!important}'
-    // Body
-    + '.inv-body{padding:1.5rem!important;background:#fff!important}'
-    // Bill section - two columns
-    + '.inv-bill{display:table!important;width:100%!important;margin-bottom:1.5rem!important;border-spacing:12px!important}'
-    + '.inv-bill-box{display:table-cell!important;width:50%!important;background:#fdf6ee!important;border:1px solid #f0dcc8!important;border-radius:8px!important;padding:12px 14px!important;vertical-align:top!important}'
-    + '.inv-bill-box h3{color:#8b2500!important;font-size:11px!important;text-transform:uppercase!important;letter-spacing:1px!important;margin:0 0 8px!important;padding-bottom:6px!important;border-bottom:1px solid #f0dcc8!important}'
-    + '.inv-bill-box p{margin:4px 0!important;font-size:13px!important;line-height:1.5!important}'
-    // Items table
-    + '.inv-items{width:100%!important;border-collapse:collapse!important;margin:16px 0!important;border-radius:8px!important;overflow:hidden!important}'
-    + '.inv-items th{background:#8b2500!important;color:#fff!important;padding:10px 12px!important;font-size:12px!important;text-transform:uppercase!important;letter-spacing:0.5px!important}'
-    + '.inv-items td{padding:10px 12px!important;font-size:13px!important;border-bottom:1px solid #f5ede0!important}'
-    + '.inv-items tr:last-child td{border-bottom:none!important}'
-    + '.inv-items tr:nth-child(even) td{background:#fdf9f5!important}'
-    // Totals
-    + '.inv-totals{background:#fdf6ee!important;border:1px solid #f0dcc8!important;border-radius:8px!important;padding:12px 16px!important;margin-top:16px!important}'
-    + '.inv-total-row{display:table!important;width:100%!important;padding:5px 0!important;font-size:13px!important;border-bottom:1px solid #f0dcc8!important}'
-    + '.inv-total-row:last-child{border-bottom:none!important}'
-    + '.inv-total-label{display:table-cell!important;color:#666!important}'
-    + '.inv-total-amount{display:table-cell!important;text-align:right!important;font-weight:600!important;color:#333!important}'
-    + '.inv-grand .inv-total-label,.inv-grand .inv-total-amount{color:#8b2500!important;font-size:15px!important;font-weight:800!important;padding-top:8px!important}'
-    // Payment section
-    + '.inv-payment{background:#fff8f0!important;border:2px solid #f0dcc8!important;border-radius:8px!important;padding:16px!important;margin-top:16px!important}'
-    + '.inv-payment h3{color:#8b2500!important;font-size:13px!important;text-transform:uppercase!important;letter-spacing:1px!important;margin:0 0 12px!important;padding-bottom:8px!important;border-bottom:1px solid #f0dcc8!important}'
-    + '.inv-payment-row{display:table!important;width:100%!important;margin-bottom:8px!important}'
-    + '.inv-payment-label{display:table-cell!important;font-size:13px!important;color:#666!important;width:50%!important}'
-    + '.inv-payment-val{display:table-cell!important;font-size:13px!important;font-weight:700!important;color:#333!important}'
-    + '.inv-pay-summary{background:#fdf6ee!important;border-radius:6px!important;padding:10px 12px!important;margin-top:12px!important}'
-    + '.inv-pay-summary h4{color:#8b2500!important;font-size:12px!important;margin:0 0 8px!important}'
-    + '.inv-adv-row{display:table!important;width:100%!important;margin:4px 0!important}'
-    + '.inv-adv-label{display:table-cell!important;font-size:13px!important;color:#555!important}'
-    + '.inv-adv-amt{display:table-cell!important;font-size:13px!important;font-weight:700!important;color:#8b2500!important;text-align:right!important}'
-    // Footer
-    + '.inv-footer{background:#f5f0e8!important;padding:16px!important;text-align:center!important;border-top:1px solid #e8ddd0!important}'
-    + '.inv-footer p{margin:3px 0!important;font-size:12px!important;color:#888!important}'
-    + cssText
-    + '</style></head><body>'
-    + invoiceHtml
-    + '</body></html>';
+  var fmtTime = "";
+  if(invTime){try{var tp=invTime.split(":");var h=parseInt(tp[0]);var m=tp[1];var ap=h>=12?"PM":"AM";h=h%12||12;fmtTime=h+":"+m+" "+ap;}catch(e){fmtTime=invTime;}}
+
+  var deliveryInfo = delType==="delivery"
+    ? "Delivery to: "+invAddr
+    : "Pickup from Tarneit";
+
+  var emailHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>'
+  +'<body style="margin:0;padding:20px;background:#f0ebe3;font-family:Arial,Helvetica,sans-serif">'
+  +'<div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.12)">'
+
+  // Header
+  +'<div style="background:#8b2500;padding:28px 24px 36px;text-align:center;position:relative">'
+  +'<div style="font-size:24px;font-weight:900;color:#ffffff;letter-spacing:2px;margin-bottom:6px">SIRI KITCHEN</div>'
+  +'<div style="font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:4px">Relish the taste of quality Indian home-made food</div>'
+  +'<div style="font-size:12px;color:rgba(255,255,255,0.75);margin-bottom:8px">Near Riverdale Village Shopping Centre, Tarneit &middot; 0432 237 104</div>'
+  +'<div style="font-size:11px;color:rgba(255,255,255,0.65)">&#128666; Free on orders above $100 (within 5km) &middot; $8 (5&ndash;10km) &middot; $1/km beyond</div>'
+  +'<div style="position:absolute;bottom:10px;right:16px;background:#ffffff;color:#8b2500;font-size:10px;font-weight:800;padding:3px 12px;border-radius:20px;white-space:nowrap">'+invNum+'</div>'
+  +'</div>'
+
+  // Body
+  +'<div style="padding:24px">'
+
+  // Bill To + Order Details (two columns using table for email compatibility)
+  +'<table style="width:100%;border-collapse:separate;border-spacing:8px;margin-bottom:20px"><tr>'
+  +'<td style="width:50%;background:#fdf6ee;border:1px solid #f0dcc8;border-radius:8px;padding:14px;vertical-align:top">'
+  +'<div style="color:#8b2500;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f0dcc8">Bill To</div>'
+  +'<div style="font-size:14px;font-weight:700;color:#222;margin-bottom:4px">'+invName+'</div>'
+  +(invPhone?'<div style="font-size:13px;color:#555;margin-bottom:3px">&#128222; '+invPhone+'</div>':'')
+  +'<div style="font-size:13px;color:#555">&#128205; '+invAddr+'</div>'
+  +'</td>'
+  +'<td style="width:50%;background:#fdf6ee;border:1px solid #f0dcc8;border-radius:8px;padding:14px;vertical-align:top">'
+  +'<div style="color:#8b2500;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f0dcc8">Order Details</div>'
+  +'<div style="font-size:13px;color:#555;margin-bottom:4px"><b>Receipt:</b> '+receiptDate+'</div>'
+  +'<div style="font-size:13px;color:#555;margin-bottom:4px"><b>Order Date:</b> '+invDate+'</div>'
+  +'<div style="font-size:13px;color:#555;margin-bottom:4px"><b>Time:</b> '+fmtTime+'</div>'
+  +'<div style="font-size:13px;color:#555"><b>Type:</b> '+deliveryInfo+'</div>'
+  +'</td>'
+  +'</tr></table>'
+
+  // Items table
+  +'<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden;margin-bottom:16px">'
+  +'<thead><tr style="background:#8b2500">'
+  +'<th style="padding:10px 12px;color:#fff;font-size:12px;text-transform:uppercase;text-align:left;width:10%">QTY</th>'
+  +'<th style="padding:10px 12px;color:#fff;font-size:12px;text-transform:uppercase;text-align:left">DESCRIPTION</th>'
+  +'<th style="padding:10px 12px;color:#fff;font-size:12px;text-transform:uppercase;text-align:right;width:18%">PRICE</th>'
+  +'<th style="padding:10px 12px;color:#fff;font-size:12px;text-transform:uppercase;text-align:right;width:18%">TOTAL</th>'
+  +'</tr></thead>'
+  +'<tbody>'+itemRows+'</tbody>'
+  +'</table>'
+
+  // Totals
+  +'<table style="width:100%;border-collapse:collapse;background:#fdf6ee;border:1px solid #f0dcc8;border-radius:8px;margin-bottom:16px">'
+  +(delChg>0?'<tr><td style="padding:8px 16px;font-size:13px;color:#666">Delivery Charge</td><td style="padding:8px 16px;font-size:13px;text-align:right;color:#333">$ '+delChg.toFixed(2)+'</td></tr>':'')
+  +'<tr><td style="padding:8px 16px;font-size:13px;color:#666">Sub Total <span style="font-size:11px;color:#999">(including tax)</span></td><td style="padding:8px 16px;font-size:13px;font-weight:600;text-align:right;color:#333">$ '+sub.toFixed(2)+'</td></tr>'
+  +'<tr style="border-top:2px solid #f0dcc8"><td style="padding:10px 16px;font-size:15px;font-weight:800;color:#8b2500">Grand Total</td><td style="padding:10px 16px;font-size:15px;font-weight:800;text-align:right;color:#8b2500">$ '+tot.toFixed(2)+'</td></tr>'
+  +'</table>'
+
+  // Payment section
+  +'<div style="background:#fff8f0;border:2px solid #f0dcc8;border-radius:8px;padding:16px;margin-bottom:16px">'
+  +'<div style="color:#8b2500;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0dcc8">Payment Method</div>'
+  +'<table style="width:100%;border-collapse:collapse">'
+  +'<tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%">PayID</td><td style="padding:5px 0;font-size:13px;font-weight:700;color:#333">0435 772 552</td></tr>'
+  +'<tr><td style="padding:5px 0;font-size:13px;color:#666">Account Name</td><td style="padding:5px 0;font-size:13px;font-weight:700;color:#333">Ishrat Parween</td></tr>'
+  +'</table>'
+  +'<div style="background:#fdf0e0;border-radius:6px;padding:12px;margin-top:12px">'
+  +'<div style="color:#8b2500;font-size:12px;font-weight:700;margin-bottom:8px">Payment Summary</div>'
+  +'<table style="width:100%;border-collapse:collapse">'
+  +'<tr><td style="padding:4px 0;font-size:13px;color:#555">Advance Payment (40%)</td><td style="padding:4px 0;font-size:14px;font-weight:800;color:#8b2500;text-align:right">$ '+adv.toFixed(2)+'</td></tr>'
+  +'<tr><td style="padding:4px 0;font-size:13px;color:#555">Remaining after Pickup/Delivery</td><td style="padding:4px 0;font-size:13px;font-weight:600;color:#333;text-align:right">$ '+rem.toFixed(2)+'</td></tr>'
+  +'</table>'
+  +'</div>'
+  +'</div>'
+
+  +(invNote?'<div style="background:#f9f9f9;border-left:3px solid #8b2500;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#555"><b>Note:</b> '+invNote+'</div>':'')
+
+  +'</div>' // end body
+
+  // Footer
+  +'<div style="background:#f5f0e8;padding:16px;text-align:center;border-top:1px solid #e8ddd0">'
+  +'<div style="font-size:13px;font-weight:700;color:#8b2500;margin-bottom:4px">Siri Kitchen</div>'
+  +'<div style="font-size:12px;color:#888;margin-bottom:2px">18 Gunawan Drive, Tarneit, VIC 3029</div>'
+  +'<div style="font-size:12px;color:#888;margin-bottom:2px">0432 237 104</div>'
+  +'<div style="font-size:12px;color:#888"><a href="mailto:sirikitchen18@gmail.com" style="color:#8b2500;text-decoration:none">sirikitchen18@gmail.com</a></div>'
+  +'</div>'
+
+  +'</div>' // end card
+  +'</body></html>';
 
   var params = {
-    to_email:       toEmail,
-    reply_to:       "sirikitchen18@gmail.com",
-    name:           "Siri Kitchen",
-    email:          toEmail,
-    title:          invNum || ("Invoice - "+invName),
-    customer_name:  invName,
-    invoice_html:   fullHtml
+    to_email:      toEmail,
+    reply_to:      "sirikitchen18@gmail.com",
+    name:          "Siri Kitchen",
+    email:         toEmail,
+    title:         invNum||("Invoice - "+invName),
+    customer_name: invName,
+    invoice_html:  emailHtml
   };
 
-  console.log("Sending invoice email to:", toEmail, "inv:", invNum);
+  console.log("Sending invoice email to:", toEmail, "items:", items.length);
 
   emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
     .then(function(){
@@ -1724,17 +1770,9 @@ function sendInvoiceEmail(toEmail, order){
     })
     .catch(function(err){
       console.error("Invoice email error:", JSON.stringify(err));
-      // Fallback: open mailto with plain text
-      var sub = encodeURIComponent("Your Order is Confirmed - Siri Kitchen - "+invNum);
-      var body = encodeURIComponent(
-        "Dear "+invName+",\n\nYour order has been confirmed!\n\n"+
-        "Invoice: "+invNum+"\n"+
-        "Date: "+invDate+"\n\n"+
-        "Please pay the 40% advance via PayID: 0435 772 552 (Ishrat Parween)\n\n"+
-        "Siri Kitchen\n0432 237 104"
-      );
-      window.open("mailto:"+toEmail+"?subject="+sub+"&body="+body,"_blank");
-      alert("EmailJS failed — opened email client as fallback. Error: "+(err.text||err.status||"unknown"));
+      var sub2 = encodeURIComponent("Your Order is Confirmed - Siri Kitchen - "+invNum);
+      var body2 = encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nInvoice: "+invNum+"\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
+      window.open("mailto:"+toEmail+"?subject="+sub2+"&body="+body2,"_blank");
     });
 }
 
