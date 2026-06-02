@@ -1579,8 +1579,8 @@ function showOrderActions(){
       Review the order above then choose your response:
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button onclick="sendAcceptWA()" style="flex:1;background:var(--red);color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;min-width:140px">
-        ✅ Accept — Send Invoice
+      <button onclick="if(typeof generateInvoice==='function')generateInvoice();updateInvSendBtn();" style="flex:1;background:var(--red);color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;min-width:140px">
+        ✅ Generate Invoice
       </button>
       <button onclick="sendDeclineWA()" style="flex:1;background:#fff;color:var(--sub);border:2px solid var(--border);border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;min-width:140px">
         ❌ Not Available
@@ -1625,60 +1625,41 @@ function sendAcceptWA(){
 function sendInvoiceEmail(toEmail, order){
   if(!toEmail||toEmail.indexOf("@")<0){alert("No customer email found.");return;}
 
-  // Get data - try DOM first, fallback to order object
-  function getVal(id){ var el=document.getElementById(id); return el?el.value.trim():""; }
-
-  var invName  = getVal("c-name")  || (order&&order.name)  || "";
-  var invPhone = getVal("c-phone") || (order&&order.phone) || "";
-  var invAddr  = getVal("c-addr")  || (order&&order.addr)  || "";
-  var invDate  = getVal("d-date")  || (order&&order.date)  || "";
-  var invTime  = getVal("d-time")  || (order&&order.time)  || "";
-  var invNote  = getVal("inv-note")|| (order&&order.notes) || "";
-  var delType  = getVal("del-type")|| (order&&order.delType)||"pickup";
-  var delChg   = parseFloat(getVal("del-charge"))||parseFloat(order&&order.delCharge)||0;
-  var invNum   = getVal("inv-num-display")|| (document.getElementById("inv-num-display")||{}).textContent||makeInvNum(invName,invDate);
-
+  // Get data from order object (most reliable)
+  var invName  = (order&&order.name)  || (document.getElementById("c-name")||{}).value  || "Customer";
+  var invPhone = (order&&order.phone) || (document.getElementById("c-phone")||{}).value || "";
+  var invAddr  = (order&&order.addr)  || (document.getElementById("c-addr")||{}).value  || "";
+  var invDate  = (order&&order.date)  || (document.getElementById("d-date")||{}).value  || "";
+  var invTime  = (order&&order.time)  || (document.getElementById("d-time")||{}).value  || "";
+  var invNote  = (order&&order.notes) || (document.getElementById("inv-note")||{}).value || "";
+  var delType  = (order&&order.delType)||(document.getElementById("del-type")||{}).value ||"pickup";
+  var delChg   = parseFloat((order&&order.delCharge)||0)||parseFloat((document.getElementById("del-charge")||{}).value)||0;
+  var invNum   = (document.getElementById("inv-num-display")||{}).textContent || makeInvNum(invName,invDate);
   var receiptDate = new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"});
+
   var fmtTime = "";
-  if(invTime){
-    try{
-      var tp=invTime.split(":");var h=parseInt(tp[0]);var m=tp[1];
-      var ap=h>=12?"PM":"AM";h=h%12||12;fmtTime=h+":"+m+" "+ap;
-    }catch(e){fmtTime=invTime;}
-  }
+  if(invTime){try{var tp=invTime.split(":");var h=parseInt(tp[0]);var m=tp[1];var ap=h>=12?"PM":"AM";h=h%12||12;fmtTime=h+":"+m+" "+ap;}catch(e){fmtTime=invTime;}}
 
-  // Get items - try builder rows first, then order object
+  // Get items from order object, fallback to builder rows
   var items = [];
-  document.querySelectorAll("#items-body tr").forEach(function(row){
-    var rid=row.id; if(!rid)return;
-    var qty  =parseFloat((document.getElementById(rid+"-qty")||{}).value)||0;
-    var desc =(document.getElementById(rid+"-desc")||{}).value||"";
-    var price=parseFloat((document.getElementById(rid+"-price")||{}).value)||0;
-    if(qty&&desc) items.push({qty:qty,name:desc,price:price});
-  });
-
-  // Fallback to order items if builder is empty
-  if(!items.length && order&&order.items&&order.items.length){
-    items = order.items.map(function(x){
-      return {qty:x.qty, name:x.name+(x.size||""), price:x.price};
+  if(order&&order.items&&order.items.length){
+    items = order.items.map(function(x){return{qty:x.qty,name:x.name+(x.size||""),price:x.price};});
+  } else {
+    document.querySelectorAll("#items-body tr").forEach(function(row){
+      var rid=row.id; if(!rid)return;
+      var qty  =parseFloat((document.getElementById(rid+"-qty")||{}).value)||0;
+      var desc =(document.getElementById(rid+"-desc")||{}).value||"";
+      var price=parseFloat((document.getElementById(rid+"-price")||{}).value)||0;
+      if(qty&&desc) items.push({qty:qty,name:desc,price:price});
     });
-    // Also populate builder rows so generateInvoice works
-    if(typeof addRow==="function"){
-      var tbody=document.getElementById("items-body");
-      if(tbody&&!tbody.children.length){
-        items.forEach(function(x){ addRow(x.qty, x.name, x.price); });
-      }
-    }
   }
-
-  console.log("sendInvoiceEmail: name="+invName+" items="+items.length+" date="+invDate);
 
   var sub = items.reduce(function(s,x){return s+x.qty*x.price;},0);
   var tot = sub+delChg;
   var adv = tot*0.4;
   var rem = tot-adv;
+  var serviceType = delType==="delivery"?"Delivery to: "+invAddr:"Pickup from Tarneit";
 
-  // Build items HTML for template
   var itemsHtml = items.map(function(x){
     return "<tr>"
       +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333'>"+x.qty+"</td>"
@@ -1688,20 +1669,18 @@ function sendInvoiceEmail(toEmail, order){
       +"</tr>";
   }).join("");
 
-  var serviceType = delType==="delivery"?"Delivery to: "+invAddr:"Pickup from Tarneit";
-
   var params = {
     to_email:       toEmail,
     reply_to:       "sirikitchen18@gmail.com",
     name:           "Siri Kitchen",
     email:          toEmail,
-    title:          invNum||makeInvNum(invName,invDate),
-    customer_name:  invName||"Customer",
+    title:          invNum,
+    customer_name:  invName,
     customer_phone: invPhone||"—",
     address:        invAddr||"Pickup from Tarneit",
     order_date:     receiptDate,
     delivery_date:  invDate||"TBC",
-    delivery_time:  fmtTime||invTime||"—",
+    delivery_time:  fmtTime||"—",
     service_type:   serviceType,
     notes:          invNote||"",
     items_html:     itemsHtml,
@@ -1710,34 +1689,26 @@ function sendInvoiceEmail(toEmail, order){
     remaining:      rem.toFixed(2)
   };
 
-  console.log("Sending invoice email to:", toEmail, "params:", JSON.stringify({
-    customer_name:params.customer_name,
-    delivery_date:params.delivery_date,
-    items_count:items.length,
-    total:params.total
-  }));
+  console.log("sendInvoiceEmail: to="+toEmail+" name="+invName+" items="+items.length+" total="+tot);
 
-  fetch("https://api.emailjs.com/api/v1.0/email/send", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      service_id:  EMAILJS_SERVICE_ID,
-      template_id: EMAILJS_INVOICE_TEMPLATE_ID,
-      user_id:     EMAILJS_PUBLIC_KEY,
+  fetch("https://api.emailjs.com/api/v1.0/email/send",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      service_id:      EMAILJS_SERVICE_ID,
+      template_id:     EMAILJS_INVOICE_TEMPLATE_ID,
+      user_id:         EMAILJS_PUBLIC_KEY,
       template_params: params
     })
   })
   .then(function(res){
-    if(res.ok){
-      alert("Invoice sent to "+toEmail+" successfully!");
-    } else {
-      return res.text().then(function(t){throw new Error(t);});
-    }
+    if(res.ok){ alert("Invoice sent to "+toEmail+"!"); }
+    else{ return res.text().then(function(t){throw new Error(t);}); }
   })
   .catch(function(err){
-    console.error("Invoice email error:", err);
-    var s = encodeURIComponent("Your Order is Confirmed - Siri Kitchen - "+(invNum||""));
-    var b = encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
+    console.error("Invoice email error:",err);
+    var s=encodeURIComponent("Your Order Confirmed - Siri Kitchen - "+invNum);
+    var b=encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
     window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
   });
 }
@@ -2732,9 +2703,12 @@ function sendEmail(){
 }
 
 function sendInvoiceSmart(){
-  // Read from hidden form fields (most reliable - set by loadFromStorage)
+  try {
+  // Read from hidden form fields
   var formComm  = (document.getElementById("inv-comm-mode")||{}).value || "";
   var formEmail = (document.getElementById("inv-cust-email")||{}).value || "";
+  
+
 
   // Also check URL params and localStorage as fallback
   var urlParams = new URLSearchParams(window.location.search);
@@ -2759,16 +2733,24 @@ function sendInvoiceSmart(){
   var custPhone = (document.getElementById("c-phone")||{}).value||"";
   console.log("sendInvoiceSmart: mode="+commMode+" email="+custEmail);
 
-  if(commMode==="email" && custEmail && custEmail.indexOf("@")>0){
-    // Send via EmailJS
+  console.log("FINAL: commMode="+commMode+" email="+custEmail+" phone="+custPhone);
+  // Simple rule: if we have a valid email AND commMode is email -> send email
+  // Otherwise -> WhatsApp
+  var hasEmail = custEmail && custEmail.indexOf("@")>0;
+  if(hasEmail && commMode==="email"){
     sendInvoiceEmail(custEmail, custOrder);
-    // Update status
     if(custOrder){updateOrderStatus(custOrder.id,"accepted");updateSheetStatus(custOrder.id,"Accepted");}
   } else {
-    // WhatsApp: screenshot invoice then open WA with short message
+    // Show confirmation for WhatsApp
+    var waNum = custPhone.replace(/\D/g,"").replace(/^0/,"61");
+    if(!waNum || waNum.length < 10){
+      alert("No phone number found for WhatsApp. Please check the customer details.");
+      return;
+    }
     sendInvoiceViaWhatsApp(custPhone, custOrder);
     if(custOrder){updateOrderStatus(custOrder.id,"accepted");updateSheetStatus(custOrder.id,"Accepted");}
   }
+  } catch(err){ alert("sendInvoiceSmart error: "+err.message); console.error(err); }
 }
 
 function sendInvoiceViaWhatsApp(phone, order){
