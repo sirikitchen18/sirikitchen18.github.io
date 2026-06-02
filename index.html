@@ -318,13 +318,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .inv{background:#fff;font-family:'Inter',sans-serif;color:#1a1a1a;box-shadow:0 4px 24px rgba(0,0,0,0.12);border-radius:12px;overflow:hidden}
 
 /* Invoice header */
-.inv-hdr{background:linear-gradient(135deg,#6b1a0a 0%,#8b2500 60%,#6b1a0a 100%);padding:2rem 2rem 2.5rem;text-align:center;position:relative}
+.inv-hdr{background:linear-gradient(135deg,#6b1a0a 0%,#8b2500 60%,#6b1a0a 100%);padding:2rem 2rem 2rem;text-align:center;position:relative}
 .inv-hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#c8874a,#e8b06a,#c8874a)}
 .inv-brand{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:#fff;letter-spacing:4px;text-shadow:0 2px 12px rgba(0,0,0,0.3)}
 .inv-tagline{color:#f5d9a0;font-size:13px;font-style:italic;margin-top:4px}
 .inv-info{color:rgba(255,255,255,0.8);font-size:12px;margin-top:4px}
 .inv-delivery{color:rgba(255,255,255,0.75);font-size:11.5px;margin-top:8px;background:rgba(255,255,255,0.08);padding:6px 14px;border-radius:20px;display:inline-block}
-.inv-num{position:absolute;top:14px;right:1.5rem;background:rgba(255,255,255,0.15);border:1px solid rgba(255,220,160,0.35);color:#f5d9a0;font-size:11px;font-weight:700;padding:4px 12px;border-radius:12px;letter-spacing:0.5px}
+.inv-num{position:absolute;bottom:12px;right:1.25rem;background:#fff;border:none;color:#8b2500;font-size:9px;font-weight:800;padding:3px 10px;border-radius:10px;letter-spacing:0.5px;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
 
 /* Customer & order info */
 .inv-meta{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:2px solid #f0e4d0}
@@ -1591,17 +1591,21 @@ function showOrderActions(){
 function sendAcceptWA(){
   var custOrder=null;
   try{
-    // First try processing order in queue
+    // Try processing order in queue first
     var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
     custOrder=q.find(function(o){return o.status==="processing";});
-    // Fallback to pending order (set by URL param handler)
+    // Fallback to pending order
     if(!custOrder){
       var raw=localStorage.getItem("sk_pending_order");
       if(raw) custOrder=JSON.parse(raw);
     }
   }catch(e){}
-  var commMode=custOrder?(custOrder.commMode||"wa"):"wa";
-  var custEmail=custOrder?(custOrder.email||""):"";
+  // Also check URL params as final fallback (when coming from email Approve link)
+  var urlParams=new URLSearchParams(window.location.search);
+  var urlComm=urlParams.get("cm")||urlParams.get("comm")||"";
+  var urlEmail=urlParams.get("em")||urlParams.get("email")||"";
+  var commMode=urlComm||(custOrder?(custOrder.commMode||"wa"):"wa");
+  var custEmail=urlEmail||(custOrder?(custOrder.email||""):"");
   console.log("sendAcceptWA: commMode="+commMode+" email="+custEmail);
   if(commMode==="email"&&custEmail&&custEmail.indexOf("@")>0){
     if(typeof generateInvoice==="function")generateInvoice();
@@ -2288,12 +2292,17 @@ function sendDeclineEmailJS(toEmail, custName, fmtDate){
 function updateSheetStatus(id,status){try{if(APPS_SCRIPT_URL)fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'updateStatus',orderId:id,status:status})});}catch(e){}}
 function declineOrder(oid, name, phone, date, custEmail, commMode) {
   name=name||"Customer"; phone=phone||""; date=date||""; custEmail=custEmail||""; commMode=commMode||"wa";
-  // Get from queue if available (more reliable than URL params)
+  // Get from queue if available
   try{
     var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
     var ord=q.find(function(o){return o.id===oid;});
     if(ord){commMode=ord.commMode||commMode; custEmail=ord.email||custEmail; phone=ord.phone||phone;}
   }catch(e){}
+  // Also check URL params
+  var urlP=new URLSearchParams(window.location.search);
+  if(!commMode||commMode==="wa"){var uc=urlP.get("cm")||urlP.get("comm")||"";if(uc)commMode=uc;}
+  if(!custEmail){var ue=urlP.get("em")||urlP.get("email")||"";if(ue)custEmail=ue;}
+  console.log("declineOrder: commMode="+commMode+" email="+custEmail+" phone="+phone);
   var fmtDate="";
   if(date){try{var d=new Date(date);fmtDate=d.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});}catch(e){}}
   var msg="Dear "+name+",\n\nThank you for your order request with Siri Kitchen!\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+" and are unable to accept your order at this time.\n\nWe sincerely apologise for any inconvenience. Please feel free to send another request for a different date - we would love to cook for you!\n\nWarm regards,\nSiri Kitchen\n0432 237 104";
