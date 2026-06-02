@@ -428,6 +428,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 }
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
   var EMAILJS_PUBLIC_KEY  = "4HHq8GGC-_F2oYTz7";
@@ -1608,18 +1609,10 @@ function sendAcceptWA(){
 
   console.log("sendAcceptWA: mode="+commMode+" email="+custEmail+" order=",custOrder);
 
-  // Generate invoice preview first
+  // Generate invoice preview then send via smart function
   if(typeof generateInvoice==="function") generateInvoice();
-
   setTimeout(function(){
-    if(commMode==="email" && custEmail && custEmail.indexOf("@")>0){
-      // Send invoice via EmailJS to customer email
-      sendInvoiceEmail(custEmail, custOrder);
-    } else {
-      // Send invoice via WhatsApp
-      if(typeof sendInvoiceWA==="function") sendInvoiceWA();
-    }
-    // Update status
+    sendInvoiceSmart();
     if(custOrder){
       updateOrderStatus(custOrder.id,"accepted");
       updateSheetStatus(custOrder.id,"Accepted");
@@ -2731,6 +2724,41 @@ function updateInvSendBtn(){
   }
 }
 
+
+/* === INVOICE SCREENSHOT === */
+function screenshotInvoice(){
+  var invEl = document.getElementById("inv-content");
+  if(!invEl){ alert("Please generate invoice first."); return; }
+  var btn = document.getElementById("inv-screenshot-btn");
+  if(btn){ btn.textContent="📸 Capturing..."; btn.disabled=true; }
+
+  html2canvas(invEl, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#ffffff",
+    logging: false
+  }).then(function(canvas){
+    // Create download link
+    var link = document.createElement("a");
+    var name = (document.getElementById("c-name")||{}).value || "invoice";
+    var date = (document.getElementById("d-date")||{}).value || "";
+    var filename = "SiriKitchen-Invoice-"+name.replace(/\s+/g,"-")+(date?"-"+date:"")+".png";
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+
+    if(btn){ btn.textContent="✅ Image Saved!"; btn.disabled=false; }
+
+    // Also offer to share via WhatsApp/Email
+    setTimeout(function(){
+      if(btn) btn.textContent="📸 Save as Image";
+    }, 2000);
+  }).catch(function(err){
+    console.error("Screenshot error:", err);
+    if(btn){ btn.textContent="📸 Save as Image"; btn.disabled=false; }
+    alert("Screenshot failed. Try Print/Save as PDF instead.");
+  });
+}
 </script>
 </body>
 </html>
