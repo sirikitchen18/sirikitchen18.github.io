@@ -1634,13 +1634,50 @@ function sendInvoiceEmail(toEmail, order){
   var invName = (document.getElementById("c-name")||{}).value || (order&&order.name) || "Customer";
   var invDate = (document.getElementById("d-date")||{}).value || (order&&order.date) || "";
 
-  // Capture full invoice HTML with inline styles
+  // Capture full invoice HTML
   var invoiceHtml = invContent.outerHTML;
 
-  // Wrap in a proper email-friendly container
-  var fullHtml = '<div style="font-family:Arial,sans-serif;max-width:700px;margin:auto;background:#fff;padding:20px">'
-    + invoiceHtml
-    + '</div>';
+  // Extract and inline all CSS from the page that applies to invoice
+  var styleSheets = document.styleSheets;
+  var cssText = "";
+  try{
+    for(var i=0;i<styleSheets.length;i++){
+      var rules = styleSheets[i].cssRules || styleSheets[i].rules || [];
+      for(var j=0;j<rules.length;j++){
+        var sel = rules[j].selectorText||"";
+        // Only include invoice-related styles
+        if(sel && (sel.indexOf("inv")<0 && sel.indexOf("bill")<0 && 
+           sel.indexOf("table")<0 && sel.indexOf("td")<0 && sel.indexOf("th")<0)) continue;
+        cssText += rules[j].cssText+" ";
+      }
+    }
+  }catch(e){}
+
+  // Wrap with styles for proper email rendering
+  var fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    + '<style>'
+    + 'body{margin:0;padding:0;background:#f5f0e8;font-family:Arial,sans-serif}'
+    + '.inv-wrap{max-width:700px;margin:20px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.1)}'
+    + '.inv-hdr{background:linear-gradient(135deg,#6b1a0a,#8b2500);padding:2rem;text-align:center;color:#fff;position:relative}'
+    + '.inv-hdr h1{font-size:1.4rem;margin:0}'
+    + '.inv-num{position:absolute;bottom:12px;right:1.25rem;background:#fff;color:#8b2500;font-size:9px;font-weight:800;padding:3px 10px;border-radius:10px}'
+    + '.inv-body{padding:1.5rem}'
+    + '.inv-bill{display:flex;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}'
+    + '.inv-bill-box{flex:1;background:#fdf6ee;border:1px solid #f0e0c8;border-radius:8px;padding:1rem}'
+    + '.inv-bill-box h3{color:#8b2500;font-size:12px;text-transform:uppercase;margin:0 0 8px}'
+    + '.inv-bill-box p{margin:3px 0;font-size:13px}'
+    + 'table{width:100%;border-collapse:collapse;margin:1rem 0}'
+    + 'table th{background:#8b2500;color:#fff;padding:10px;text-align:left;font-size:13px}'
+    + 'table td{padding:10px;border-bottom:1px solid #f0e0c8;font-size:13px}'
+    + '.inv-totals{margin-top:1rem}'
+    + '.inv-total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f0e0c8}'
+    + '.inv-grand{font-weight:800;color:#8b2500;font-size:15px}'
+    + '.inv-payment{background:#fdf6ee;border:1px solid #f0e0c8;border-radius:8px;padding:1rem;margin-top:1rem}'
+    + '.inv-footer{text-align:center;padding:1rem;background:#f5f0e8;font-size:11px;color:#999}'
+    + cssText
+    + '</style></head><body>'
+    + '<div class="inv-wrap">' + invoiceHtml + '</div>'
+    + '</body></html>';
 
   var params = {
     to_email:       toEmail,
