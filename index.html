@@ -1625,19 +1625,29 @@ function sendAcceptWA(){
 function sendInvoiceEmail(toEmail, order){
   if(!toEmail||toEmail.indexOf("@")<0){alert("No customer email found.");return;}
 
-  // Read data from generated invoice
-  var invNum   = (document.getElementById("inv-num-display")||{}).textContent||"";
-  var invName  = (document.getElementById("c-name")||{}).value||(order&&order.name)||"Customer";
-  var invPhone = (document.getElementById("c-phone")||{}).value||(order&&order.phone)||"";
-  var invAddr  = (document.getElementById("c-addr")||{}).value||(order&&order.addr)||"";
-  var invDate  = (document.getElementById("d-date")||{}).value||(order&&order.date)||"";
-  var invTime  = (document.getElementById("d-time")||{}).value||(order&&order.time)||"";
-  var delType  = (document.getElementById("del-type")||{}).value||(order&&order.delType)||"pickup";
-  var delChg   = parseFloat((document.getElementById("del-charge")||{}).value||0)||(order&&order.delCharge)||0;
-  var invNote  = (document.getElementById("inv-note")||{}).value||(order&&order.notes)||"";
-  var receiptDate = new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"});
+  // Get data - try DOM first, fallback to order object
+  function getVal(id){ var el=document.getElementById(id); return el?el.value.trim():""; }
 
-  // Read items from invoice table
+  var invName  = getVal("c-name")  || (order&&order.name)  || "";
+  var invPhone = getVal("c-phone") || (order&&order.phone) || "";
+  var invAddr  = getVal("c-addr")  || (order&&order.addr)  || "";
+  var invDate  = getVal("d-date")  || (order&&order.date)  || "";
+  var invTime  = getVal("d-time")  || (order&&order.time)  || "";
+  var invNote  = getVal("inv-note")|| (order&&order.notes) || "";
+  var delType  = getVal("del-type")|| (order&&order.delType)||"pickup";
+  var delChg   = parseFloat(getVal("del-charge"))||parseFloat(order&&order.delCharge)||0;
+  var invNum   = getVal("inv-num-display")|| (document.getElementById("inv-num-display")||{}).textContent||makeInvNum(invName,invDate);
+
+  var receiptDate = new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"});
+  var fmtTime = "";
+  if(invTime){
+    try{
+      var tp=invTime.split(":");var h=parseInt(tp[0]);var m=tp[1];
+      var ap=h>=12?"PM":"AM";h=h%12||12;fmtTime=h+":"+m+" "+ap;
+    }catch(e){fmtTime=invTime;}
+  }
+
+  // Get items - try builder rows first, then order object
   var items = [];
   document.querySelectorAll("#items-body tr").forEach(function(row){
     var rid=row.id; if(!rid)return;
@@ -1646,146 +1656,67 @@ function sendInvoiceEmail(toEmail, order){
     var price=parseFloat((document.getElementById(rid+"-price")||{}).value)||0;
     if(qty&&desc) items.push({qty:qty,name:desc,price:price});
   });
-  if(!items.length&&order&&order.items) items=order.items;
+
+  // Fallback to order items if builder is empty
+  if(!items.length && order&&order.items&&order.items.length){
+    items = order.items.map(function(x){
+      return {qty:x.qty, name:x.name+(x.size||""), price:x.price};
+    });
+    // Also populate builder rows so generateInvoice works
+    if(typeof addRow==="function"){
+      var tbody=document.getElementById("items-body");
+      if(tbody&&!tbody.children.length){
+        items.forEach(function(x){ addRow(x.qty, x.name, x.price); });
+      }
+    }
+  }
+
+  console.log("sendInvoiceEmail: name="+invName+" items="+items.length+" date="+invDate);
 
   var sub = items.reduce(function(s,x){return s+x.qty*x.price;},0);
   var tot = sub+delChg;
   var adv = tot*0.4;
   var rem = tot-adv;
 
-  // Build fully inline-styled email HTML
-  var itemRows = items.map(function(x){
-    return '<tr>'
-      +'<td style="padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333">'+x.qty+'</td>'
-      +'<td style="padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333">'+x.name+'</td>'
-      +'<td style="padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right">$ '+x.price.toFixed(2)+'</td>'
-      +'<td style="padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right">$ '+(x.qty*x.price).toFixed(2)+'</td>'
-      +'</tr>';
-  }).join("");
-
-  var fmtTime = "";
-  if(invTime){try{var tp=invTime.split(":");var h=parseInt(tp[0]);var m=tp[1];var ap=h>=12?"PM":"AM";h=h%12||12;fmtTime=h+":"+m+" "+ap;}catch(e){fmtTime=invTime;}}
-
-  var deliveryInfo = delType==="delivery"
-    ? "Delivery to: "+invAddr
-    : "Pickup from Tarneit";
-
-  var emailHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>'
-  +'<body style="margin:0;padding:20px;background:#f0ebe3;font-family:Arial,Helvetica,sans-serif">'
-  +'<div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.12)">'
-
-  // Header
-  +'<div style="background:#8b2500;padding:28px 24px 36px;text-align:center;position:relative">'
-  +'<div style="font-size:24px;font-weight:900;color:#ffffff;letter-spacing:2px;margin-bottom:6px">SIRI KITCHEN</div>'
-  +'<div style="font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:4px">Relish the taste of quality Indian home-made food</div>'
-  +'<div style="font-size:12px;color:rgba(255,255,255,0.75);margin-bottom:8px">Near Riverdale Village Shopping Centre, Tarneit &middot; 0432 237 104</div>'
-  +'<div style="font-size:11px;color:rgba(255,255,255,0.65)">&#128666; Free on orders above $100 (within 5km) &middot; $8 (5&ndash;10km) &middot; $1/km beyond</div>'
-  +'<div style="position:absolute;bottom:10px;right:16px;background:#ffffff;color:#8b2500;font-size:10px;font-weight:800;padding:3px 12px;border-radius:20px;white-space:nowrap">'+invNum+'</div>'
-  +'</div>'
-
-  // Body
-  +'<div style="padding:24px">'
-
-  // Bill To + Order Details (two columns using table for email compatibility)
-  +'<table style="width:100%;border-collapse:separate;border-spacing:8px;margin-bottom:20px"><tr>'
-  +'<td style="width:50%;background:#fdf6ee;border:1px solid #f0dcc8;border-radius:8px;padding:14px;vertical-align:top">'
-  +'<div style="color:#8b2500;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f0dcc8">Bill To</div>'
-  +'<div style="font-size:14px;font-weight:700;color:#222;margin-bottom:4px">'+invName+'</div>'
-  +(invPhone?'<div style="font-size:13px;color:#555;margin-bottom:3px">&#128222; '+invPhone+'</div>':'')
-  +'<div style="font-size:13px;color:#555">&#128205; '+invAddr+'</div>'
-  +'</td>'
-  +'<td style="width:50%;background:#fdf6ee;border:1px solid #f0dcc8;border-radius:8px;padding:14px;vertical-align:top">'
-  +'<div style="color:#8b2500;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f0dcc8">Order Details</div>'
-  +'<div style="font-size:13px;color:#555;margin-bottom:4px"><b>Receipt:</b> '+receiptDate+'</div>'
-  +'<div style="font-size:13px;color:#555;margin-bottom:4px"><b>Order Date:</b> '+invDate+'</div>'
-  +'<div style="font-size:13px;color:#555;margin-bottom:4px"><b>Time:</b> '+fmtTime+'</div>'
-  +'<div style="font-size:13px;color:#555"><b>Type:</b> '+deliveryInfo+'</div>'
-  +'</td>'
-  +'</tr></table>'
-
-  // Items table
-  +'<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden;margin-bottom:16px">'
-  +'<thead><tr style="background:#8b2500">'
-  +'<th style="padding:10px 12px;color:#fff;font-size:12px;text-transform:uppercase;text-align:left;width:10%">QTY</th>'
-  +'<th style="padding:10px 12px;color:#fff;font-size:12px;text-transform:uppercase;text-align:left">DESCRIPTION</th>'
-  +'<th style="padding:10px 12px;color:#fff;font-size:12px;text-transform:uppercase;text-align:right;width:18%">PRICE</th>'
-  +'<th style="padding:10px 12px;color:#fff;font-size:12px;text-transform:uppercase;text-align:right;width:18%">TOTAL</th>'
-  +'</tr></thead>'
-  +'<tbody>'+itemRows+'</tbody>'
-  +'</table>'
-
-  // Totals
-  +'<table style="width:100%;border-collapse:collapse;background:#fdf6ee;border:1px solid #f0dcc8;border-radius:8px;margin-bottom:16px">'
-  +(delChg>0?'<tr><td style="padding:8px 16px;font-size:13px;color:#666">Delivery Charge</td><td style="padding:8px 16px;font-size:13px;text-align:right;color:#333">$ '+delChg.toFixed(2)+'</td></tr>':'')
-  +'<tr><td style="padding:8px 16px;font-size:13px;color:#666">Sub Total <span style="font-size:11px;color:#999">(including tax)</span></td><td style="padding:8px 16px;font-size:13px;font-weight:600;text-align:right;color:#333">$ '+sub.toFixed(2)+'</td></tr>'
-  +'<tr style="border-top:2px solid #f0dcc8"><td style="padding:10px 16px;font-size:15px;font-weight:800;color:#8b2500">Grand Total</td><td style="padding:10px 16px;font-size:15px;font-weight:800;text-align:right;color:#8b2500">$ '+tot.toFixed(2)+'</td></tr>'
-  +'</table>'
-
-  // Payment section
-  +'<div style="background:#fff8f0;border:2px solid #f0dcc8;border-radius:8px;padding:16px;margin-bottom:16px">'
-  +'<div style="color:#8b2500;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0dcc8">Payment Method</div>'
-  +'<table style="width:100%;border-collapse:collapse">'
-  +'<tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%">PayID</td><td style="padding:5px 0;font-size:13px;font-weight:700;color:#333">0435 772 552</td></tr>'
-  +'<tr><td style="padding:5px 0;font-size:13px;color:#666">Account Name</td><td style="padding:5px 0;font-size:13px;font-weight:700;color:#333">Ishrat Parween</td></tr>'
-  +'</table>'
-  +'<div style="background:#fdf0e0;border-radius:6px;padding:12px;margin-top:12px">'
-  +'<div style="color:#8b2500;font-size:12px;font-weight:700;margin-bottom:8px">Payment Summary</div>'
-  +'<table style="width:100%;border-collapse:collapse">'
-  +'<tr><td style="padding:4px 0;font-size:13px;color:#555">Advance Payment (40%)</td><td style="padding:4px 0;font-size:14px;font-weight:800;color:#8b2500;text-align:right">$ '+adv.toFixed(2)+'</td></tr>'
-  +'<tr><td style="padding:4px 0;font-size:13px;color:#555">Remaining after Pickup/Delivery</td><td style="padding:4px 0;font-size:13px;font-weight:600;color:#333;text-align:right">$ '+rem.toFixed(2)+'</td></tr>'
-  +'</table>'
-  +'</div>'
-  +'</div>'
-
-  +(invNote?'<div style="background:#f9f9f9;border-left:3px solid #8b2500;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#555"><b>Note:</b> '+invNote+'</div>':'')
-
-  +'</div>' // end body
-
-  // Footer
-  +'<div style="background:#f5f0e8;padding:16px;text-align:center;border-top:1px solid #e8ddd0">'
-  +'<div style="font-size:13px;font-weight:700;color:#8b2500;margin-bottom:4px">Siri Kitchen</div>'
-  +'<div style="font-size:12px;color:#888;margin-bottom:2px">18 Gunawan Drive, Tarneit, VIC 3029</div>'
-  +'<div style="font-size:12px;color:#888;margin-bottom:2px">0432 237 104</div>'
-  +'<div style="font-size:12px;color:#888"><a href="mailto:sirikitchen18@gmail.com" style="color:#8b2500;text-decoration:none">sirikitchen18@gmail.com</a></div>'
-  +'</div>'
-
-  +'</div>' // end card
-  +'</body></html>';
-
-  // Build items_html for template
+  // Build items HTML for template
   var itemsHtml = items.map(function(x){
     return "<tr>"
       +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333'>"+x.qty+"</td>"
       +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333'>"+x.name+"</td>"
-      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$ "+x.price.toFixed(2)+"</td>"
-      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$ "+(x.qty*x.price).toFixed(2)+"</td>"
+      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$"+x.price.toFixed(2)+"</td>"
+      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$"+(x.qty*x.price).toFixed(2)+"</td>"
       +"</tr>";
   }).join("");
+
+  var serviceType = delType==="delivery"?"Delivery to: "+invAddr:"Pickup from Tarneit";
 
   var params = {
     to_email:       toEmail,
     reply_to:       "sirikitchen18@gmail.com",
     name:           "Siri Kitchen",
     email:          toEmail,
-    title:          invNum||("Invoice - "+invName),
-    customer_name:  invName,
+    title:          invNum||makeInvNum(invName,invDate),
+    customer_name:  invName||"Customer",
     customer_phone: invPhone||"—",
     address:        invAddr||"Pickup from Tarneit",
     order_date:     receiptDate,
     delivery_date:  invDate||"TBC",
-    delivery_time:  fmtTime||invTime||"",
-    service_type:   delType==="delivery"?"Delivery to: "+invAddr:"Pickup from Tarneit",
+    delivery_time:  fmtTime||invTime||"—",
+    service_type:   serviceType,
     notes:          invNote||"",
     items_html:     itemsHtml,
     total:          tot.toFixed(2),
     advance:        adv.toFixed(2),
-    remaining:      rem.toFixed(2),
-    invoice_html:   emailHtml
+    remaining:      rem.toFixed(2)
   };
 
-  console.log("Sending invoice email to:", toEmail, "items:", items.length);
+  console.log("Sending invoice email to:", toEmail, "params:", JSON.stringify({
+    customer_name:params.customer_name,
+    delivery_date:params.delivery_date,
+    items_count:items.length,
+    total:params.total
+  }));
 
-  // Send via EmailJS REST API directly (bypasses template variable escaping)
   fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
@@ -1805,10 +1736,9 @@ function sendInvoiceEmail(toEmail, order){
   })
   .catch(function(err){
     console.error("Invoice email error:", err);
-    // Fallback mailto
-    var sub2 = encodeURIComponent("Your Order is Confirmed - Siri Kitchen - "+invNum);
-    var body2 = encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nInvoice: "+invNum+"\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
-    window.open("mailto:"+toEmail+"?subject="+sub2+"&body="+body2,"_blank");
+    var s = encodeURIComponent("Your Order is Confirmed - Siri Kitchen - "+(invNum||""));
+    var b = encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
+    window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
   });
 }
 
