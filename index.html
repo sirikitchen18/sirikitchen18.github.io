@@ -2580,16 +2580,16 @@ function sendAcceptWA(){
         var n=decodeURIComponent(params.get("name")||"Customer");
         var p=decodeURIComponent(params.get("phone")||"");
         var dt=decodeURIComponent(params.get("date")||"");
-        if(!p)return;
+        var custEmail = decodeURIComponent(params.get("email")||"");
+        var custComm  = decodeURIComponent(params.get("comm")||"wa");
+        // Don't return early if no phone - customer may have chosen email
+        if(!p && !custEmail){ return; }
         var fmtDate="";
         if(dt){try{var d=new Date(dt);fmtDate=d.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});}catch(e){}}
         var msg=["Dear "+n+",","","Thank you for your order request with Siri Kitchen!","","Unfortunately, we are *not available* on "+(fmtDate||"the requested date")+" and are unable to accept your order at this time.","","We sincerely apologise for any inconvenience. Please feel free to send another request for a different date - we would love to cook for you!","","Warm regards,","Siri Kitchen","0432 237 104"].join("\n");
         updateSheetStatus(declineId,"Not Available");
         try{var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");q=q.map(function(o){if(o.id===declineId)o.status="declined";return o;});localStorage.setItem("sk_order_queue",JSON.stringify(q));}catch(e){}
-        var custEmail = decodeURIComponent(params.get("email")||"");
-        var custComm  = decodeURIComponent(params.get("comm")||"wa");
         if(custComm==="email" && custEmail && custEmail.indexOf("@")>0){
-          // Customer chose email - send decline via EmailJS
           sendDeclineEmailJS(custEmail, n, fmtDate);
         } else if(p && p.replace(/\D/g,"").length>=10){
           window.open("https://wa.me/"+p.replace(/\D/g,"").replace(/^0/,"61")+"?text="+encodeURIComponent(msg),"_blank");
