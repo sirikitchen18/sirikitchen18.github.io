@@ -2824,18 +2824,26 @@ function sendInvoiceViaWhatsApp(phone, order){
 }
 
 function fallbackDownload(dataUrl, fileName, waUrl, btn){
-  // Create download link using dataURL (no blob = no timing issue)
-  var a = document.createElement("a");
-  a.href = dataUrl;
-  a.download = fileName;
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  // Open image in new tab - user can long-press (mobile) or right-click to save
+  // No save dialog, no timing issues
+  var imgWin = window.open("","_blank");
+  imgWin.document.write(
+    "<html><head><title>Invoice - Save this image</title>"
+    +"<style>body{margin:0;background:#222;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:Arial}"
+    +"p{color:#fff;font-size:14px;margin:10px;text-align:center}"
+    +"img{max-width:95vw;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.5)}"
+    +"button{margin-top:16px;padding:12px 28px;background:#25D366;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer}"
+    +"</style></head><body>"
+    +"<p>📱 <strong>Long-press the image</strong> to save it, then attach it in WhatsApp</p>"
+    +"<img src='"+dataUrl+"' />"
+    +"<br><button onclick=\"location.href='"+waUrl+"'\" >Open WhatsApp</button>"
+    +"<p style='font-size:12px;color:#aaa'>After saving: go to WhatsApp → tap 📎 → Photos → select invoice</p>"
+    +"</body></html>"
+  );
+  imgWin.document.close();
 
-  // Update button to open WhatsApp on next click
   if(btn){
-    btn.innerHTML="✅ Saved! Tap to open WhatsApp";
+    btn.innerHTML="✅ Tap to open WhatsApp";
     btn.disabled=false;
     btn.style.background="#128C7E";
     btn.onclick=function(){
@@ -2843,9 +2851,6 @@ function fallbackDownload(dataUrl, fileName, waUrl, btn){
       btn.innerHTML="📱 Send Invoice via WhatsApp";
       btn.style.background="#25D366";
       window.open(waUrl,"_blank");
-      setTimeout(function(){
-        alert("Attach the invoice image in WhatsApp:\n📎 → Photos/Files → Invoice-"+fileName.split("/").pop());
-      },500);
     };
   }
 }
@@ -2930,16 +2935,29 @@ function printInvoice(){
   var invEl = document.getElementById("inv-content");
   if(!invEl){ alert("Please generate invoice first."); return; }
 
-  var printWin = window.open("","_blank","width=800,height=900");
+  // Collect all styles from current page
+  var styles = "";
+  try{
+    for(var i=0;i<document.styleSheets.length;i++){
+      try{
+        var rules = document.styleSheets[i].cssRules||document.styleSheets[i].rules||[];
+        for(var j=0;j<rules.length;j++) styles += rules[j].cssText + "\n";
+      }catch(e){}
+    }
+  }catch(e){}
+
+  var printWin = window.open("","_blank","width=850,height=1100");
   printWin.document.write(
     "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
     +"<title>Siri Kitchen Invoice</title>"
     +"<style>"
-    +"*{margin:0;padding:0;box-sizing:border-box}"
-    +"body{font-family:Arial,Helvetica,sans-serif;background:#fff;padding:20px}"
+    + styles
+    +"body{margin:0;padding:20px;background:#f5f0e8!important}"
+    +"#inv-content{max-width:700px;margin:0 auto}"
     +"@media print{"
-    +"  body{padding:0}"
-    +"  @page{margin:10mm;size:A4}"
+    +"  body{padding:0;background:#fff!important}"
+    +"  @page{margin:8mm;size:A4}"
+    +"  .inv-actions{display:none!important}"
     +"}"
     +"</style>"
     +"</head><body>"
@@ -2948,10 +2966,7 @@ function printInvoice(){
   );
   printWin.document.close();
   printWin.focus();
-  setTimeout(function(){
-    printWin.print();
-    printWin.close();
-  }, 500);
+  setTimeout(function(){ printWin.print(); }, 800);
 }
 </script>
 </body>
