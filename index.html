@@ -1701,7 +1701,7 @@ function sendInvoiceEmail(toEmail, order){
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
       service_id:      EMAILJS_SERVICE_ID,
-      template_id:     EMAILJS_INVOICE_TEMPLATE_ID,
+      template_id:     "template_j10vpk5",
       user_id:         EMAILJS_PUBLIC_KEY,
       template_params: params
     })
@@ -2363,32 +2363,59 @@ function declineOrder(oid, name, phone, date, custEmail, commMode) {
 }
 
 function sendDeclineEmail(toEmail, custName, fmtDate, bodyText){
-  // Send decline via EmailJS using a simple notification template
+  if(!toEmail||toEmail.indexOf("@")<0){
+    alert("No email address found for this customer.");
+    return;
+  }
+  // Send via EmailJS REST API directly to customer
   var params = {
-    to_email:       "sirikitchen18@gmail.com",
-    reply_to:       toEmail,
-    customer_email: toEmail,
-    customer_name:  custName,
-    // Use same template with special decline flag
-    title:          "Order Not Available - "+custName,
-    name:           custName,
+    to_email:       toEmail,
+    reply_to:       "sirikitchen18@gmail.com",
+    name:           "Siri Kitchen",
     email:          toEmail,
-    service_type:   "Not Available",
+    title:          "Re: Your Order Request - Siri Kitchen",
+    customer_name:  custName,
+    customer_phone: "",
+    customer_email: toEmail,
+    order_date:     new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"}),
+    service_type:   "Order Not Available",
     delivery_date:  fmtDate||"Requested date",
     delivery_time:  "",
     address:        "",
-    notes:          bodyText,
-    items:          [{name:"Order Not Available",qty:"",price:""}],
-    items_text:     "Unfortunately not available on the requested date.",
+    notes:          "",
+    items_html:     "<tr><td colspan='4' style='padding:20px;font-size:14px;color:#333;text-align:center'>"
+                    +"Unfortunately, we are <strong>not available</strong> on "+(fmtDate||"the requested date")+".<br><br>"
+                    +"Please feel free to send another request for a different date.<br>"
+                    +"We would love to cook for you! 🍛</td></tr>",
+    items_text:     "Order not available on "+(fmtDate||"requested date"),
     total:          "0",
     advance:        "0",
+    remaining:      "0",
     approval_link:  "#",
     reject_link:    "#"
   };
-  // Use mailto as reliable fallback for decline (no sensitive financial data)
-  window.open("mailto:"+toEmail+
-    "?subject="+encodeURIComponent("Re: Your Order Request - Siri Kitchen")+
-    "&body="+encodeURIComponent(bodyText),"_blank");
+
+  fetch("https://api.emailjs.com/api/v1.0/email/send",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      service_id:      EMAILJS_SERVICE_ID,
+      template_id:     EMAILJS_INVOICE_TEMPLATE_ID,
+      user_id:         EMAILJS_PUBLIC_KEY,
+      template_params: params
+    })
+  })
+  .then(function(res){
+    if(res.ok){ alert("Decline notification sent to "+toEmail); }
+    else{ return res.text().then(function(t){throw new Error(t);}); }
+  })
+  .catch(function(err){
+    console.error("Decline email error:",err);
+    // Fallback mailto
+    var s = encodeURIComponent("Re: Your Order Request - Siri Kitchen");
+    var b = encodeURIComponent(bodyText);
+    window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
+  });
 }
 
 function updateOrderStatus(id,status){try{var q=JSON.parse(localStorage.getItem('sk_order_queue')||'[]');q=q.map(function(o){if(o.id===id)o.status=status;return o;});localStorage.setItem('sk_order_queue',JSON.stringify(q));}catch(e){}}
