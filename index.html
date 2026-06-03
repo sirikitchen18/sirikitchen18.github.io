@@ -2311,23 +2311,23 @@ renderAll();
 
 /* === SHEET STATUS + ORDER QUEUE + ADMIN LINKS === */
 function sendDeclineEmailJS(toEmail, custName, fmtDate){
-  if(!toEmail||toEmail.indexOf("@")<0){alert("No email found.");return;}
-
   var subject = "Re: Your Order Request - Siri Kitchen";
   var body = "Dear "+custName+","
     +"\n\nThank you for your order request with Siri Kitchen!"
-    +"\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+" and are unable to accept your order at this time."
-    +"\n\nWe sincerely apologise for any inconvenience. Please feel free to send another request for a different date - we would love to cook for you!"
+    +"\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")
+    +" and are unable to accept your order at this time."
+    +"\n\nWe sincerely apologise for any inconvenience. Please feel free to"
+    +" send another request for a different date - we would love to cook for you!"
     +"\n\nWarm regards,"
     +"\nSiri Kitchen"
     +"\n0432 237 104";
 
-  window.open("mailto:"+toEmail
-    +"?subject="+encodeURIComponent(subject)
-    +"&body="+encodeURIComponent(body),
-    "_blank"
-  );
-  alert("Decline email opened in your email client. Please click Send.");
+  var gmailUrl = "https://mail.google.com/mail/?view=cm&fs=1"
+    +"&to="+encodeURIComponent(toEmail)
+    +"&su="+encodeURIComponent(subject)
+    +"&body="+encodeURIComponent(body);
+
+  window.open(gmailUrl, "_blank");
 }
 
 function updateSheetStatus(id,status){try{if(APPS_SCRIPT_URL)fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'updateStatus',orderId:id,status:status})});}catch(e){}}
