@@ -2820,7 +2820,7 @@ function sendInvoiceViaWhatsApp(phone, order){
 }
 
 function downloadAndOpenWA(blob, fileName, waNum, msg, btn){
-  // Download the invoice image
+  // Step 1: Download invoice image
   var url = URL.createObjectURL(blob);
   var link = document.createElement("a");
   link.href = url;
@@ -2828,17 +2828,29 @@ function downloadAndOpenWA(blob, fileName, waNum, msg, btn){
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  // Don't revoke URL immediately - wait longer
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
 
-  // Open WhatsApp with message after short delay
-  setTimeout(function(){
+  // Step 2: Show instruction first, THEN open WhatsApp on user click
+  // This avoids popup blocker (user gesture required)
+  if(btn){
+    btn.innerHTML="✅ Image saved! Tap to open WhatsApp";
+    btn.disabled=false;
+    btn.style.background="#128C7E";
+    btn.onclick=function(){
+      btn.onclick=null; // prevent double tap
+      window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
+      btn.innerHTML="📱 Send Invoice via WhatsApp";
+      btn.style.background="#25D366";
+      setTimeout(function(){
+        alert("In WhatsApp: tap the 📎 attachment icon → Photos/Files → select the Invoice image → Send.");
+      },800);
+    };
+  } else {
+    // No button - just show alert then open WA
+    alert("📎 Invoice image downloaded!\n\nTap OK then attach it in WhatsApp.");
     window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
-    if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}
-    // Show instruction
-    setTimeout(function(){
-      alert("📎 Invoice image saved to your Downloads!\n\nIn WhatsApp: tap the 📎 attachment icon → select the invoice image from your gallery/downloads → send.");
-    }, 1000);
-  }, 600);
+  }
 }
 
 // Update invoice send button label based on comm mode
