@@ -2323,29 +2323,47 @@ function sendDeclineEmailJS(toEmail, custName, fmtDate){
 function updateSheetStatus(id,status){try{if(APPS_SCRIPT_URL)fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'updateStatus',orderId:id,status:status})});}catch(e){}}
 function declineOrder(oid, name, phone, date, custEmail, commMode) {
   name=name||"Customer"; phone=phone||""; date=date||""; custEmail=custEmail||""; commMode=commMode||"wa";
-  // Get from queue if available
+
+  // Get from queue
   try{
     var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
     var ord=q.find(function(o){return o.id===oid;});
     if(ord){commMode=ord.commMode||commMode; custEmail=ord.email||custEmail; phone=ord.phone||phone;}
   }catch(e){}
-  // Also check URL params
-  var urlP=new URLSearchParams(window.location.search);
+
+  // Check sessionStorage (saved when Approve/Decline link opened)
+  var sessComm  = sessionStorage.getItem("sk_comm_mode")||"";
+  var sessEmail = sessionStorage.getItem("sk_cust_email")||"";
+  if(sessComm)  commMode  = sessComm;
+  if(sessEmail) custEmail = sessEmail;
+
+  // Check URL params as fallback
+  var urlP = new URLSearchParams(window.location.search);
   if(!commMode||commMode==="wa"){var uc=urlP.get("cm")||urlP.get("comm")||"";if(uc)commMode=uc;}
   if(!custEmail){var ue=urlP.get("em")||urlP.get("email")||"";if(ue)custEmail=ue;}
+
   console.log("declineOrder: commMode="+commMode+" email="+custEmail+" phone="+phone);
+
   var fmtDate="";
   if(date){try{var d=new Date(date);fmtDate=d.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});}catch(e){}}
+
   var msg="Dear "+name+",\n\nThank you for your order request with Siri Kitchen!\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+" and are unable to accept your order at this time.\n\nWe sincerely apologise for any inconvenience. Please feel free to send another request for a different date - we would love to cook for you!\n\nWarm regards,\nSiri Kitchen\n0432 237 104";
+
+  // Confirmation popup
+  var channel = commMode==="email" ? "email to "+custEmail : "WhatsApp to "+phone;
+  if(!confirm("Send decline notification to "+name+" via "+channel+"?")){
+    return;
+  }
+
   updateOrderStatus(oid,"declined");
   updateSheetStatus(oid,"Not Available");
-  // Respect customer's chosen communication channel
+
   if(commMode==="email"&&custEmail&&custEmail.indexOf("@")>0){
     sendDeclineEmail(custEmail, name, fmtDate, msg);
   } else if(phone&&phone.replace(/\D/g,"").length>=10){
     window.open("https://wa.me/"+phone.replace(/\D/g,"").replace(/^0/,"61")+"?text="+encodeURIComponent(msg),"_blank");
   } else {
-    alert("Order marked Not Available. No contact details found.");
+    alert("Order marked Not Available. No contact details found to notify customer.");
   }
   setTimeout(showOrderQueue,600);
 }
@@ -2521,6 +2539,11 @@ function sendAcceptWA(){
     }
 
     if(declineId){
+      // Save comm params to sessionStorage
+      var dcm = params.get("cm")||params.get("comm")||"";
+      var dem = params.get("em")||params.get("email")||"";
+      if(dcm) sessionStorage.setItem("sk_comm_mode", dcm);
+      if(dem) sessionStorage.setItem("sk_cust_email", dem);
       setTimeout(function(){
         var n=decodeURIComponent(params.get("name")||"Customer");
         var p=decodeURIComponent(params.get("phone")||"");
