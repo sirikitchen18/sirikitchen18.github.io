@@ -2342,7 +2342,8 @@ function declineOrder(oid, name, phone, date, custEmail, commMode) {
   if(!commMode||commMode==="wa"){var uc=urlP.get("cm")||urlP.get("comm")||"";if(uc)commMode=uc;}
   if(!custEmail){var ue=urlP.get("em")||urlP.get("email")||"";if(ue)custEmail=ue;}
 
-  console.log("declineOrder: commMode="+commMode+" email="+custEmail+" phone="+phone);
+  // DEBUG - visible alert to trace
+  alert("declineOrder called:\noid="+oid+"\ncommMode="+commMode+"\nemail="+custEmail+"\nphone="+phone+"\nsessComm="+sessionStorage.getItem("sk_comm_mode")+"\nsessEmail="+sessionStorage.getItem("sk_cust_email"));
 
   var fmtDate="";
   if(date){try{var d=new Date(date);fmtDate=d.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});}catch(e){}}
