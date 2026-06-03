@@ -1696,26 +1696,14 @@ function sendInvoiceEmail(toEmail, order){
 
   console.log("sendInvoiceEmail: to="+toEmail+" name="+invName+" items="+items.length+" total="+tot);
 
-  fetch("https://api.emailjs.com/api/v1.0/email/send",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      service_id:      EMAILJS_SERVICE_ID,
-      template_id:     "template_j10vpk5",
-      user_id:         EMAILJS_PUBLIC_KEY,
-      template_params: params
-    })
-  })
-  .then(function(res){
-    if(res.ok){ alert("Invoice sent to "+toEmail+"!"); }
-    else{ return res.text().then(function(t){throw new Error(t);}); }
-  })
-  .catch(function(err){
-    console.error("Invoice email error:",err);
-    var s=encodeURIComponent("Your Order Confirmed - Siri Kitchen - "+invNum);
-    var b=encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
-    window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
-  });
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
+    .then(function(){ alert("Invoice sent to "+toEmail+"!"); })
+    .catch(function(err){
+      console.error("Invoice email error:", JSON.stringify(err));
+      var s=encodeURIComponent("Your Order Confirmed - Siri Kitchen - "+invNum);
+      var b=encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
+      window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
+    });
 }
 
 function sendDeclineWA(){
@@ -2395,27 +2383,14 @@ function sendDeclineEmail(toEmail, custName, fmtDate, bodyText){
     reject_link:    "#"
   };
 
-  fetch("https://api.emailjs.com/api/v1.0/email/send",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      service_id:      EMAILJS_SERVICE_ID,
-      template_id:     EMAILJS_INVOICE_TEMPLATE_ID,
-      user_id:         EMAILJS_PUBLIC_KEY,
-      template_params: params
-    })
-  })
-  .then(function(res){
-    if(res.ok){ alert("Decline notification sent to "+toEmail); }
-    else{ return res.text().then(function(t){throw new Error(t);}); }
-  })
-  .catch(function(err){
-    console.error("Decline email error:",err);
-    // Fallback mailto
-    var s = encodeURIComponent("Re: Your Order Request - Siri Kitchen");
-    var b = encodeURIComponent(bodyText);
-    window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
-  });
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
+    .then(function(){ alert("Decline notification sent to "+toEmail); })
+    .catch(function(err){
+      console.error("Decline email error:", JSON.stringify(err));
+      var s = encodeURIComponent("Re: Your Order Request - Siri Kitchen");
+      var b = encodeURIComponent(bodyText);
+      window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
+    });
 }
 
 function updateOrderStatus(id,status){try{var q=JSON.parse(localStorage.getItem('sk_order_queue')||'[]');q=q.map(function(o){if(o.id===id)o.status=status;return o;});localStorage.setItem('sk_order_queue',JSON.stringify(q));}catch(e){}}
