@@ -2754,14 +2754,15 @@ function sendInvoiceSmart(){
 }
 
 function sendInvoiceViaWhatsApp(phone, order){
-  var name  = (document.getElementById("c-name")||{}).value || (order&&order.name) || "";
-  var date  = (document.getElementById("d-date")||{}).value || (order&&order.date) || "";
-  var time  = (document.getElementById("d-time")||{}).value || (order&&order.time) || "";
-  var sub   = typeof getSubtotal==="function" ? getSubtotal() : 0;
-  var del   = parseFloat((document.getElementById("del-charge")||{}).value)||0;
-  var tot   = sub+del;
-  var adv   = tot*0.4;
-  var invNum= makeInvNum(name, date);
+  var name   = (document.getElementById("c-name")||{}).value || (order&&order.name) || "";
+  var date   = (document.getElementById("d-date")||{}).value || (order&&order.date) || "";
+  var time   = (document.getElementById("d-time")||{}).value || (order&&order.time) || "";
+  var sub    = typeof getSubtotal==="function" ? getSubtotal() : 0;
+  var del    = parseFloat((document.getElementById("del-charge")||{}).value)||0;
+  var tot    = sub+del;
+  var adv    = tot*0.4;
+  var invNum = makeInvNum(name, date);
+  var waNum  = phone ? phone.replace(/\D/g,"").replace(/^0/,"61") : "61432237104";
 
   var msg = [
     "✅ *Order Confirmed - Siri Kitchen*","",
@@ -2769,38 +2770,75 @@ function sendInvoiceViaWhatsApp(phone, order){
     "*Invoice:* "+invNum,
     "*Date:* "+date+" at "+time,
     "*Total:* $"+tot.toFixed(2),
-    "*Advance (40%):* $"+adv.toFixed(2),
-    "",
+    "*Advance (40%):* $"+adv.toFixed(2),"",
     "Please pay the advance via PayID:",
-    "*0435 772 552 (Ishrat Parween)*",
-    "",
-    "_Invoice image attached. Send payment screenshot to confirm._"
+    "*0435 772 552 (Ishrat Parween)*","",
+    "_Please find invoice image attached._"
   ].filter(Boolean).join("\n");
 
-  var waNum = phone ? phone.replace(/\D/g,"").replace(/^0/,"61") : "61432237104";
-
-  // Screenshot invoice first, then open WhatsApp
   var invEl = document.getElementById("inv-content");
-  if(invEl && typeof html2canvas !== "undefined"){
-    html2canvas(invEl, {scale:2, backgroundColor:"#ffffff", logging:false})
-      .then(function(canvas){
-        // Download screenshot
-        var link = document.createElement("a");
-        link.download = "Invoice-"+invNum+".png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-        // Then open WhatsApp after short delay
-        setTimeout(function(){
-          window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
-        }, 800);
-      })
-      .catch(function(){
-        // If screenshot fails, just open WhatsApp
-        window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
-      });
-  } else {
+  if(!invEl || typeof html2canvas==="undefined"){
     window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
+    return;
   }
+
+  var btn = document.getElementById("inv-send-btn");
+  if(btn){btn.innerHTML="📸 Capturing invoice...";btn.disabled=true;}
+
+  html2canvas(invEl, {scale:2, backgroundColor:"#ffffff", logging:false})
+    .then(function(canvas){
+      canvas.toBlob(function(blob){
+        var fileName = "Invoice-"+invNum+".png";
+        var file = new File([blob], fileName, {type:"image/png"});
+
+        // Try Web Share API first (works on mobile - can share directly to WhatsApp)
+        if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+          navigator.share({
+            files: [file],
+            text: msg,
+            title: "Siri Kitchen Invoice - "+invNum
+          }).then(function(){
+            if(btn){btn.innerHTML="✅ Invoice Shared!";btn.disabled=false;}
+          }).catch(function(e){
+            if(e.name!=="AbortError"){
+              // Share failed - fallback to download + WA
+              downloadAndOpenWA(blob, fileName, waNum, msg, btn);
+            } else {
+              if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}
+            }
+          });
+        } else {
+          // Desktop or unsupported: download image then open WhatsApp
+          downloadAndOpenWA(blob, fileName, waNum, msg, btn);
+        }
+      }, "image/png");
+    })
+    .catch(function(){
+      if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}
+      window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
+    });
+}
+
+function downloadAndOpenWA(blob, fileName, waNum, msg, btn){
+  // Download the invoice image
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+
+  // Open WhatsApp with message after short delay
+  setTimeout(function(){
+    window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
+    if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}
+    // Show instruction
+    setTimeout(function(){
+      alert("📎 Invoice image saved to your Downloads!\n\nIn WhatsApp: tap the 📎 attachment icon → select the invoice image from your gallery/downloads → send.");
+    }, 1000);
+  }, 600);
 }
 
 // Update invoice send button label based on comm mode
