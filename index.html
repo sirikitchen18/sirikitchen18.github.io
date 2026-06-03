@@ -824,7 +824,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   </div>
 
   <div class="inv-actions">
-    <button class="btn btn-primary" onclick="window.print()">🖨 Print / Save as PDF</button>
+    <button class="btn btn-primary" onclick="printInvoice()">🖨 Print / Save as PDF</button>
     <button class="btn btn-wa" id="inv-send-btn" onclick="sendInvoiceSmart()">
       <span id="inv-send-icon">📤</span>&nbsp;
       <span id="inv-send-label">Send Invoice</span>
@@ -2773,83 +2773,80 @@ function sendInvoiceViaWhatsApp(phone, order){
     "*Advance (40%):* $"+adv.toFixed(2),"",
     "Please pay the advance via PayID:",
     "*0435 772 552 (Ishrat Parween)*","",
-    "_Please find invoice image attached._"
+    "_Invoice image attached._"
   ].filter(Boolean).join("\n");
 
+  var waUrl = "https://wa.me/"+waNum+"?text="+encodeURIComponent(msg);
   var invEl = document.getElementById("inv-content");
+  var btn   = document.getElementById("inv-send-btn");
+
   if(!invEl || typeof html2canvas==="undefined"){
-    window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
+    window.open(waUrl,"_blank");
     return;
   }
 
-  var btn = document.getElementById("inv-send-btn");
-  if(btn){btn.innerHTML="📸 Capturing invoice...";btn.disabled=true;}
+  if(btn){btn.innerHTML="📸 Capturing...";btn.disabled=true;}
 
-  html2canvas(invEl, {scale:2, backgroundColor:"#ffffff", logging:false})
+  html2canvas(invEl,{scale:2,backgroundColor:"#ffffff",logging:false})
     .then(function(canvas){
-      canvas.toBlob(function(blob){
-        var fileName = "Invoice-"+invNum+".png";
-        var file = new File([blob], fileName, {type:"image/png"});
+      // Use dataURL - no blob, no timing issues
+      var dataUrl = canvas.toDataURL("image/png");
+      var fileName = "Invoice-"+invNum+".png";
 
-        // Try Web Share API first (works on mobile - can share directly to WhatsApp)
-        if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-          navigator.share({
-            files: [file],
-            text: msg,
-            title: "Siri Kitchen Invoice - "+invNum
-          }).then(function(){
-            if(btn){btn.innerHTML="✅ Invoice Shared!";btn.disabled=false;}
-          }).catch(function(e){
-            if(e.name!=="AbortError"){
-              // Share failed - fallback to download + WA
-              downloadAndOpenWA(blob, fileName, waNum, msg, btn);
+      // Try Web Share API (mobile - shares directly to WhatsApp)
+      if(navigator.share && navigator.canShare){
+        fetch(dataUrl)
+          .then(function(r){return r.blob();})
+          .then(function(blob){
+            var file = new File([blob], fileName, {type:"image/png"});
+            if(navigator.canShare({files:[file]})){
+              return navigator.share({files:[file], text:msg, title:"Siri Kitchen Invoice"});
             } else {
-              if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}
+              throw new Error("canShare false");
             }
+          })
+          .then(function(){
+            if(btn){btn.innerHTML="✅ Invoice Shared!";btn.disabled=false;}
+          })
+          .catch(function(e){
+            if(e.name!=="AbortError") fallbackDownload(dataUrl, fileName, waUrl, btn);
+            else if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}
           });
-        } else {
-          // Desktop or unsupported: download image then open WhatsApp
-          downloadAndOpenWA(blob, fileName, waNum, msg, btn);
-        }
-      }, "image/png");
+      } else {
+        fallbackDownload(dataUrl, fileName, waUrl, btn);
+      }
     })
-    .catch(function(){
+    .catch(function(err){
+      console.error("Screenshot error:",err);
       if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}
-      window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
+      window.open(waUrl,"_blank");
     });
 }
 
-function downloadAndOpenWA(blob, fileName, waNum, msg, btn){
-  // Step 1: Download invoice image
-  var url = URL.createObjectURL(blob);
-  var link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  // Don't revoke URL immediately - wait longer
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+function fallbackDownload(dataUrl, fileName, waUrl, btn){
+  // Create download link using dataURL (no blob = no timing issue)
+  var a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = fileName;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 
-  // Step 2: Show instruction first, THEN open WhatsApp on user click
-  // This avoids popup blocker (user gesture required)
+  // Update button to open WhatsApp on next click
   if(btn){
-    btn.innerHTML="✅ Image saved! Tap to open WhatsApp";
+    btn.innerHTML="✅ Saved! Tap to open WhatsApp";
     btn.disabled=false;
     btn.style.background="#128C7E";
     btn.onclick=function(){
-      btn.onclick=null; // prevent double tap
-      window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
+      btn.onclick=null;
       btn.innerHTML="📱 Send Invoice via WhatsApp";
       btn.style.background="#25D366";
+      window.open(waUrl,"_blank");
       setTimeout(function(){
-        alert("In WhatsApp: tap the 📎 attachment icon → Photos/Files → select the Invoice image → Send.");
-      },800);
+        alert("Attach the invoice image in WhatsApp:\n📎 → Photos/Files → Invoice-"+fileName.split("/").pop());
+      },500);
     };
-  } else {
-    // No button - just show alert then open WA
-    alert("📎 Invoice image downloaded!\n\nTap OK then attach it in WhatsApp.");
-    window.open("https://wa.me/"+waNum+"?text="+encodeURIComponent(msg),"_blank");
   }
 }
 
@@ -2927,6 +2924,34 @@ function screenshotInvoice(){
     if(btn){ btn.textContent="📸 Save as Image"; btn.disabled=false; }
     alert("Screenshot failed. Try Print/Save as PDF instead.");
   });
+}
+
+function printInvoice(){
+  var invEl = document.getElementById("inv-content");
+  if(!invEl){ alert("Please generate invoice first."); return; }
+
+  var printWin = window.open("","_blank","width=800,height=900");
+  printWin.document.write(
+    "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
+    +"<title>Siri Kitchen Invoice</title>"
+    +"<style>"
+    +"*{margin:0;padding:0;box-sizing:border-box}"
+    +"body{font-family:Arial,Helvetica,sans-serif;background:#fff;padding:20px}"
+    +"@media print{"
+    +"  body{padding:0}"
+    +"  @page{margin:10mm;size:A4}"
+    +"}"
+    +"</style>"
+    +"</head><body>"
+    + invEl.outerHTML
+    +"</body></html>"
+  );
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(function(){
+    printWin.print();
+    printWin.close();
+  }, 500);
 }
 </script>
 </body>
