@@ -2458,6 +2458,12 @@ function sendAcceptWA(){
 
     // Accept link - reconstruct order from URL params
     if(oid){
+      // Save comm params to sessionStorage immediately so they survive navigation
+      var cmParam = params.get("cm")||"";
+      var emParam = params.get("em")||"";
+      if(cmParam) sessionStorage.setItem("sk_comm_mode", cmParam);
+      if(emParam) sessionStorage.setItem("sk_cust_email", emParam);
+
       setTimeout(function(){
         try{
           var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
@@ -2706,10 +2712,13 @@ function sendInvoiceSmart(){
     }
   }catch(e){}
 
-  // Priority: URL params > order object > form fields > default wa
-  // (form fields default to "wa" so check URL/order first)
-  var commMode  = urlComm  || (custOrder&&custOrder.commMode) || formComm  || "wa";
-  var custEmail = urlEmail || (custOrder&&custOrder.email)    || formEmail || "";
+  // Read from sessionStorage (saved when Approve link was first opened)
+  var sessComm  = sessionStorage.getItem("sk_comm_mode")  || "";
+  var sessEmail = sessionStorage.getItem("sk_cust_email") || "";
+
+  // Priority: sessionStorage > URL params > order object > form fields > default wa
+  var commMode  = sessComm  || urlComm  || (custOrder&&custOrder.commMode) || formComm  || "wa";
+  var custEmail = sessEmail || urlEmail || (custOrder&&custOrder.email)    || formEmail || "";
   console.log("sendInvoiceSmart sources: formComm="+formComm+" urlComm="+urlComm+" orderComm="+(custOrder&&custOrder.commMode)+" -> final="+commMode);
   var custPhone = (document.getElementById("c-phone")||{}).value||"";
   console.log("sendInvoiceSmart: mode="+commMode+" email="+custEmail);
@@ -2842,14 +2851,15 @@ function updateInvSendBtn(){
   var commMode  = (document.getElementById("inv-comm-mode")||{}).value || "";
   var custEmail = (document.getElementById("inv-cust-email")||{}).value || "";
 
-  // Check URL params first (most reliable when coming from email Approve link)
+  // Check sessionStorage and URL params
   var urlParams2 = new URLSearchParams(window.location.search);
-  if(!commMode || commMode==="wa"){
-    var urlC = urlParams2.get("cm") || "";
-    if(urlC) commMode = urlC;
+  var sessC = sessionStorage.getItem("sk_comm_mode")||"";
+  var sessE = sessionStorage.getItem("sk_cust_email")||"";
+  if(!commMode||commMode==="wa"){
+    commMode  = sessC || urlParams2.get("cm") || commMode;
   }
   if(!custEmail){
-    custEmail = urlParams2.get("em") || "";
+    custEmail = sessE || urlParams2.get("em") || "";
   }
   if(!commMode){
     try{
