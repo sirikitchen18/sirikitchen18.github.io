@@ -2311,13 +2311,45 @@ renderAll();
 
 /* === SHEET STATUS + ORDER QUEUE + ADMIN LINKS === */
 function sendDeclineEmailJS(toEmail, custName, fmtDate){
-  var declineMsg = "Dear "+custName+",\n\nThank you for your order request with Siri Kitchen!\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+" and are unable to accept your order.\n\nWe sincerely apologise. Please send another request for a different date - we would love to cook for you!\n\nWarm regards,\nSiri Kitchen\n0432 237 104";
+  if(!toEmail||toEmail.indexOf("@")<0){
+    alert("No email address found.");return;
+  }
+  var declineMsg = "Dear "+custName+",\n\nThank you for your order request with Siri Kitchen!\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+" and are unable to accept your order at this time.\n\nWe sincerely apologise for any inconvenience. Please feel free to send another request for a different date - we would love to cook for you!\n\nWarm regards,\nSiri Kitchen\n0432 237 104";
 
-  // Simple mailto - most reliable for decline
-  var subject = encodeURIComponent("Re: Your Order Request - Siri Kitchen");
-  var body    = encodeURIComponent(declineMsg);
-  window.open("mailto:"+toEmail+"?subject="+subject+"&body="+body,"_blank");
-  alert("Decline email drafted. Click Send in your email client.");
+  var itemsHtml = "<tr><td colspan='4' style='padding:20px;font-size:14px;color:#333;text-align:center'>"
+    +"Unfortunately, we are <strong>not available</strong> on "+(fmtDate||"the requested date")+".<br><br>"
+    +"Please feel free to send another request for a different date.<br>"
+    +"We would love to cook for you! 🍛</td></tr>";
+
+  var params = {
+    to_email:       toEmail,
+    reply_to:       "sirikitchen18@gmail.com",
+    name:           "Siri Kitchen",
+    email:          toEmail,
+    title:          "Re: Your Order Request - Siri Kitchen",
+    customer_name:  custName,
+    customer_phone: "",
+    address:        "",
+    order_date:     new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"}),
+    delivery_date:  fmtDate||"Requested date",
+    delivery_time:  "",
+    service_type:   "Order Not Available",
+    notes:          "",
+    items_html:     itemsHtml,
+    items_text:     "Order not available",
+    total:          "0",
+    advance:        "0",
+    remaining:      "0"
+  };
+
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
+    .then(function(){ alert("Decline notification sent to "+toEmail+"!"); })
+    .catch(function(err){
+      console.error("Decline email error:", JSON.stringify(err));
+      var s = encodeURIComponent("Re: Your Order Request - Siri Kitchen");
+      var b = encodeURIComponent(declineMsg);
+      window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
+    });
 }
 
 function updateSheetStatus(id,status){try{if(APPS_SCRIPT_URL)fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'updateStatus',orderId:id,status:status})});}catch(e){}}
@@ -2342,8 +2374,7 @@ function declineOrder(oid, name, phone, date, custEmail, commMode) {
   if(!commMode||commMode==="wa"){var uc=urlP.get("cm")||urlP.get("comm")||"";if(uc)commMode=uc;}
   if(!custEmail){var ue=urlP.get("em")||urlP.get("email")||"";if(ue)custEmail=ue;}
 
-  // DEBUG - visible alert to trace
-  alert("declineOrder called:\noid="+oid+"\ncommMode="+commMode+"\nemail="+custEmail+"\nphone="+phone+"\nsessComm="+sessionStorage.getItem("sk_comm_mode")+"\nsessEmail="+sessionStorage.getItem("sk_cust_email"));
+  console.log("declineOrder: commMode="+commMode+" email="+custEmail+" phone="+phone);
 
   var fmtDate="";
   if(date){try{var d=new Date(date);fmtDate=d.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});}catch(e){}}
@@ -2654,7 +2685,8 @@ function sendEmail(){
     "&name="+encodeURIComponent(name)+
     "&phone="+encodeURIComponent(phone||"")+
     "&date="+encodeURIComponent(date||"")+
-    "&email="+encodeURIComponent(email||"");
+    "&email="+encodeURIComponent(email||"")+
+    "&comm="+encodeURIComponent(comm||"wa");
 
     var invNum = makeInvNum(name, date);
   // Pre-render items as HTML table rows to avoid EmailJS {{#each}} corruption
