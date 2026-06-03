@@ -3203,9 +3203,50 @@ function searchMenu(q){
       row.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:12px";
 
       var info = document.createElement("div");
-      info.innerHTML = "<div style='font-size:15px;font-weight:700;color:var(--text)'>"+item.n+"</div>"
-        +(item.d?"<div style='font-size:12px;color:var(--sub);margin-top:2px'>"+item.d+"</div>":"")
-        +"<div style='font-size:13px;color:var(--red);font-weight:600;margin-top:4px'>$"+p.toFixed(2)+(label?" · "+label:"")+"</div>";
+      info.style.cssText = "flex:1";
+      // Name and description
+      var nameDiv = document.createElement("div");
+      nameDiv.style.cssText = "font-size:15px;font-weight:700;color:var(--text)";
+      nameDiv.textContent = item.n;
+      info.appendChild(nameDiv);
+      if(item.d){
+        var descDiv = document.createElement("div");
+        descDiv.style.cssText = "font-size:12px;color:var(--sub);margin-top:2px";
+        descDiv.textContent = item.d;
+        info.appendChild(descDiv);
+      }
+      // Show size options if item has both family and jumbo
+      if(item.t==="fj" && item.f && item.j){
+        var sizesDiv = document.createElement("div");
+        sizesDiv.style.cssText = "display:flex;gap:8px;margin-top:6px;flex-wrap:wrap";
+        // Family option
+        var famBtn = document.createElement("div");
+        famBtn.style.cssText = "display:flex;align-items:center;gap:6px;background:#fdf6ee;border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer";
+        famBtn.innerHTML = "<span style='font-size:12px;color:var(--sub)'>Family</span><span style='font-size:13px;font-weight:700;color:var(--red)'>$"+item.f.toFixed(2)+"</span>";
+        famBtn.addEventListener("click", function(){
+          // Switch to family and add
+          if(typeof setSize==="function") setSize(item.id,"f");
+          adj(item.id,1);
+          searchMenu(document.getElementById("menu-search").value);
+        });
+        // Jumbo option
+        var jumbBtn = document.createElement("div");
+        jumbBtn.style.cssText = "display:flex;align-items:center;gap:6px;background:#fdf6ee;border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer";
+        jumbBtn.innerHTML = "<span style='font-size:12px;color:var(--sub)'>Jumbo</span><span style='font-size:13px;font-weight:700;color:var(--red)'>$"+item.j.toFixed(2)+"</span>";
+        jumbBtn.addEventListener("click", function(){
+          if(typeof setSize==="function") setSize(item.id,"j");
+          adj(item.id,1);
+          searchMenu(document.getElementById("menu-search").value);
+        });
+        sizesDiv.appendChild(famBtn);
+        sizesDiv.appendChild(jumbBtn);
+        info.appendChild(sizesDiv);
+      } else {
+        var priceDiv = document.createElement("div");
+        priceDiv.style.cssText = "font-size:13px;color:var(--red);font-weight:600;margin-top:4px";
+        priceDiv.textContent = "$"+p.toFixed(2)+(label?" · "+label:"");
+        info.appendChild(priceDiv);
+      }
 
       var ctrl = document.createElement("div");
       ctrl.style.cssText = "display:flex;align-items:center;gap:8px;flex-shrink:0";
