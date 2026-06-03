@@ -1276,7 +1276,7 @@ function updTotals(){
 // ── MODAL ────────────────────────────────────────────
 function openModal(){
   const a=Object.values(cart).filter(c=>c.qty>0);
-  console.log("openModal: cart items=",a.length, a);
+  ;
   if(!a.length)return;
   const ol=document.getElementById('olines');
   if(!ol){console.error('olines not found');return;}
@@ -1614,8 +1614,7 @@ function sendAcceptWA(){
   var commMode = urlComm || (custOrder&&custOrder.commMode) || "wa";
   var custEmail= urlEmail|| (custOrder&&custOrder.email)   || "";
 
-  console.log("sendAcceptWA: mode="+commMode+" email="+custEmail+" order=",custOrder);
-
+  
   // Generate invoice preview then send via smart function
   if(typeof generateInvoice==="function") generateInvoice();
   setTimeout(function(){
@@ -1680,6 +1679,8 @@ function sendInvoiceEmail(toEmail, order){
     name:           "Siri Kitchen",
     email:          toEmail,
     title:          invNum,
+    message_body:   "Your order has been <strong>approved</strong>! &#127881;<br>Please find your invoice below. Pay the <strong>40% advance</strong> via PayID to confirm.",
+    message_body:   "Your order has been <strong>approved</strong>! &#127881;<br>Please find your invoice below. Pay the <strong>40% advance</strong> via PayID to confirm.",
     customer_name:  invName,
     customer_phone: invPhone||"—",
     address:        invAddr||"Pickup from Tarneit",
@@ -1694,8 +1695,7 @@ function sendInvoiceEmail(toEmail, order){
     remaining:      rem.toFixed(2)
   };
 
-  console.log("sendInvoiceEmail: to="+toEmail+" name="+invName+" items="+items.length+" total="+tot);
-
+  
   emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
     .then(function(){ alert("Invoice sent to "+toEmail+"!"); })
     .catch(function(err){
@@ -2313,46 +2313,21 @@ renderAll();
 function sendDeclineEmailJS(toEmail, custName, fmtDate){
   if(!toEmail||toEmail.indexOf("@")<0){alert("No email found.");return;}
 
-  var params = {
-    // order_received_siri template variables
-    to_email:       toEmail,
-    reply_to:       "sirikitchen18@gmail.com",
-    title:          "Re: Your Order Request",
-    name:           custName,
-    email:          toEmail,
-    customer_name:  custName,
-    customer_phone: "",
-    customer_email: toEmail,
-    service_type:   "Order Update",
-    delivery_date:  fmtDate||"Requested date",
-    delivery_time:  "",
-    address:        "",
-    notes:          "We are not available on "+(fmtDate||"the requested date")+". Please send another request for a different date - we would love to cook for you!",
-    items_html:     "<tr><td colspan='3' style='padding:20px 16px;font-size:15px;color:#333;text-align:center;line-height:1.8'>"
-                    +"Dear <strong>"+custName+"</strong>,<br><br>"
-                    +"Thank you for your order request with <strong>Siri Kitchen</strong>!<br><br>"
-                    +"Unfortunately, we are <strong>not available</strong> on <strong>"+(fmtDate||"the requested date")+"</strong> "
-                    +"and are unable to accept your order at this time.<br><br>"
-                    +"We sincerely apologise for any inconvenience. "
-                    +"Please feel free to send another request for a different date — we would love to cook for you! 🍛<br><br>"
-                    +"<strong>Warm regards,<br>Siri Kitchen<br>0432 237 104</strong>"
-                    +"</td></tr>",
-    items_text:     "Order not available on "+(fmtDate||"requested date"),
-    total:          "0",
-    advance:        "0",
-    remaining:      "0",
-    approval_link:  "#",
-    reject_link:    "#"
-  };
+  var subject = "Re: Your Order Request - Siri Kitchen";
+  var body = "Dear "+custName+","
+    +"\n\nThank you for your order request with Siri Kitchen!"
+    +"\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+" and are unable to accept your order at this time."
+    +"\n\nWe sincerely apologise for any inconvenience. Please feel free to send another request for a different date - we would love to cook for you!"
+    +"\n\nWarm regards,"
+    +"\nSiri Kitchen"
+    +"\n0432 237 104";
 
-  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
-    .then(function(){ alert("Decline notification sent to "+toEmail+"!"); })
-    .catch(function(err){
-      console.error("Decline email error:", JSON.stringify(err));
-      var s = encodeURIComponent("Re: Your Order Request - Siri Kitchen");
-      var b = encodeURIComponent("Dear "+custName+",\n\nUnfortunately we are not available on "+(fmtDate||"the requested date")+".\n\nPlease send another request.\n\nSiri Kitchen - 0432 237 104");
-      window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
-    });
+  window.open("mailto:"+toEmail
+    +"?subject="+encodeURIComponent(subject)
+    +"&body="+encodeURIComponent(body),
+    "_blank"
+  );
+  alert("Decline email opened in your email client. Please click Send.");
 }
 
 function updateSheetStatus(id,status){try{if(APPS_SCRIPT_URL)fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'updateStatus',orderId:id,status:status})});}catch(e){}}
@@ -2377,8 +2352,7 @@ function declineOrder(oid, name, phone, date, custEmail, commMode) {
   if(!commMode||commMode==="wa"){var uc=urlP.get("cm")||urlP.get("comm")||"";if(uc)commMode=uc;}
   if(!custEmail){var ue=urlP.get("em")||urlP.get("email")||"";if(ue)custEmail=ue;}
 
-  console.log("declineOrder: commMode="+commMode+" email="+custEmail+" phone="+phone);
-
+  
   var fmtDate="";
   if(date){try{var d=new Date(date);fmtDate=d.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});}catch(e){}}
 
@@ -2429,6 +2403,7 @@ function sendDeclineEmail(toEmail, custName, fmtDate, bodyText){
                     +"Please feel free to send another request for a different date.<br>"
                     +"We would love to cook for you! 🍛</td></tr>",
     items_text:     "Order not available on "+(fmtDate||"requested date"),
+    order_date:     new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"}),
     total:          "0",
     advance:        "0",
     remaining:      "0",
@@ -2552,7 +2527,7 @@ function sendAcceptWA(){
               q.push(order);localStorage.setItem("sk_order_queue",JSON.stringify(q));
             }
           }
-        }catch(e){console.log("OID handler error:",e);}
+        }catch(e){console.error("OID handler error:",e);}
         showPass();
       },600);
     }
@@ -2568,7 +2543,7 @@ function sendAcceptWA(){
           if(!q.find(function(o){return o.id===acceptId;})){
             q.push(order);localStorage.setItem("sk_order_queue",JSON.stringify(q));
           }
-        }catch(e){console.log("Accept link error:",e);}
+        }catch(e){console.error("Accept link error:",e);}
         showPass();
       },600);
     }
@@ -2581,8 +2556,6 @@ function sendAcceptWA(){
         var em      = decodeURIComponent(params.get("email")||"");
         var comm    = decodeURIComponent(params.get("comm")||"wa");
         var fmtDate = "";
-
-        alert("Decline handler:\ncomm="+comm+"\nemail="+em+"\nphone="+p);
 
         if(dt){
           try{
@@ -2599,14 +2572,12 @@ function sendAcceptWA(){
         }catch(e){}
 
         if(comm==="email" && em && em.indexOf("@")>0){
-          alert("Sending decline email to: "+em);
-          sendDeclineEmailJS(em, n, fmtDate);
+                  sendDeclineEmailJS(em, n, fmtDate);
         } else if(p && p.replace(/\D/g,"").length>=10){
           var msg="Dear "+n+",\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+".\n\nPlease feel free to send another request.\n\nSiri Kitchen\n0432 237 104";
           window.open("https://wa.me/"+p.replace(/\D/g,"").replace(/^0/,"61")+"?text="+encodeURIComponent(msg),"_blank");
         } else {
-          alert("No contact method found. comm="+comm+" email="+em+" phone="+p);
-        }
+                }
       },300);
     }
   }catch(e){}
@@ -2735,11 +2706,7 @@ function sendEmail(){
     reject_link:    declineLink
   };
 
-  console.log("Sending email via EmailJS...");
-  console.log("Service:", EMAILJS_SERVICE_ID);
-  console.log("Template:", EMAILJS_TEMPLATE_ID);
-  console.log("Params keys:", Object.keys(templateParams));
-  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
     .then(function(){
       if(ebtn){
         ebtn.innerHTML="&#10003; Order Sent!";
@@ -2786,12 +2753,9 @@ function sendInvoiceSmart(){
   // Priority: sessionStorage > URL params > order object > form fields > default wa
   var commMode  = sessComm  || urlComm  || (custOrder&&custOrder.commMode) || formComm  || "wa";
   var custEmail = sessEmail || urlEmail || (custOrder&&custOrder.email)    || formEmail || "";
-  console.log("sendInvoiceSmart sources: formComm="+formComm+" urlComm="+urlComm+" orderComm="+(custOrder&&custOrder.commMode)+" -> final="+commMode);
-  var custPhone = (document.getElementById("c-phone")||{}).value||"";
-  console.log("sendInvoiceSmart: mode="+commMode+" email="+custEmail);
-
-  console.log("FINAL: commMode="+commMode+" email="+custEmail+" phone="+custPhone);
-  // Simple rule: if we have a valid email AND commMode is email -> send email
+    var custPhone = (document.getElementById("c-phone")||{}).value||"";
+  
+    // Simple rule: if we have a valid email AND commMode is email -> send email
   // Otherwise -> WhatsApp
   var hasEmail = custEmail && custEmail.indexOf("@")>0;
   if(hasEmail && commMode==="email"){
