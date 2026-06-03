@@ -1831,7 +1831,7 @@ window.sendWA = function() {
   var commLabel = comm==="email" ? "Email ("+email+")" : "WhatsApp ("+phone+")";
 
   var adminParams = {
-    title:          invNum,
+    title:          "New Order: "+name+" - "+(date||"TBC"),
     name:           "Siri Kitchen Team",
     email:          "sirikitchen18@gmail.com",
     to_email:       "sirikitchen18@gmail.com",
@@ -2311,35 +2311,38 @@ renderAll();
 
 /* === SHEET STATUS + ORDER QUEUE + ADMIN LINKS === */
 function sendDeclineEmailJS(toEmail, custName, fmtDate){
-  if(!toEmail||toEmail.indexOf("@")<0){
-    alert("No email address found.");return;
-  }
-  var declineMsg = "Dear "+custName+",\n\nThank you for your order request with Siri Kitchen!\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+" and are unable to accept your order at this time.\n\nWe sincerely apologise for any inconvenience. Please feel free to send another request for a different date - we would love to cook for you!\n\nWarm regards,\nSiri Kitchen\n0432 237 104";
-
-  var itemsHtml = "<tr><td colspan='4' style='padding:20px;font-size:14px;color:#333;text-align:center'>"
-    +"Unfortunately, we are <strong>not available</strong> on "+(fmtDate||"the requested date")+".<br><br>"
-    +"Please feel free to send another request for a different date.<br>"
-    +"We would love to cook for you! 🍛</td></tr>";
+  if(!toEmail||toEmail.indexOf("@")<0){alert("No email found.");return;}
 
   var params = {
+    // order_received_siri template variables
     to_email:       toEmail,
     reply_to:       "sirikitchen18@gmail.com",
-    name:           "Siri Kitchen",
+    title:          "Re: Your Order Request",
+    name:           custName,
     email:          toEmail,
-    title:          "Re: Your Order Request - Siri Kitchen",
     customer_name:  custName,
     customer_phone: "",
-    address:        "",
-    order_date:     new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"}),
+    customer_email: toEmail,
+    service_type:   "Order Update",
     delivery_date:  fmtDate||"Requested date",
     delivery_time:  "",
-    service_type:   "Order Not Available",
-    notes:          "",
-    items_html:     itemsHtml,
-    items_text:     "Order not available",
+    address:        "",
+    notes:          "We are not available on "+(fmtDate||"the requested date")+". Please send another request for a different date - we would love to cook for you!",
+    items_html:     "<tr><td colspan='3' style='padding:20px 16px;font-size:15px;color:#333;text-align:center;line-height:1.8'>"
+                    +"Dear <strong>"+custName+"</strong>,<br><br>"
+                    +"Thank you for your order request with <strong>Siri Kitchen</strong>!<br><br>"
+                    +"Unfortunately, we are <strong>not available</strong> on <strong>"+(fmtDate||"the requested date")+"</strong> "
+                    +"and are unable to accept your order at this time.<br><br>"
+                    +"We sincerely apologise for any inconvenience. "
+                    +"Please feel free to send another request for a different date — we would love to cook for you! 🍛<br><br>"
+                    +"<strong>Warm regards,<br>Siri Kitchen<br>0432 237 104</strong>"
+                    +"</td></tr>",
+    items_text:     "Order not available on "+(fmtDate||"requested date"),
     total:          "0",
     advance:        "0",
-    remaining:      "0"
+    remaining:      "0",
+    approval_link:  "#",
+    reject_link:    "#"
   };
 
   emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
@@ -2347,7 +2350,7 @@ function sendDeclineEmailJS(toEmail, custName, fmtDate){
     .catch(function(err){
       console.error("Decline email error:", JSON.stringify(err));
       var s = encodeURIComponent("Re: Your Order Request - Siri Kitchen");
-      var b = encodeURIComponent(declineMsg);
+      var b = encodeURIComponent("Dear "+custName+",\n\nUnfortunately we are not available on "+(fmtDate||"the requested date")+".\n\nPlease send another request.\n\nSiri Kitchen - 0432 237 104");
       window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
     });
 }
