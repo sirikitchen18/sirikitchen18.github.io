@@ -844,7 +844,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     <div class="mhandle"></div>
     <div class="mhdr">
       <h2>Complete Your Order</h2>
-      <p>Review and submit via WhatsApp</p>
+      <p id="modal-subtitle">Review and submit via WhatsApp</p>
       <button class="mclose" onclick="closeModal()">✕</button>
     </div>
     <div class="mbody">
@@ -1331,6 +1331,11 @@ function setComm(mode){
     if(label) label.textContent = "Send Order Request via WhatsApp";
     if(icon)  icon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="vertical-align:middle;margin-right:8px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
   }
+  // Update modal subtitle
+  var sub = document.getElementById("modal-subtitle");
+  if(sub) sub.textContent = mode==="email"
+    ? "Review and submit via Email"
+    : "Review and submit via WhatsApp";
   checkWAReady();
 }
 
@@ -2318,39 +2323,13 @@ renderAll();
 
 /* === SHEET STATUS + ORDER QUEUE + ADMIN LINKS === */
 function sendDeclineEmailJS(toEmail, custName, fmtDate){
-  var params = {
-    title:         "Order Not Available - "+custName,
-    name:          custName,
-    email:         toEmail,
-    to_email:      toEmail,
-    reply_to:      "sirikitchen18@gmail.com",
-    customer_name: custName,
-    customer_email:toEmail,
-    customer_phone:"",
-    order_id:      "",
-    order_date:    new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"}),
-    service_type:  "Order Not Available",
-    delivery_date: fmtDate||"Requested date",
-    delivery_time: "",
-    address:       "",
-    notes:         "We are sorry, we are not available on the requested date. Please feel free to send another request for a different date.",
-    items:         [{name:"Unfortunately we are not available on "+( fmtDate||"the requested date"),qty:"",price:""}],
-    items_text:    "We are not available on the requested date.",
-    items_html:    "<tr><td style='padding:10px;color:#c00'>Unfortunately we are not available on "+(fmtDate||"the requested date")+". Please try a different date.</td></tr>",
-    total:         "0",
-    advance:       "0",
-    approval_link: "#",
-    reject_link:   "#"
-  };
-  // Use a decline template or reuse invoice template
-  var declineTemplateId = typeof EMAILJS_DECLINE_TEMPLATE_ID !== "undefined" ? EMAILJS_DECLINE_TEMPLATE_ID : EMAILJS_INVOICE_TEMPLATE_ID;
-  emailjs.send(EMAILJS_SERVICE_ID, declineTemplateId, params)
-    .then(function(){ alert("Decline notification sent to "+toEmail); })
-    .catch(function(err){
-      console.error("Decline email error:", err);
-      var declineBody="Dear "+custName+",\n\nUnfortunately we are not available on "+(fmtDate||"the requested date")+". Please feel free to send another request.\n\nWarm regards,\nSiri Kitchen\n0432 237 104";
-      window.open("mailto:"+toEmail+"?subject="+encodeURIComponent("Re: Your Order Request - Siri Kitchen")+"&body="+encodeURIComponent(declineBody),"_blank");
-    });
+  var declineMsg = "Dear "+custName+",\n\nThank you for your order request with Siri Kitchen!\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+" and are unable to accept your order.\n\nWe sincerely apologise. Please send another request for a different date - we would love to cook for you!\n\nWarm regards,\nSiri Kitchen\n0432 237 104";
+
+  // Simple mailto - most reliable for decline
+  var subject = encodeURIComponent("Re: Your Order Request - Siri Kitchen");
+  var body    = encodeURIComponent(declineMsg);
+  window.open("mailto:"+toEmail+"?subject="+subject+"&body="+body,"_blank");
+  alert("Decline email drafted. Click Send in your email client.");
 }
 
 function updateSheetStatus(id,status){try{if(APPS_SCRIPT_URL)fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'updateStatus',orderId:id,status:status})});}catch(e){}}
