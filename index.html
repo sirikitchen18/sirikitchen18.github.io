@@ -1916,6 +1916,7 @@ window.sendWA = function() {
     addr: delType==="delivery" ? addr : "Pickup from Tarneit",
     delType:delType, delCharge:delCharge, distKm:Math.round(km*1.3),
     id:"ORD-"+Date.now(), receivedAt:new Date().toISOString(), status:"pending",
+    promo: (typeof activePromo!=="undefined"&&activePromo) ? activePromo : null,
     items:a.map(function(x){return{qty:x.qty,name:x.name,size:x.size||"",price:x.price};})
   };
 
@@ -2046,6 +2047,21 @@ function loadFromStorage() {
   setVal("c-addr",    od.addr);
   setVal("inv-comm-mode",  od.commMode||"wa");
   setVal("inv-cust-email", od.email||"");
+  // Restore promo from order
+  if(od.promo){
+    try{
+      activePromo = od.promo;
+      localStorage.setItem("sk_active_promo", JSON.stringify(activePromo));
+      var pi = document.getElementById("promo-input");
+      if(pi) pi.value = od.promo.code||"";
+      var pm = document.getElementById("promo-msg");
+      if(pm){ pm.style.cssText="font-size:12px;margin-top:4px;display:block;color:#2d8a4e"; pm.textContent="✅ "+od.promo.label+" applied!"; }
+      var dr = document.getElementById("discount-row");
+      if(dr && od.promo.type!=="freeitem") dr.style.display="flex";
+      var fr = document.getElementById("free-item-row");
+      if(fr && od.promo.type==="freeitem"){ fr.style.display="flex"; var fl=document.getElementById("free-item-label"); if(fl) fl.textContent=od.promo.item||""; }
+    }catch(e){}
+  }
   setVal("d-date",    od.date);
   setVal("d-time",    od.time);
   setVal("inv-note",  od.notes);
