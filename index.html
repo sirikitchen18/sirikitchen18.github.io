@@ -347,8 +347,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .inv-items{padding:0 1.5rem}
 .inv-tbl{width:100%;border-collapse:collapse;margin:1.25rem 0}
 .inv-tbl thead tr{background:#8b2500}
-.inv-tbl thead th{color:#fff;padding:10px 12px;font-size:12px;font-weight:700;text-align:left;letter-spacing:0.3px}
+.inv-tbl thead th{color:#fff;padding:8px 10px;font-size:11px;font-weight:700;text-align:left;letter-spacing:0.3px;white-space:nowrap}
 .inv-tbl thead th:nth-child(1){width:40px;text-align:center}
+.inv-tbl thead th:nth-child(3),.inv-tbl thead th:nth-child(4){white-space:nowrap;text-align:right}
+.inv-tbl tbody td:nth-child(3),.inv-tbl tbody td:nth-child(4){white-space:nowrap;text-align:right;font-weight:600}
 .inv-tbl thead th:nth-child(3),.inv-tbl thead th:nth-child(4){text-align:right}
 .inv-tbl tbody tr:nth-child(even){background:#fdf8f4}
 .inv-tbl tbody td{padding:10px 12px;font-size:13.5px;border-bottom:1px solid #f5ede0;color:#1a1a1a;vertical-align:top}
@@ -897,6 +899,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       <div id="dfields">
         <div class="fg">
           <label class="fl">Delivery Address</label>
+          <div class="fg" style="margin-bottom:8px">
+            <label class="fl">Unit / Apt / Street No. <span style="color:var(--sub);font-weight:400">(optional)</span></label>
+            <input class="fi" type="text" id="dunit" placeholder="e.g. Unit 5, or 42B" autocomplete="off">
+          </div>
+          <label class="fl">Street Address</label>
           <div class="awrap">
             <input class="fi" type="text" id="daddr" placeholder="Start typing your address..." autocomplete="off" oninput="onAddr()" onkeydown="if(event.key==='Escape')hideSugg()">
             <div class="asugg" id="asugg"></div>
@@ -1257,11 +1264,7 @@ async function fetchSugg(q){
 }
 function selAddr(i){
   const item=suggs[i];
-  const typed = document.getElementById('daddr').value.trim();
-  // If customer typed a unit/apt number before selecting, prepend it
-  const unitMatch = typed.match(/^(unit|apt|u|apartment|suite|shop)[\s#]*[\d\w]+/i);
-  const fullAddr = unitMatch ? unitMatch[0]+', '+item.display_name : item.display_name;
-  document.getElementById('daddr').value = fullAddr;
+  document.getElementById('daddr').value = item.display_name;
   slat=parseFloat(item.lat);slon=parseFloat(item.lon);
   hideSugg();calcDel();
 }
@@ -1897,7 +1900,10 @@ window.sendWA = function() {
   if(comm==="email" && (!email||email.indexOf("@")<0)){alert("Please enter a valid email address.");return;}
 
   var addrEl = document.getElementById("daddr");
+  var unitEl = document.getElementById("dunit");
+  var unitNum = unitEl ? unitEl.value.trim() : "";
   var addr = addrEl ? addrEl.value.trim() : "";
+  if(unitNum && addr) addr = unitNum + ", " + addr;
   if(delType==="delivery"&&!addr){alert("Please enter your delivery address.");return;}
 
   var a = Object.values(cart).filter(function(x){return x.qty>0;});
