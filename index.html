@@ -84,7 +84,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .iname{font-size:15px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:2px}
 .idesc{font-size:12px;color:var(--sub);line-height:1.35;margin-bottom:8px}
 .ifoot{display:flex;flex-direction:column;gap:7px;margin-top:8px}
-.ifoot-sel{width:100%}
+.ifoot-sel{width:auto}
 .ifoot-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .iprice{font-size:16px;font-weight:800;color:var(--red);white-space:nowrap}
 .iright{display:flex;align-items:center;gap:8px}
@@ -1115,7 +1115,7 @@ function renderSection(data,elId){
   el.innerHTML=data.map(item=>{
     let ctrl='',priceStr='';
     if(item.t==='fj'){
-      ctrl=`<select class="ssel" id="sz-${item.id}" onchange="upP('${item.id}')"><option value="f">Family $${item.f}</option><option value="j">Jumbo $${item.j}</option></select>`;
+      ctrl=`<select class="ssel" id="sz-${item.id}" onchange="upP('${item.id}')"><option value="f">Family (4–5 pax) $${item.f}</option><option value="j">Jumbo (8–9 pax) $${item.j}</option></select>`;
       priceStr=``;  // price shown in dropdown
     }else if(item.t==='flat'){priceStr=`$${item.v}`;}
     else if(item.t==='pc'){priceStr=`$${item.v.toFixed(2)} ea`+(item.min?` · min ${item.min}`:'');}
@@ -3200,7 +3200,7 @@ function buildSearchCard(card, item){
   var priceArea=document.createElement("div"); foot.appendChild(priceArea);
   if(item.t==="fj"){
     var sel=document.createElement("select"); sel.className="ssel"; sel.id="sz-"+iid;
-    sel.innerHTML="<option value='f'>Family $"+item.f+"</option><option value='j'>Jumbo (8-9 pax)) $"+item.j+"</option>";
+    sel.innerHTML="<option value='f'>Family (4-5 pax) $"+item.f+"</option><option value='j'>Jumbo (8-9 pax)) $"+item.j+"</option>";
     sel.addEventListener("change",function(){upP(iid);});
     priceArea.appendChild(sel);
   } else {
