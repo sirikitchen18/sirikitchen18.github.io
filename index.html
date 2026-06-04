@@ -88,7 +88,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .ifoot-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .iprice{font-size:16px;font-weight:800;color:var(--red);white-space:nowrap}
 .iright{display:flex;align-items:center;gap:8px}
-.ssel{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;color:var(--text);background:#fffaf6;font-family:'Inter',sans-serif;cursor:pointer;touch-action:manipulation;display:block}
+.ssel{width:auto;padding:5px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--text);background:#fffaf6;font-family:'Inter',sans-serif;cursor:pointer;touch-action:manipulation;display:inline-block}
 .ssel:focus{outline:none;border-color:var(--red)}
 .qrow{display:flex;align-items:center;gap:6px}
 .qbtn{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);background:#fff;cursor:pointer;font-size:19px;font-weight:700;color:var(--red);display:flex;align-items:center;justify-content:center;transition:all .15s;touch-action:manipulation;flex-shrink:0}
@@ -1115,7 +1115,7 @@ function renderSection(data,elId){
   el.innerHTML=data.map(item=>{
     let ctrl='',priceStr='';
     if(item.t==='fj'){
-      ctrl=`<select class="ssel" id="sz-${item.id}" onchange="upP('${item.id}')"><option value="f">Family (4–5 pax) $${item.f}</option><option value="j">Jumbo (8–9 pax) $${item.j}</option></select>`;
+      ctrl=`<select class="ssel" id="sz-${item.id}" onchange="upP('${item.id}')"><option value="f">Family $${item.f}</option><option value="j">Jumbo $${item.j}</option></select>`;
       priceStr=``;  // price shown in dropdown
     }else if(item.t==='flat'){priceStr=`$${item.v}`;}
     else if(item.t==='pc'){priceStr=`$${item.v.toFixed(2)} ea`+(item.min?` · min ${item.min}`:'');}
@@ -3061,35 +3061,23 @@ function screenshotInvoice(){
 function printInvoice(){
   var invEl = document.getElementById("inv-content");
   if(!invEl){ alert("Please generate invoice first."); return; }
-
-  // Collect all styles from current page
+  var printWin = window.open("","_blank","width=850,height=1100");
   var styles = "";
   try{
     for(var i=0;i<document.styleSheets.length;i++){
       try{
-        var rules = document.styleSheets[i].cssRules||document.styleSheets[i].rules||[];
-        for(var j=0;j<rules.length;j++) styles += rules[j].cssText + "\n";
+        var rules=document.styleSheets[i].cssRules||document.styleSheets[i].rules||[];
+        for(var j=0;j<rules.length;j++) styles+=rules[j].cssText+"\n";
       }catch(e){}
     }
   }catch(e){}
-
-  var printWin = window.open("","_blank","width=850,height=1100");
   printWin.document.write(
-    "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
-    +"<title>Siri Kitchen Invoice</title>"
-    +"<style>"
-    + styles
+    "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Siri Kitchen Invoice</title>"
+    +"<style>"+styles
     +"body{margin:0;padding:20px;background:#f5f0e8!important}"
     +"#inv-content{max-width:700px;margin:0 auto}"
-    +"@media print{"
-    +"  body{padding:0;background:#fff!important}"
-    +"  @page{margin:8mm;size:A4}"
-    +"  .inv-actions{display:none!important}"
-    +"}"
-    +"</style>"
-    +"</head><body>"
-    + invEl.outerHTML
-    +"</body></html>"
+    +"@media print{body{padding:0;background:#fff!important}@page{margin:8mm;size:A4}.inv-actions{display:none!important}}"
+    +"</style></head><body>"+invEl.outerHTML+"</body></html>"
   );
   printWin.document.close();
   printWin.focus();
@@ -3101,17 +3089,13 @@ function searchMenu(q){
   var clearBtn = document.getElementById("search-clear");
   if(clearBtn) clearBtn.style.display = q ? "block" : "none";
 
-  // Synonym map for common searches
   var synonyms = {
     "lamb":"goat","mutton":"goat",
     "prawn":"shrimp","shrimp":"prawn",
     "paneer":"cottage cheese",
     "naan":"roti lacchedar paratha","bread":"roti chapati lacchedar",
-    "dumpling":"modak",
-    "pudding":"kheer payesh",
-    "rice cake":"dhokar",
-    "lentil":"dal daal",
-    "egg":"devil anda"
+    "dumpling":"modak","pudding":"kheer payesh",
+    "rice cake":"dhokar","lentil":"dal daal","egg":"devil anda"
   };
   var originalQ = q.trim();
   var expandedQ = q;
@@ -3119,14 +3103,13 @@ function searchMenu(q){
   var qLower = q.toLowerCase().trim();
   Object.keys(synonyms).forEach(function(k){
     if(qLower===k || qLower.indexOf(k)>-1){
-      expandedQ = expandedQ + " " + synonyms[k];
-      synonymUsed = synonyms[k].split(" ")[0]; // first word of synonym
+      expandedQ = expandedQ+" "+synonyms[k];
+      synonymUsed = synonyms[k].split(" ")[0];
     }
   });
   q = expandedQ;
 
   if(!q.trim()){
-    // Show all sections, hide search results
     document.getElementById("catnav").style.display = "";
     document.querySelectorAll(".menu-section").forEach(function(s){s.style.display="";});
     var sr = document.getElementById("search-results-section");
@@ -3134,142 +3117,58 @@ function searchMenu(q){
     return;
   }
 
-  q = q.toLowerCase();
+  var qWords = q.toLowerCase().split(/\s+/).filter(function(w){return w.length>1;});
   var results = [];
   Object.keys(MENU).forEach(function(k){
     (MENU[k]||[]).forEach(function(item){
-      if(item.n.toLowerCase().indexOf(q)>-1 || (item.d&&item.d.toLowerCase().indexOf(q)>-1)){
-        results.push({item:item, section:k});
+      var hay = (item.n+" "+(item.d||"")).toLowerCase();
+      if(qWords.some(function(w){return hay.indexOf(w)>-1;})){
+        results.push({item:item,section:k});
       }
     });
   });
 
-  // Hide all sections and catnav
   document.getElementById("catnav").style.display = "none";
   document.querySelectorAll(".menu-section").forEach(function(s){s.style.display="none";});
 
-  // Show search results section
   var sr = document.getElementById("search-results-section");
   if(!sr){
     sr = document.createElement("div");
     sr.id = "search-results-section";
     sr.className = "search-results";
-    var menuArea = document.getElementById("order-mode");
-    // Insert after search-wrap
     var sw = document.getElementById("search-wrap");
-    sw.parentNode.insertBefore(sr, sw.nextSibling.nextSibling);
+    if(sw && sw.parentNode) sw.parentNode.insertBefore(sr, sw.nextSibling.nextSibling);
   }
   sr.style.display = "block";
-
   sr.innerHTML = "";
+
   if(!results.length){
-    // Find suggestions - partial word match or category match
     var suggestions = [];
-    var words = q.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;});
+    var words = originalQ.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;});
     Object.keys(MENU).forEach(function(k){
       (MENU[k]||[]).forEach(function(item){
-        var haystack = (item.n+" "+(item.d||"")).toLowerCase();
-        var matches = words.some(function(w){ return haystack.indexOf(w)>-1; });
-        if(matches && suggestions.length<4) suggestions.push({item:item,section:k});
+        var hay=(item.n+" "+(item.d||"")).toLowerCase();
+        if(words.some(function(w){return hay.indexOf(w)>-1;}) && suggestions.length<4)
+          suggestions.push({item:item,section:k});
       });
     });
-
     var noRes = document.createElement("div");
     noRes.style.cssText = "text-align:center;padding:24px 16px;color:var(--sub)";
-    noRes.textContent = "No exact match for \"" + originalQ + "\"";
-      var subDiv = document.createElement("div"); subDiv.style.fontSize="13px"; subDiv.textContent = suggestions.length ? "Did you mean one of these?" : "Try a different keyword"; noRes.appendChild(subDiv);
+    noRes.textContent = "No exact match for \""+originalQ+"\"";
+    var subDiv = document.createElement("div");
+    subDiv.style.fontSize="13px";
+    subDiv.textContent = suggestions.length ? "Did you mean one of these?" : "Try a different keyword";
+    noRes.appendChild(subDiv);
     sr.appendChild(noRes);
-
     if(!suggestions.length) return;
-
-    // Show suggestion cards
-    suggestions.forEach(function(r){
-      var item = r.item;
-      var p = getP(item);
-      var label = getL(item);
-      var iid = item.id;
-      var qty = (cart[iid]&&cart[iid].qty)||0;
-
-      var card = document.createElement("div");
-      card.className = "search-result-item";
-      card.style.borderStyle = "dashed";
-
-      var badge = document.createElement("div");
-      badge.style.cssText = "font-size:11px;color:var(--sub);margin-bottom:6px";
-      badge.textContent = "💡 Suggestion";
+    results = suggestions;
+    // Show as suggestions with dashed border
+    results.forEach(function(r){
+      var item=r.item; items[item.id]=item;
+      var card=document.createElement("div"); card.className="search-result-item"; card.style.borderStyle="dashed";
+      var badge=document.createElement("div"); badge.style.cssText="font-size:11px;color:var(--sub);margin-bottom:4px"; badge.textContent="💡 Suggestion";
       card.appendChild(badge);
-
-      var row = document.createElement("div");
-      row.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:12px";
-
-      var info = document.createElement("div");
-      info.style.cssText = "flex:1";
-      // Name and description
-      var nameDiv = document.createElement("div");
-      nameDiv.style.cssText = "font-size:15px;font-weight:700;color:var(--text)";
-      nameDiv.textContent = item.n;
-      info.appendChild(nameDiv);
-      if(item.d){
-        var descDiv = document.createElement("div");
-        descDiv.style.cssText = "font-size:12px;color:var(--sub);margin-top:2px";
-        descDiv.textContent = item.d;
-        info.appendChild(descDiv);
-      }
-      // Show size options if item has both family and jumbo
-      if(item.t==="fj" && item.f && item.j){
-        var sizesDiv = document.createElement("div");
-        sizesDiv.style.cssText = "display:flex;gap:8px;margin-top:6px;flex-wrap:wrap";
-        // Family option
-        var famBtn = document.createElement("div");
-        famBtn.style.cssText = "display:flex;align-items:center;gap:6px;background:#fdf6ee;border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer";
-        famBtn.innerHTML = "<span style='font-size:12px;color:var(--sub)'>Family</span><span style='font-size:13px;font-weight:700;color:var(--red)'>$"+item.f.toFixed(2)+"</span>";
-        famBtn.addEventListener("click", function(){
-          // Switch to family and add
-          if(typeof setSize==="function") setSize(item.id,"f");
-          adj(item.id,1);
-          searchMenu(document.getElementById("menu-search").value);
-        });
-        // Jumbo option
-        var jumbBtn = document.createElement("div");
-        jumbBtn.style.cssText = "display:flex;align-items:center;gap:6px;background:#fdf6ee;border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer";
-        jumbBtn.innerHTML = "<span style='font-size:12px;color:var(--sub)'>Jumbo</span><span style='font-size:13px;font-weight:700;color:var(--red)'>$"+item.j.toFixed(2)+"</span>";
-        jumbBtn.addEventListener("click", function(){
-          if(typeof setSize==="function") setSize(item.id,"j");
-          adj(item.id,1);
-          searchMenu(document.getElementById("menu-search").value);
-        });
-        sizesDiv.appendChild(famBtn);
-        sizesDiv.appendChild(jumbBtn);
-        info.appendChild(sizesDiv);
-      } else {
-        var priceDiv = document.createElement("div");
-        priceDiv.style.cssText = "font-size:13px;color:var(--red);font-weight:600;margin-top:4px";
-        priceDiv.textContent = "$"+p.toFixed(2)+(label?" · "+label:"");
-        info.appendChild(priceDiv);
-      }
-
-      var ctrl = document.createElement("div");
-      ctrl.style.cssText = "display:flex;align-items:center;gap:8px;flex-shrink:0";
-
-      if(qty>0){
-        var minusBtn = document.createElement("button");
-        minusBtn.textContent = "−";
-        minusBtn.style.cssText = "width:30px;height:30px;border-radius:50%;border:1.5px solid var(--red);background:#fff;color:var(--red);font-size:18px;cursor:pointer;font-weight:700";
-        minusBtn.addEventListener("click", function(){ adj(iid,-1); searchMenu(document.getElementById("menu-search").value); });
-        var qtySpan = document.createElement("span");
-        qtySpan.textContent = qty;
-        qtySpan.style.cssText = "min-width:20px;text-align:center;font-weight:700";
-        ctrl.appendChild(minusBtn);
-        ctrl.appendChild(qtySpan);
-      }
-      var plusBtn = document.createElement("button");
-      plusBtn.textContent = "+";
-      plusBtn.style.cssText = "width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:18px;cursor:pointer;font-weight:700";
-      plusBtn.addEventListener("click", function(){ adj(iid,1); searchMenu(document.getElementById("menu-search").value); });
-      ctrl.appendChild(plusBtn);
-
-      row.appendChild(info); row.appendChild(ctrl);
-      card.appendChild(row);
+      buildSearchCard(card, item);
       sr.appendChild(card);
     });
     return;
@@ -3283,49 +3182,41 @@ function searchMenu(q){
   sr.appendChild(countDiv);
 
   results.forEach(function(r){
-    var item = r.item;
-    var p = getP(item);
-    var label = getL(item);
-    var iid = item.id;
-    var qty = (cart[iid]&&cart[iid].qty)||0;
-
-    var card = document.createElement("div");
-    card.className = "search-result-item";
-
-    var row = document.createElement("div");
-    row.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:12px";
-
-    var info = document.createElement("div");
-    info.innerHTML = "<div style='font-size:15px;font-weight:700;color:var(--text)'>"+item.n+"</div>"
-      +(item.d?"<div style='font-size:12px;color:var(--sub);margin-top:2px'>"+item.d+"</div>":"")
-      +"<div style='font-size:13px;color:var(--red);font-weight:600;margin-top:4px'>$"+p.toFixed(2)+(label?" · "+label:"")+"</div>";
-
-    var ctrl = document.createElement("div");
-    ctrl.style.cssText = "display:flex;align-items:center;gap:8px;flex-shrink:0";
-
-    if(qty>0){
-      var minusBtn = document.createElement("button");
-      minusBtn.textContent = "−";
-      minusBtn.style.cssText = "width:30px;height:30px;border-radius:50%;border:1.5px solid var(--red);background:#fff;color:var(--red);font-size:18px;cursor:pointer;font-weight:700";
-      minusBtn.addEventListener("click", function(){ adj(iid,-1); searchMenu(document.getElementById("menu-search").value); });
-      var qtySpan = document.createElement("span");
-      qtySpan.textContent = qty;
-      qtySpan.style.cssText = "min-width:20px;text-align:center;font-weight:700";
-      ctrl.appendChild(minusBtn);
-      ctrl.appendChild(qtySpan);
-    }
-
-    var plusBtn = document.createElement("button");
-    plusBtn.textContent = "+";
-    plusBtn.style.cssText = "width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:18px;cursor:pointer;font-weight:700";
-    plusBtn.addEventListener("click", function(){ adj(iid,1); searchMenu(document.getElementById("menu-search").value); });
-    ctrl.appendChild(plusBtn);
-
-    row.appendChild(info);
-    row.appendChild(ctrl);
-    card.appendChild(row);
+    var item=r.item; items[item.id]=item;
+    var card=document.createElement("div"); card.className="search-result-item";
+    buildSearchCard(card, item);
     sr.appendChild(card);
   });
+}
+
+function buildSearchCard(card, item){
+  var iid = item.id;
+  // Name
+  var nameEl=document.createElement("div"); nameEl.style.cssText="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px"; nameEl.textContent=item.n; card.appendChild(nameEl);
+  // Desc
+  if(item.d){var dEl=document.createElement("div");dEl.style.cssText="font-size:12px;color:var(--sub);margin-bottom:6px";dEl.textContent=item.d;card.appendChild(dEl);}
+  // Price row
+  var foot=document.createElement("div"); foot.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px"; card.appendChild(foot);
+  var priceArea=document.createElement("div"); foot.appendChild(priceArea);
+  if(item.t==="fj"){
+    var sel=document.createElement("select"); sel.className="ssel"; sel.id="sz-"+iid;
+    sel.innerHTML="<option value='f'>Family $"+item.f+"</option><option value='j'>Jumbo (8-9 pax)) $"+item.j+"</option>";
+    sel.addEventListener("change",function(){upP(iid);});
+    priceArea.appendChild(sel);
+  } else {
+    var p=getP(item); var label=getL(item);
+    var pEl=document.createElement("div"); pEl.className="iprice"; pEl.id="p-"+iid;
+    pEl.textContent="$"+p.toFixed(2)+(label?" · "+label:""); priceArea.appendChild(pEl);
+  }
+  // +/- controls
+  var qrow=document.createElement("div"); qrow.className="qrow"; foot.appendChild(qrow);
+  var qty=(cart[iid]&&cart[iid].qty)||0;
+  var mb=document.createElement("button"); mb.className="qbtn"; mb.textContent="−";
+  mb.addEventListener("click",function(){adj(iid,-1);searchMenu(document.getElementById("menu-search").value);});
+  var qs=document.createElement("span"); qs.className="qval"; qs.id="q-"+iid; qs.textContent=qty;
+  var pb=document.createElement("button"); pb.className="qbtn"; pb.textContent="+";
+  pb.addEventListener("click",function(){adj(iid,1);searchMenu(document.getElementById("menu-search").value);});
+  qrow.appendChild(mb); qrow.appendChild(qs); qrow.appendChild(pb);
 }
 
 function clearSearch(){
