@@ -2292,10 +2292,51 @@ function generateInvoice(){
 
   // Totals
   const sub = getSubtotal();
-  const total = sub+del;
+  // Apply discount if promo active
+  var discount = 0;
+  var promoLabel = "";
+  if(typeof activePromo !== "undefined" && activePromo){
+    if(activePromo.type==="percent") discount = sub*(activePromo.value/100);
+    else if(activePromo.type==="fixed") discount = Math.min(activePromo.value, sub);
+    promoLabel = activePromo.label || "Discount";
+  }
+  const total = sub - discount + del;
   const adv = total*0.4;
   document.getElementById('inv-sub').textContent = '$ '+sub.toFixed(2);
   document.getElementById('inv-del').textContent = '$ '+del.toFixed(2);
+  // Show discount row in invoice if applicable
+  var discRow = document.getElementById('inv-discount-row');
+  if(!discRow && discount>0){
+    // Create discount row dynamically before total
+    var grandRow = document.getElementById('inv-total').closest('.inv-tot-row');
+    var dr = document.createElement('div');
+    dr.className = 'inv-tot-row';
+    dr.id = 'inv-discount-row';
+    dr.style.color = '#2d8a4e';
+    dr.innerHTML = '<span>'+promoLabel+'</span><span>- $ '+discount.toFixed(2)+'</span>';
+    grandRow.parentNode.insertBefore(dr, grandRow);
+  } else if(discRow){
+    if(discount>0){
+      discRow.style.display='flex';
+      discRow.querySelector('span:last-child').textContent='- $ '+discount.toFixed(2);
+      discRow.querySelector('span:first-child').textContent=promoLabel;
+    } else {
+      discRow.style.display='none';
+    }
+  }
+  // Show free item in invoice if applicable
+  if(typeof activePromo!=="undefined" && activePromo && activePromo.type==="freeitem"){
+    var freeRow = document.getElementById('inv-free-row');
+    if(!freeRow){
+      var grandRow2 = document.getElementById('inv-total').closest('.inv-tot-row');
+      var fr = document.createElement('div');
+      fr.className = 'inv-tot-row';
+      fr.id = 'inv-free-row';
+      fr.style.color = '#2d8a4e';
+      fr.innerHTML = '<span>'+activePromo.item+'</span><span>complimentary</span>';
+      grandRow2.parentNode.insertBefore(fr, grandRow2);
+    }
+  }
   document.getElementById('inv-total').textContent = '$ '+total.toFixed(2);
   document.getElementById('inv-adv').textContent = '$ '+adv.toFixed(2);
   document.getElementById('inv-rem').textContent = '$ '+(total-adv).toFixed(2);
