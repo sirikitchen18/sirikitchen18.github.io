@@ -1903,7 +1903,7 @@ window.sendWA = function() {
   var unitEl = document.getElementById("dunit");
   var unitNum = unitEl ? unitEl.value.trim() : "";
   var addr = addrEl ? addrEl.value.trim() : "";
-  if(unitNum && addr) addr = unitNum + ", " + addr;
+  if(unitNum && addr) addr = unitNum + " " + addr;
   if(delType==="delivery"&&!addr){alert("Please enter your delivery address.");return;}
 
   var a = Object.values(cart).filter(function(x){return x.qty>0;});
