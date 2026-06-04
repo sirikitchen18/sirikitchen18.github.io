@@ -780,7 +780,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       <div class="inv-brand">SIRI KITCHEN</div>
       <div class="inv-tagline">Relish the taste of quality Indian home-made food</div>
       <div class="inv-info">Near Riverdale Village Shopping Centre, Tarneit · Phone: 0432237104</div>
-      <div class="inv-delivery">🚚 Free on orders above $100 (within 5km) · $8 (5–10km) · $1/km beyond (up to 30km)</div>
+      <div class="inv-delivery">🚚 Free on orders above $100 (within 5km) · $8 (5–10km) · $1/km beyond</div>
       <div class="inv-num" id="inv-num-display"></div>
     </div>
 
@@ -880,6 +880,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
       <div class="mlabel">Your Order</div>
       <div class="osum" id="olines"></div>
+      <button onclick="closeModal()" style="width:100%;margin-top:6px;padding:8px;background:transparent;border:1.5px dashed var(--border);border-radius:8px;color:var(--sub);font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">
+        ✏️ Edit Cart
+      </button>
 
       <div class="mlabel">Delivery or Pickup?</div>
       <div class="dtoggle">
@@ -938,8 +941,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="fstep"><div class="fnum">5</div><div class="ftxt">We process your order and deliver on the confirmed date ✅</div></div>
       </div>
 
+      <div class="promo-wrap">
+        <div class="mlabel" style="margin-bottom:6px">Promo / Discount Code</div>
+        <div style="display:flex;gap:8px">
+          <input class="fi" type="text" id="promo-input" placeholder="Enter code or leave blank" style="flex:1;margin:0">
+          <button onclick="applyPromo()" style="padding:10px 16px;background:var(--red);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">Apply</button>
+        </div>
+        <div id="promo-msg" style="font-size:12px;margin-top:4px;display:none"></div>
+      </div>
+
       <div class="tots">
         <div class="trow"><span>Subtotal</span><span id="tsub">$0.00</span></div>
+        <div class="trow" id="discount-row" style="display:none;color:#2d8a4e"><span id="discount-label">Discount</span><span id="tdiscount">-$0.00</span></div>
+        <div class="trow" id="free-item-row" style="display:none;color:#2d8a4e"><span id="free-item-label">Free Item</span><span>complimentary</span></div>
         <div class="trow"><span>Delivery</span><span id="tdel">Free (pickup)</span></div>
         <div class="trow tbig"><span>Total</span><span id="ttotal">$0.00</span></div>
         <div class="tdep"><span>40% deposit (payable after acceptance)</span><strong id="tdep" style="color:var(--sub)">$0.00</strong></div>
@@ -1275,7 +1289,8 @@ async function calcDel(){
     let charge=0,msg='';
     if(rk<=5){charge=sub>=100?0:8;msg=sub>=100?'✅ <strong>Free delivery</strong> — within 5 km & order over $100':'ℹ️ Within 5 km but under $100 — <strong>$8 flat fee</strong>';}
     else if(rk<=10){charge=8;msg=`🚚 ${rk} km — <strong>$8 flat fee</strong>`;}
-    else{charge=rk;msg=`🚚 ~${rk} km — <strong>$${rk} delivery</strong> ($1/km)`;}
+    else if(rk<=30){charge=rk;msg=`🚚 ~${rk} km — <strong>$${rk} delivery</strong> ($1/km)`;}
+    else{charge=rk;msg=`🚚 ~${rk} km — <strong>$${rk} delivery</strong> ($1/km) · <span style="color:#c00;font-size:11px">Long distance — we'll confirm feasibility</span>`;}
     delCharge=charge;
     el.innerHTML=msg+'<br><small style="color:var(--sub);font-size:12px">*Estimated. Exact charge confirmed at booking.</small>';
     updTotals();
@@ -1289,7 +1304,17 @@ async function calcDel(){
 function updTotals(){
   const a=Object.values(cart).filter(c=>c.qty>0);
   const sub=a.reduce((s,c)=>s+c.qty*c.price,0);
-  const total=sub+delCharge;
+  // Apply discount if promo active
+  var discount=0;
+  if(typeof activePromo!=="undefined"&&activePromo){
+    if(activePromo.type==="percent") discount=sub*(activePromo.value/100);
+    else if(activePromo.type==="fixed") discount=Math.min(activePromo.value,sub);
+  }
+  var discEl=document.getElementById("tdiscount");
+  var discLabel=document.getElementById("discount-label");
+  if(discEl) discEl.textContent="-$"+discount.toFixed(2);
+  if(discLabel&&activePromo) discLabel.textContent=activePromo.label||"Discount";
+  const total=sub-discount+delCharge;
   const dep=total*0.4;
   function setTxt(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
   setTxt('tsub','$'+sub.toFixed(2));
@@ -1410,7 +1435,13 @@ function hookWAValidation(){
   checkWAReady();
 }
 
-function closeModal(){var ov=document.getElementById('overlay');ov.classList.remove('on');ov.style.display='none';}
+function closeModal(){
+  // Reset promo on close
+  if(typeof activePromo!=="undefined") activePromo=null;
+  var pr=document.getElementById("promo-input"); if(pr) pr.value="";
+  var pm=document.getElementById("promo-msg"); if(pm) pm.style.display="none";
+  var dr=document.getElementById("discount-row"); if(dr) dr.style.display="none";
+  var fr=document.getElementById("free-item-row"); if(fr) fr.style.display="none";var ov=document.getElementById('overlay');ov.classList.remove('on');ov.style.display='none';}
 document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
 
 // Ensure overlay works in Google Sites iframe
@@ -3224,6 +3255,60 @@ function clearSearch(){
   if(input) input.value = "";
   searchMenu("");
   if(input) input.focus();
+}
+
+/* === PROMO / DISCOUNT === */
+var activePromo = null;
+
+// Define promo codes - admin can update these
+var PROMO_CODES = {
+  "WELCOME10":  {type:"percent", value:10, label:"10% Welcome Discount"},
+  "FLAT20":     {type:"fixed",   value:20, label:"$20 Flat Discount"},
+  "FREESAM":    {type:"freeitem",item:"Punjabi Samosa (15 pcs)", label:"Free Samosa (15 pcs)"},
+  "LOYAL5":     {type:"percent", value:5,  label:"5% Loyalty Discount"},
+  "BENGALI10":  {type:"percent", value:10, label:"10% Bengali Community Discount"}
+};
+
+function applyPromo(){
+  var code = (document.getElementById("promo-input").value||"").trim().toUpperCase();
+  var msg  = document.getElementById("promo-msg");
+  var discRow  = document.getElementById("discount-row");
+  var freeRow  = document.getElementById("free-item-row");
+
+  if(!code){
+    // Clear promo
+    activePromo = null;
+    if(discRow) discRow.style.display="none";
+    if(freeRow) freeRow.style.display="none";
+    if(msg){ msg.style.display="none"; }
+    updTotals(); return;
+  }
+
+  var promo = PROMO_CODES[code];
+  if(!promo){
+    msg.style.cssText="font-size:12px;margin-top:4px;display:block;color:#c00";
+    msg.textContent="❌ Invalid promo code. Please check and try again.";
+    activePromo = null;
+    if(discRow) discRow.style.display="none";
+    if(freeRow) freeRow.style.display="none";
+    updTotals(); return;
+  }
+
+  activePromo = {code:code, ...promo};
+  msg.style.cssText="font-size:12px;margin-top:4px;display:block;color:#2d8a4e";
+  msg.textContent="✅ "+promo.label+" applied!";
+
+  if(promo.type==="freeitem"){
+    if(discRow) discRow.style.display="none";
+    if(freeRow){
+      freeRow.style.display="flex";
+      document.getElementById("free-item-label").textContent=promo.item;
+    }
+  } else {
+    if(freeRow) freeRow.style.display="none";
+    if(discRow) discRow.style.display="flex";
+  }
+  updTotals();
 }
 </script>
 </body>
