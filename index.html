@@ -948,8 +948,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="fstep"><div class="fnum">5</div><div class="ftxt">We process your order and deliver on the confirmed date ✅</div></div>
       </div>
 
+      <div class="promo-wrap">
+        <div class="mlabel" style="margin-bottom:6px">🎉 Occasion / Event Type</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="occ-btn" onclick="setOccasion(this,'Birthday Party')">🎂 Birthday</button>
+          <button class="occ-btn" onclick="setOccasion(this,'Wedding Function')">💍 Wedding</button>
+          <button class="occ-btn" onclick="setOccasion(this,'Eid Celebration')">🌙 Eid</button>
+          <button class="occ-btn" onclick="setOccasion(this,'Puja / Festival')">🪔 Puja/Festival</button>
+          <button class="occ-btn" onclick="setOccasion(this,'Family Gathering')">👨‍👩‍👧‍👦 Family Get-together</button>
+          <button class="occ-btn" onclick="setOccasion(this,'Corporate Event')">💼 Corporate</button>
+          <button class="occ-btn" onclick="setOccasion(this,'Other')">✨ Other</button>
+        </div>
+        <input class="fi" type="text" id="occasion-input" placeholder="Selected occasion (or type your own)" style="margin-top:8px">
+      </div>
+
       <div class="tots">
         <div class="trow"><span>Subtotal</span><span id="tsub">$0.00</span></div>
+        <div class="trow" id="discount-row" style="display:none;color:#2d8a4e"><span id="discount-label">Discount</span><span id="tdiscount">-$0.00</span></div>
+        <div class="trow" id="free-item-row" style="display:none;color:#2d8a4e"><span id="free-item-label">Free Item</span><span>complimentary</span></div>
         <div class="trow"><span>Delivery</span><span id="tdel">Free (pickup)</span></div>
         <div class="trow tbig"><span>Total</span><span id="ttotal">$0.00</span></div>
         <div class="tdep"><span>40% deposit (payable after acceptance)</span><strong id="tdep" style="color:var(--sub)">$0.00</strong></div>
@@ -1300,7 +1316,17 @@ async function calcDel(){
 function updTotals(){
   const a=Object.values(cart).filter(c=>c.qty>0);
   const sub=a.reduce((s,c)=>s+c.qty*c.price,0);
-  const total=sub+delCharge;
+  // Apply discount if promo active
+  var discount=0;
+  if(typeof activePromo!=="undefined"&&activePromo){
+    if(activePromo.type==="percent") discount=sub*(activePromo.value/100);
+    else if(activePromo.type==="fixed") discount=Math.min(activePromo.value,sub);
+  }
+  var discEl=document.getElementById("tdiscount");
+  var discLabel=document.getElementById("discount-label");
+  if(discEl) discEl.textContent="-$"+discount.toFixed(2);
+  if(discLabel&&activePromo) discLabel.textContent=activePromo.label||"Discount";
+  const total=sub-discount+delCharge;
   const dep=total*0.4;
   function setTxt(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
   setTxt('tsub','$'+sub.toFixed(2));
@@ -1382,6 +1408,13 @@ function setComm(mode){
   checkWAReady();
 }
 
+function setOccasion(btn, label){
+  document.querySelectorAll(".occ-btn").forEach(function(b){b.classList.remove("on");});
+  btn.classList.add("on");
+  document.getElementById("occasion-input").value = label;
+  checkWAReady();
+}
+
 function checkWAReady(){
   var name = (document.getElementById("cname")||{}).value||"";
   var date = (document.getElementById("cdate")||{}).value||"";
@@ -1422,66 +1455,1079 @@ function hookWAValidation(){
 }
 
 function closeModal(){
+  // Reset promo on close
+  if(typeof activePromo!=="undefined") activePromo=null;
+  var pr=document.getElementById("promo-input"); if(pr) pr.value="";
+  var pm=document.getElementById("promo-msg"); if(pm) pm.style.display="none";
+  var dr=document.getElementById("discount-row"); if(dr) dr.style.display="none";
+  var fr=document.getElementById("free-item-row"); if(fr) fr.style.display="none";var ov=document.getElementById('overlay');ov.classList.remove('on');ov.style.display='none';}
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
+
+// Ensure overlay works in Google Sites iframe
+(function(){
+  const ov = document.getElementById('overlay');
+  // When modal opens, try to scroll it into view
+  const origOpen = window.openModal;
+  window.openModal = function(){
+    origOpen();
+    setTimeout(()=>{
+      try{ window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); }catch(e){}
+    }, 100);
+  };
+})();
+
+// ── WHATSAPP ─────────────────────────────────────────
+function sendWA(){
+  const name=document.getElementById('cname').value.trim();
+  const phone=document.getElementById('cphone').value.trim();
+  const date=document.getElementById('cdate').value;
+  const time=document.getElementById('ctime').value;
+  const notes=document.getElementById('cnotes').value.trim();
+  if(!name||!phone){alert('Please enter your name and phone number.');return;}
+  const addr=document.getElementById('daddr').value.trim();
+  if(delType==='delivery'&&!addr){alert('Please enter your delivery address.');return;}
+  const a=Object.values(cart).filter(c=>c.qty>0);
+  const sub=a.reduce((s,c)=>s+c.qty*c.price,0);
+  const total=sub+delCharge;
+
+  // Build order data object for invoice pre-fill
+  const orderData={
+    name, phone, date, time, notes,
+    addr: delType==='delivery'?addr:'Pickup from Tarneit',
+    delType, delCharge,
+    distKm: Math.round(km*1.3),
+    items: a.map(i=>({qty:i.qty,name:i.name,size:i.size,price:i.price}))
+  };
+
+  // Encode as base64 URL param
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(orderData))));
+
+  // Invoice link — replace with your hosted invoice URL
+  const invoiceBase = 'https://sirikitchen18.pages.dev';
+  const invoiceLink = invoiceBase + '?order=' + encoded;
+
+  const msg=[
+    '🍽️ *New Order Request — Siri Kitchen*','',
+    `*Name:* ${name}`,`*Phone:* ${phone}`,
+    `*Date & Time:* ${date||'TBC'} ${time||''}`.trim(),
+    `*Order Type:* ${delType==='delivery'?`Delivery → ${addr} (~${Math.round(km*1.3)} km)`:'Pickup from Tarneit'}`,
+    '','*Items:*',
+    ...a.map(i=>`  • ${i.qty}× ${i.name}${i.size} — $${(i.qty*i.price).toFixed(2)}`),
+    '',`*Subtotal:* $${sub.toFixed(2)}`,
+    delCharge>0?`*Delivery:* $${delCharge.toFixed(2)} (est.)`:'*Delivery:* Free (Pickup)',
+    `*Estimated Total:* $${total.toFixed(2)}`,
+    notes?`
+*Instructions:* ${notes}`:'',
+    '','_This is an order REQUEST — no payment required yet._',
+    '_We will confirm availability and send you an invoice._',
+    '',
+    `📋 *[Admin Invoice Link — Do Not Share]*`,
+    invoiceLink
+  ].filter(Boolean);
+  // Save order to queue
+  var od={name:name,phone:phone,date:date,time:time,notes:notes,
+    addr:delType==='delivery'?addr:'Pickup from Tarneit',
+    delType:delType,delCharge:delCharge,distKm:Math.round(km*1.3),
+    id:'ORD-'+Date.now(),receivedAt:new Date().toISOString(),status:'pending',
+    items:a.map(function(x){return{qty:x.qty,name:x.name,size:x.size||'',price:x.price};})
+  };
+  try{var q=[];try{q=JSON.parse(localStorage.getItem('sk_order_queue')||'[]');}catch(e){}q.push(od);localStorage.setItem('sk_order_queue',JSON.stringify(q));localStorage.setItem('sk_pending_order',JSON.stringify(od));}catch(e){}
+  // Google Sheets
+  try{if(APPS_SCRIPT_URL)fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'newOrder',order:od})});}catch(e){}
+  // Admin links
+  var enc=btoa(unescape(encodeURIComponent(JSON.stringify(od))));
+  var aLink=NETLIFY_URL+'?accept='+od.id+'&d='+encodeURIComponent(enc);
+  var dLink=NETLIFY_URL+'?decline='+od.id+'&name='+encodeURIComponent(name)+'&phone='+encodeURIComponent(phone)+'&date='+encodeURIComponent(date||'');
+  msg.push('');msg.push('--- ADMIN ONLY ---');msg.push('Accept & Send Invoice:');msg.push(aLink);msg.push('');msg.push('Not Available:');msg.push(dLink);
+  window.open('https://wa.me/61432237104?text='+encodeURIComponent(msg.join('\n')),'_blank');
 }
 
-function sendEmail(){
-  // Alias - uses sendWA with email commMode
-  sendWA();
+// ── TAB NAV ──────────────────────────────────────────
+function goTab(id,el){
+  // Switch active section
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  var mBtn=document.getElementById('menu-tab');
+  if(mBtn){mBtn.classList.remove('active');mBtn.style.background='';mBtn.style.color='';}
+  document.getElementById(id).classList.add('active');
+  if(el) el.classList.add('active');
+  // If clicking Full Menu hero button, highlight it
+  if(id==='tmenu' && mBtn){mBtn.style.background='var(--red)';mBtn.style.color='#fff';}
+  // Only scroll the clicked tab chip into view horizontally within the nav bar
+  // Use scrollIntoView on the nav's inner container to avoid page scroll
+  try {
+    var navInner = document.querySelector('.cat-inner');
+    if(navInner && el.closest('.cat-inner')){
+      var elLeft = el.offsetLeft;
+      var elWidth = el.offsetWidth;
+      var navWidth = navInner.offsetWidth;
+      var scrollTarget = elLeft - (navWidth/2) + (elWidth/2);
+      navInner.scrollLeft = scrollTarget;
+    }
+  } catch(e){}
+  // Never scroll the page — banner stays fixed in place
+  // Render full menu list if showing tmenu
+  if(id==='tmenu') renderFullMenu();
+}
+
+function renderFullMenu(){
+  var container = document.getElementById("full-menu-list");
+  if(!container || container.dataset.rendered) return;
+  container.dataset.rendered = "1";
+
+  var sectionNames = {
+    snacks:"Snacks & Starters", family:"Family Specials", kebab:"Kebabs",
+    ic:"Indo-Chinese", veg:"Veg Mains", nv:"Non-Veg Mains",
+    bir:"Biryani & Rice", roti:"Roti & Breads", dessert:"Desserts",
+    bf:"Bengali Fish", bm:"Bengali Mutton/Chicken", bv:"Bengali Veg", bs:"Bengali Sweets"
+  };
+
+  Object.keys(sectionNames).forEach(function(k){
+    var items = MENU[k]||[];
+    if(!items.length) return;
+
+    var secDiv = document.createElement("div");
+    secDiv.style.cssText = "margin-bottom:4px";
+
+    var hdr = document.createElement("div");
+    hdr.style.cssText = "background:var(--red);color:#fff;padding:10px 1rem;font-size:14px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase";
+    hdr.textContent = sectionNames[k];
+    secDiv.appendChild(hdr);
+
+    items.forEach(function(item){
+      var row = document.createElement("div");
+      row.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:10px 1rem;border-bottom:1px solid var(--border);background:#fff;gap:10px";
+
+      var left = document.createElement("div");
+      var nameEl = document.createElement("div");
+      nameEl.style.cssText = "font-size:14px;font-weight:600;color:var(--text)";
+      nameEl.textContent = item.n;
+      left.appendChild(nameEl);
+      if(item.d){
+        var desc = document.createElement("div");
+        desc.style.cssText = "font-size:12px;color:var(--sub);margin-top:2px";
+        desc.textContent = item.d;
+        left.appendChild(desc);
+      }
+
+      var right = document.createElement("div");
+      right.style.cssText = "text-align:right;flex-shrink:0";
+      var p = getP(item);
+      var label = getL(item);
+      var priceEl = document.createElement("div");
+      priceEl.style.cssText = "font-size:14px;font-weight:700;color:var(--red)";
+      priceEl.textContent = "$"+p.toFixed(2);
+      right.appendChild(priceEl);
+      if(label){
+        var labelEl = document.createElement("div");
+        labelEl.style.cssText = "font-size:11px;color:var(--sub)";
+        labelEl.textContent = label;
+        right.appendChild(labelEl);
+      }
+
+      // Add to cart button
+      var addBtn = document.createElement("button");
+      addBtn.style.cssText = "margin-left:10px;width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:18px;cursor:pointer;font-weight:700;flex-shrink:0";
+      addBtn.textContent = "+";
+      addBtn.addEventListener("click", function(){ adj(item.id,1); });
+
+      row.appendChild(left);
+      row.appendChild(right);
+      row.appendChild(addBtn);
+      secDiv.appendChild(row);
+    });
+
+    container.appendChild(secDiv);
+  });
+}
+
+renderAll();
+
+// ── MENU PAGE NAVIGATION ─────────────────────────────
+let menuCurPage = 0;
+const MENU_PAGES = 3;
+function menuPage(d){
+  menuCurPage = Math.max(0, Math.min(MENU_PAGES-1, menuCurPage + d));
+  document.getElementById('menu-slider').style.transform = `translateX(-${menuCurPage * 100}%)`;
+  document.getElementById('menu-pg-label').textContent = `Page ${menuCurPage+1} of ${MENU_PAGES}`;
+}
+// Touch swipe support for menu
+(function(){
+  let sx=0, sy=0;
+  const el = document.getElementById('menu-pages');
+  if(!el) return;
+  el.addEventListener('touchstart', e=>{ sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+  el.addEventListener('touchend', e=>{
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40){
+      menuPage(dx < 0 ? 1 : -1);
+    }
+  }, {passive:true});
+})();
+
+// ── STICKY HEADER ON SCROLL ──────────────────────────
+(function(){
+  const hdr = document.getElementById('sticky-hdr');
+  const nav = document.getElementById('catnav');
+  const hero = document.querySelector('.hero');
+  let hdrH = 0;
+
+  function onScroll(){
+    const heroBottom = hero.getBoundingClientRect().bottom;
+    if(heroBottom <= 0){
+      hdr.classList.add('show');
+      hdrH = hdrH || hdr.offsetHeight;
+      nav.style.top = hdrH + 'px';
+    } else {
+      hdr.classList.remove('show');
+      nav.style.top = '0px';
+    }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', ()=>{ hdrH=0; onScroll(); }, {passive:true});
+})();
+
+
+/* === MODE + PASSCODE === */
+var ADMIN_PASS = "2552";
+
+function showPass() {
+  document.getElementById("pm-overlay").classList.add("show");
+  setTimeout(function(){ document.getElementById("pm-inp").focus(); }, 80);
+}
+function closePass() {
+  document.getElementById("pm-overlay").classList.remove("show");
+  document.getElementById("pm-inp").value = "";
+  document.getElementById("pm-err").style.display = "none";
+}
+function checkPass() {
+  if(document.getElementById("pm-inp").value === ADMIN_PASS) {
+    closePass();
+    toInvoice();
+  } else {
+    document.getElementById("pm-err").style.display = "block";
+    document.getElementById("pm-inp").value = "";
+    document.getElementById("pm-inp").focus();
+  }
+}
+function toInvoice() {
+  document.getElementById("order-mode").classList.add("hidden");
+  document.getElementById("inv-mode").classList.add("active");
+  window.scrollTo({top:0});
+  loadFromStorage();
+  // Show accept/decline panel if there's a pending order
+  showOrderActions();
+
+  showOrderQueue();
+}
+
+function showOrderActions(){
+  // Check if there's a pending order in storage or already loaded
+  var existing = document.getElementById("order-actions-bar");
+  if(existing) return;
+
+  var bar = document.createElement("div");
+  bar.id = "order-actions-bar";
+  bar.style.cssText = "background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:10px";
+
+  bar.innerHTML = `
+    <div style="font-size:13px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
+      📋 Respond to Customer
+    </div>
+    <div style="font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:4px">
+      Review the order above then choose your response:
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button onclick="if(typeof generateInvoice==='function')generateInvoice();updateInvSendBtn();" style="flex:1;background:var(--red);color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;min-width:140px">
+        ✅ Generate Invoice
+      </button>
+      <button onclick="sendDeclineWA()" style="flex:1;background:#fff;color:var(--sub);border:2px solid var(--border);border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;min-width:140px">
+        ❌ Not Available
+      </button>
+    </div>`;
+
+  var builderBody = document.querySelector(".builder-body");
+  if(builderBody) builderBody.insertBefore(bar, builderBody.firstChild);
+}
+
+function sendAcceptWA(){
+  var custOrder=null;
+  try{
+    var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
+    custOrder=q.find(function(o){return o.status==="processing";});
+    if(!custOrder){
+      var raw=localStorage.getItem("sk_pending_order");
+      if(raw) custOrder=JSON.parse(raw);
+    }
+  }catch(e){}
+
+  // Get commMode - check all sources in priority order
+  var urlParams=new URLSearchParams(window.location.search);
+  var urlComm  = urlParams.get("cm")||"";
+  var urlEmail = urlParams.get("em")||"";
+  var commMode = urlComm || (custOrder&&custOrder.commMode) || "wa";
+  var custEmail= urlEmail|| (custOrder&&custOrder.email)   || "";
+
+  
+  // Generate invoice preview then send via smart function
+  if(typeof generateInvoice==="function") generateInvoice();
+  setTimeout(function(){
+    sendInvoiceSmart();
+    if(custOrder){
+      updateOrderStatus(custOrder.id,"accepted");
+      updateSheetStatus(custOrder.id,"Accepted");
+    }
+  },500);
 }
 
 function sendInvoiceEmail(toEmail, order){
   if(!toEmail||toEmail.indexOf("@")<0){alert("No customer email found.");return;}
-  var invName  = (order&&order.name)||(document.getElementById("c-name")||{}).value||"Customer";
-  var invPhone = (order&&order.phone)||(document.getElementById("c-phone")||{}).value||"";
-  var invAddr  = (order&&order.addr)||(document.getElementById("c-addr")||{}).value||"";
-  var invDate  = (order&&order.date)||(document.getElementById("d-date")||{}).value||"";
-  var invTime  = (order&&order.time)||(document.getElementById("d-time")||{}).value||"";
-  var invNote  = (order&&order.notes)||(document.getElementById("inv-note")||{}).value||"";
-  var delType2 = (order&&order.delType)||(document.getElementById("del-type")||{}).value||"pickup";
+
+  // Get data from order object (most reliable)
+  var invName  = (order&&order.name)  || (document.getElementById("c-name")||{}).value  || "Customer";
+  var invPhone = (order&&order.phone) || (document.getElementById("c-phone")||{}).value || "";
+  var invAddr  = (order&&order.addr)  || (document.getElementById("c-addr")||{}).value  || "";
+  var invDate  = (order&&order.date)  || (document.getElementById("d-date")||{}).value  || "";
+  var invTime  = (order&&order.time)  || (document.getElementById("d-time")||{}).value  || "";
+  var invNote  = (order&&order.notes) || (document.getElementById("inv-note")||{}).value || "";
+  var delType  = (order&&order.delType)||(document.getElementById("del-type")||{}).value ||"pickup";
   var delChg   = parseFloat((order&&order.delCharge)||0)||parseFloat((document.getElementById("del-charge")||{}).value)||0;
-  var invNum   = (document.getElementById("inv-num-display")||{}).textContent||makeInvNum(invName,invDate);
+  var invNum   = (document.getElementById("inv-num-display")||{}).textContent || makeInvNum(invName,invDate);
   var receiptDate = new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"});
+
   var fmtTime = "";
   if(invTime){try{var tp=invTime.split(":");var h=parseInt(tp[0]);var m=tp[1];var ap=h>=12?"PM":"AM";h=h%12||12;fmtTime=h+":"+m+" "+ap;}catch(e){fmtTime=invTime;}}
+
+  // Get items from order object, fallback to builder rows
   var items = [];
   if(order&&order.items&&order.items.length){
-    items=order.items.map(function(x){return{qty:x.qty,name:x.name+(x.size||""),price:x.price};});
+    items = order.items.map(function(x){return{qty:x.qty,name:x.name+(x.size||""),price:x.price};});
   } else {
     document.querySelectorAll("#items-body tr").forEach(function(row){
-      var rid=row.id;if(!rid)return;
-      var qty=parseFloat((document.getElementById(rid+"-qty")||{}).value)||0;
-      var desc=(document.getElementById(rid+"-desc")||{}).value||"";
+      var rid=row.id; if(!rid)return;
+      var qty  =parseFloat((document.getElementById(rid+"-qty")||{}).value)||0;
+      var desc =(document.getElementById(rid+"-desc")||{}).value||"";
       var price=parseFloat((document.getElementById(rid+"-price")||{}).value)||0;
       if(qty&&desc) items.push({qty:qty,name:desc,price:price});
     });
   }
-  var sub=items.reduce(function(s,x){return s+x.qty*x.price;},0);
-  var tot=sub+delChg; var adv=tot*0.4; var rem=tot-adv;
-  var serviceType=delType2==="delivery"?"Delivery to: "+invAddr:"Pickup from Tarneit";
-  var itemsHtml=items.map(function(x){
-    return "<tr><td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333'>"+x.qty+"</td>"
+
+  var sub = items.reduce(function(s,x){return s+x.qty*x.price;},0);
+  var tot = sub+delChg;
+  var adv = tot*0.4;
+  var rem = tot-adv;
+  var serviceType = delType==="delivery"?"Delivery to: "+invAddr:"Pickup from Tarneit";
+
+  var itemsHtml = items.map(function(x){
+    return "<tr>"
+      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333'>"+x.qty+"</td>"
       +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333'>"+x.name+"</td>"
       +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$"+x.price.toFixed(2)+"</td>"
-      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$"+(x.qty*x.price).toFixed(2)+"</td></tr>";
+      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$"+(x.qty*x.price).toFixed(2)+"</td>"
+      +"</tr>";
   }).join("");
-  var params={
-    to_email:toEmail, reply_to:"sirikitchen18@gmail.com", name:"Siri Kitchen", email:toEmail,
-    title:invNum, message_body:"Your order has been <strong>approved</strong>! &#127881;<br>Please find your invoice below. Pay the <strong>40% advance</strong> via PayID to confirm.",
-    customer_name:invName, customer_phone:invPhone||"—", address:invAddr||"Pickup from Tarneit",
-    order_date:receiptDate, delivery_date:invDate||"TBC", delivery_time:fmtTime||"—",
-    service_type:serviceType, notes:invNote||"", items_html:itemsHtml, items_text:"",
-    total:tot.toFixed(2), advance:adv.toFixed(2), remaining:rem.toFixed(2)
+
+  var params = {
+    to_email:       toEmail,
+    reply_to:       "sirikitchen18@gmail.com",
+    name:           "Siri Kitchen",
+    email:          toEmail,
+    title:          invNum,
+    message_body:   "Your order has been <strong>approved</strong>! &#127881;<br>Please find your invoice below. Pay the <strong>40% advance</strong> via PayID to confirm.",
+    message_body:   "Your order has been <strong>approved</strong>! &#127881;<br>Please find your invoice below. Pay the <strong>40% advance</strong> via PayID to confirm.",
+    customer_name:  invName,
+    customer_phone: invPhone||"—",
+    address:        invAddr||"Pickup from Tarneit",
+    order_date:     receiptDate,
+    delivery_date:  invDate||"TBC",
+    delivery_time:  fmtTime||"—",
+    service_type:   serviceType,
+    notes:          invNote||"",
+    items_html:     itemsHtml,
+    total:          tot.toFixed(2),
+    advance:        adv.toFixed(2),
+    remaining:      rem.toFixed(2)
   };
+
+  
   emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
-    .then(function(){alert("Invoice sent to "+toEmail+"!");})
+    .then(function(){ alert("Invoice sent to "+toEmail+"!"); })
     .catch(function(err){
-      console.error("Invoice email error:",JSON.stringify(err));
+      console.error("Invoice email error:", JSON.stringify(err));
       var s=encodeURIComponent("Your Order Confirmed - Siri Kitchen - "+invNum);
       var b=encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
       window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
     });
 }
 
+function sendDeclineWA(){
+  var name = document.getElementById("c-name") ? document.getElementById("c-name").value.trim() : "";
+  var phone = document.getElementById("c-phone") ? document.getElementById("c-phone").value.trim() : "";
+  var date = document.getElementById("d-date") ? document.getElementById("d-date").value : "";
+
+  if(!phone){ alert("Customer phone number is needed to send the message."); return; }
+
+  var fmtDate = "";
+  if(date){
+    var d = new Date(date);
+    fmtDate = d.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});
+  }
+
+  var msg = [
+    "Dear " + (name||"Customer") + ",",
+    "",
+    "Thank you so much for your order request with Siri Kitchen! 🙏",
+    "",
+    "Unfortunately, we are *not available* on " + (fmtDate||"the requested date") + " and are unable to accept this order at this time.",
+    "",
+    "We apologise for the inconvenience. Please feel free to place another request for a different date and we will do our best to accommodate you. 😊",
+    "",
+    "Kind regards,",
+    "Siri Kitchen",
+    "📞 0432 237 104"
+  ].join("\n");
+
+  var waNum = phone.replace(/\D/g,"").replace(/^0/,"61");
+  window.open("https://wa.me/" + waNum + "?text=" + encodeURIComponent(msg), "_blank");
+}
+function toOrder() {
+  document.getElementById("inv-mode").classList.remove("active");
+  document.getElementById("order-mode").classList.remove("hidden");
+  window.scrollTo({top:0});
+}
+
+/* === OVERRIDE sendWA TO SAVE ORDER TO LOCALSTORAGE === */
+window.sendWA = function() {
+  var name  = document.getElementById("cname").value.trim();
+  var phone = document.getElementById("cphone").value.trim();
+  var email = document.getElementById("cemail") ? document.getElementById("cemail").value.trim() : "";
+  var date  = document.getElementById("cdate").value;
+  var time  = document.getElementById("ctime").value;
+  var notes = document.getElementById("cnotes").value.trim();
+  var comm  = typeof commMode !== "undefined" ? commMode : "wa";
+
+  if(!name){alert("Please enter your name.");return;}
+  if(comm==="wa" && !phone){alert("Please enter your phone number.");return;}
+  if(comm==="email" && (!email||email.indexOf("@")<0)){alert("Please enter a valid email address.");return;}
+
+  var addrEl = document.getElementById("daddr");
+  var unitEl = document.getElementById("dunit");
+  var unitNum = unitEl ? unitEl.value.trim() : "";
+  var addr = addrEl ? addrEl.value.trim() : "";
+  if(unitNum && addr) addr = unitNum + " " + addr;
+  if(delType==="delivery"&&!addr){alert("Please enter your delivery address.");return;}
+
+  var a = Object.values(cart).filter(function(x){return x.qty>0;});
+  var sub = a.reduce(function(s,x){return s+x.qty*x.price;},0);
+  var tot = sub + delCharge;
+
+  var od = {
+    name:name, phone:phone||"", email:email||"", commMode:comm,
+    date:date, time:time, notes:notes,
+    addr: delType==="delivery" ? addr : "Pickup from Tarneit",
+    delType:delType, delCharge:delCharge, distKm:Math.round(km*1.3),
+    id:"ORD-"+Date.now(), receivedAt:new Date().toISOString(), status:"pending",
+    promo: (typeof activePromo!=="undefined"&&activePromo) ? activePromo : null,
+    items:a.map(function(x){return{qty:x.qty,name:x.name,size:x.size||"",price:x.price};})
+  };
+
+  // Save to localStorage queue
+  try{
+    var queue=[];
+    try{queue=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");}catch(e){}
+    queue.push(od);
+    localStorage.setItem("sk_order_queue",JSON.stringify(queue));
+    localStorage.setItem("sk_pending_order",JSON.stringify(od));
+  }catch(e){}
+
+  // Always save to Google Sheets
+  try{
+    if(typeof APPS_SCRIPT_URL!=="undefined"&&APPS_SCRIPT_URL)
+      fetch(APPS_SCRIPT_URL,{method:"POST",mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"newOrder",order:od})});
+  }catch(e){}
+
+  var lines = a.map(function(x){
+    return x.qty+"x "+x.name+(x.size||"")+" - $"+(x.qty*x.price).toFixed(2);
+  });
+
+  // Build admin links
+  var itemsCompact = od.items.map(function(x){
+    return x.qty+"|"+encodeURIComponent(x.name+(x.size||""))+"|"+x.price;
+  }).join(",");
+  var acceptLink = NETLIFY_URL+
+    "?oid="+od.id+"&n="+encodeURIComponent(name)+
+    "&p="+encodeURIComponent(phone||"")+
+    "&em="+encodeURIComponent(email||"")+
+    "&cm="+encodeURIComponent(comm)+
+    "&dt="+encodeURIComponent(date||"")+
+    "&tm="+encodeURIComponent(time||"")+
+    "&ad="+encodeURIComponent(od.addr)+
+    "&dl="+encodeURIComponent(delType)+
+    "&dc="+delCharge+
+    "&it="+encodeURIComponent(itemsCompact)+
+    (notes?"&nt="+encodeURIComponent(notes):"");
+  var declineLink = NETLIFY_URL+
+    "?decline="+od.id+
+    "&name="+encodeURIComponent(name)+
+    "&phone="+encodeURIComponent(phone||"")+
+    "&email="+encodeURIComponent(email||"")+
+    "&comm="+encodeURIComponent(comm)+
+    "&date="+encodeURIComponent(date||"");
+
+  // ALWAYS send admin notification via EmailJS
+  var invNum = makeInvNum(name, date);
+  var itemsHtml = od.items.map(function(x){
+    var iname=(x.name+(x.size||"")).replace(/[<>&"]/g,"");
+    return "<tr><td style='padding:6px 10px;border:1px solid #eee'>"+iname+"</td>"+
+           "<td style='padding:6px 10px;border:1px solid #eee;text-align:center'>"+x.qty+"</td>"+
+           "<td style='padding:6px 10px;border:1px solid #eee;text-align:right'>AUD $"+(x.qty*x.price).toFixed(2)+"</td></tr>";
+  }).join("");
+  var itemsText = lines.join("\n");
+
+  var commLabel = comm==="email" ? "Email ("+email+")" : "WhatsApp ("+phone+")";
+
+  var adminParams = {
+    title:          "New Order: "+name+" - "+(date||"TBC"),
+    name:           "Siri Kitchen Team",
+    email:          "sirikitchen18@gmail.com",
+    to_email:       "sirikitchen18@gmail.com",
+    reply_to:       "sirikitchen18@gmail.com",
+    customer_name:  name,
+    customer_phone: phone||"not provided",
+    customer_email: email||"not provided",
+    order_id:       od.id,
+    order_date:     new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"}),
+    service_type:   delType==="delivery"?"Delivery to: "+addr:"Pickup from Tarneit",
+    delivery_date:  date||"TBC",
+    delivery_time:  time||"",
+    address:        addr||"Pickup from Tarneit",
+    notes:          (notes||"None")+"\n\nCustomer prefers: "+commLabel,
+    items:          [{name:itemsText,qty:"",price:""}],
+    items_text:     itemsText,
+    items_html:     itemsHtml,
+    total:          tot.toFixed(2),
+    advance:        (tot*0.4).toFixed(2),
+    approval_link:  acceptLink,
+    reject_link:    declineLink
+  };
+
+  var btn = document.getElementById("wa-send-btn");
+  if(btn){btn.innerHTML="Sending...";btn.disabled=true;}
+
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, adminParams)
+    .then(function(){
+      if(btn){
+        btn.innerHTML="&#10003; Order Request Sent!";
+        btn.style.background="#128C7E";
+        btn.disabled=true;
+        btn.style.opacity="0.85";
+      }
+    })
+    .catch(function(err){
+      console.error("EmailJS error:",err);
+      // Fallback: send via WhatsApp to admin
+      var adminMsg = ["NEW ORDER - Siri Kitchen","",
+        "Name: "+name, "Contact: "+commLabel,
+        "Date: "+(date||"TBC")+" at "+(time||""),
+        "Type: "+(delType==="delivery"?"Delivery: "+addr:"Pickup"),
+        "","Items:"
+      ].concat(lines).concat([
+        "Total: $"+tot.toFixed(2),"",
+        "Accept: "+acceptLink,"",
+        "Decline: "+declineLink
+      ]).filter(Boolean);
+      window.open("https://wa.me/61432237104?text="+encodeURIComponent(adminMsg.join("\n")),"_blank");
+      if(btn){btn.innerHTML="&#10003; Sent via WhatsApp";btn.disabled=true;}
+    });
+};
+
+/* === LOAD ORDER INTO INVOICE FROM LOCALSTORAGE === */
+function loadFromStorage() {
+  var raw;
+  try { raw = localStorage.getItem("sk_pending_order"); } catch(e){ return; }
+  if(!raw) return;
+
+  var od;
+  try { od = JSON.parse(raw); } catch(e){ return; }
+
+  function setVal(id, val) { var el=document.getElementById(id); if(el&&val!=null) el.value=val; }
+  setVal("c-name",    od.name);
+  setVal("c-phone",   od.phone);
+  setVal("c-addr",    od.addr);
+  setVal("inv-comm-mode",  od.commMode||"wa");
+  setVal("inv-cust-email", od.email||"");
+  // Restore promo from order
+  if(od.promo){
+    try{
+      activePromo = od.promo;
+      localStorage.setItem("sk_active_promo", JSON.stringify(activePromo));
+      var pi = document.getElementById("promo-input");
+      if(pi) pi.value = od.promo.code||"";
+      var pm = document.getElementById("promo-msg");
+      if(pm){ pm.style.cssText="font-size:12px;margin-top:4px;display:block;color:#2d8a4e"; pm.textContent="✅ "+od.promo.label+" applied!"; }
+      var dr = document.getElementById("discount-row");
+      if(dr && od.promo.type!=="freeitem") dr.style.display="flex";
+      var fr = document.getElementById("free-item-row");
+      if(fr && od.promo.type==="freeitem"){ fr.style.display="flex"; var fl=document.getElementById("free-item-label"); if(fl) fl.textContent=od.promo.item||""; }
+    }catch(e){}
+  }
+  setVal("d-date",    od.date);
+  setVal("d-time",    od.time);
+  setVal("inv-note",  od.notes);
+  setVal("del-type",  od.delType);
+  if(od.delCharge > 0) {
+    setVal("del-charge", parseFloat(od.delCharge).toFixed(2));
+    setVal("del-km",     od.distKm);
+  }
+  if(od.items && od.items.length) {
+    document.getElementById("items-body").innerHTML = "";
+    od.items.forEach(function(it){ addRow(it.qty, it.name+(it.size||""), it.price); });
+  }
+
+  setVal("o-date", new Date().toISOString().split("T")[0]);
+  updateInvNum();
+  updateSummary();
+  calcDelivery();
+
+  try { localStorage.removeItem("sk_pending_order"); } catch(e){}
+
+  /* Show banner */
+  if(!document.getElementById("af-banner")) {
+    var banner = document.createElement("div");
+    banner.id = "af-banner";
+    banner.className = "af-banner";
+
+    var icon = document.createElement("span");
+    icon.style.fontSize = "22px";
+    icon.style.flexShrink = "0";
+    icon.textContent = "OK";
+
+    var info = document.createElement("div");
+    var strong = document.createElement("strong");
+    strong.textContent = "Order auto-filled from customer request!";
+    var small = document.createElement("small");
+    small.textContent = "Review details, adjust if needed, then generate invoice.";
+    var clrBtn = document.createElement("button");
+    clrBtn.className = "af-clear";
+    clrBtn.textContent = "Dismiss";
+    clrBtn.addEventListener("click", function(){
+      var b = document.getElementById("af-banner");
+      if(b) b.remove();
+    });
+
+    info.appendChild(strong);
+    info.appendChild(small);
+    info.appendChild(clrBtn);
+    banner.appendChild(icon);
+    banner.appendChild(info);
+
+    var builderBody = document.querySelector(".builder-body");
+    if(builderBody) builderBody.insertBefore(banner, builderBody.firstChild);
+  }
+}
+
+/* === INVOICE JS === */
+
+// ── ROWS ──────────────────────────────────────────────
+var invRowCount = 0;
+function addRow(qty, desc, price) {
+  invRowCount++;
+  var rid = 'irow-' + invRowCount;
+  var tr = document.createElement('tr');
+  tr.id = rid;
+  // Build cells safely using DOM
+  var tdQty = document.createElement('td');
+  var inQty = document.createElement('input');
+  inQty.className='right'; inQty.type='number'; inQty.min='1';
+  inQty.value = qty||1; inQty.id = rid+'-qty';
+  inQty.style.width='50px';
+  inQty.addEventListener('input', function(){ rowTotal(rid); });
+  tdQty.appendChild(inQty);
+
+  var tdDesc = document.createElement('td');
+  var inDesc = document.createElement('input');
+  inDesc.type='text'; inDesc.value = desc||'';
+  inDesc.placeholder='Item description'; inDesc.id = rid+'-desc';
+  inDesc.style.width='100%';
+  tdDesc.appendChild(inDesc);
+
+  var tdPrice = document.createElement('td');
+  var inPrice = document.createElement('input');
+  inPrice.className='right'; inPrice.type='number'; inPrice.min='0';
+  inPrice.step='0.01'; inPrice.value = price||'';
+  inPrice.placeholder='0.00'; inPrice.id = rid+'-price';
+  inPrice.style.width='90px';
+  inPrice.addEventListener('input', function(){ rowTotal(rid); });
+  tdPrice.appendChild(inPrice);
+
+  var tdTotal = document.createElement('td');
+  var inTotal = document.createElement('input');
+  inTotal.className='right'; inTotal.type='number'; inTotal.id = rid+'-total';
+  inTotal.placeholder='0.00'; inTotal.readOnly = true;
+  inTotal.style.cssText='width:90px;background:#f5f0e8;color:var(--sub)';
+  tdTotal.appendChild(inTotal);
+
+  var tdDel = document.createElement('td');
+  var btnDel = document.createElement('button');
+  btnDel.className='del-row'; btnDel.innerHTML='&#10005;';
+  btnDel.addEventListener('click', function(){ removeRow(rid); });
+  tdDel.appendChild(btnDel);
+
+  tr.appendChild(tdQty); tr.appendChild(tdDesc); tr.appendChild(tdPrice);
+  tr.appendChild(tdTotal); tr.appendChild(tdDel);
+
+  var tbody = document.getElementById('items-body');
+  if(tbody) tbody.appendChild(tr);
+  if(qty && price) rowTotal(rid);
+}
+
+// ── ROWS (original invoice JS below) ──────────────────────────────────────────────
+function rowTotal(rid){
+  const q = parseFloat(document.getElementById(rid+'-qty').value)||0;
+  const p = parseFloat(document.getElementById(rid+'-price').value)||0;
+  document.getElementById(rid+'-total').value = (q*p).toFixed(2);
+  updateSummary();
+}
+function removeRow(rid){
+  document.getElementById(rid).remove();
+  updateSummary();
+}
+
+// ── DELIVERY ──────────────────────────────────────────
+function calcDelivery(){
+  const type = document.getElementById('del-type').value;
+  const km = parseFloat(document.getElementById('del-km').value)||0;
+  const chargeEl = document.getElementById('del-charge');
+  const resEl = document.getElementById('del-result');
+  if(type==='pickup'){
+    chargeEl.value = '0';
+    resEl.style.display='block';
+    resEl.textContent = '✅ Free pickup from Tarneit';
+    updateSummary(); return;
+  }
+  if(!km){ resEl.style.display='none'; updateSummary(); return; }
+  const sub = getSubtotal();
+  let charge = 0, msg = '';
+  if(km<=5){charge=sub>=100?0:8;msg=sub>=100?'✅ Free delivery (within 5km, order over $100)':'ℹ️ Within 5km, order under $100 — $8 flat fee';}
+  else if(km<=10){charge=8;msg=`🚚 ${km}km — $8 flat fee`;}
+  else{charge=Math.round(km);msg=`🚚 ${km}km — $${charge} delivery charge ($1/km)`;}
+  chargeEl.value = charge.toFixed(2);
+  resEl.style.display='block';
+  resEl.textContent = msg;
+  updateSummary();
+}
+
+// ── SUMMARY ───────────────────────────────────────────
+function getSubtotal(){
+  var sub=0;
+  document.querySelectorAll('[id$="-total"]').forEach(function(el){
+    if(el.id.startsWith('irow-')) sub+=parseFloat(el.value)||0;
+  });
+  return sub;
+}
+function updateSummary(){
+  const sub = getSubtotal();
+  const del = parseFloat(document.getElementById('del-charge').value)||0;
+  const total = sub+del;
+  const adv = total*0.4;
+  document.getElementById('s-sub').textContent = '$'+sub.toFixed(2);
+  document.getElementById('s-del').textContent = '$'+del.toFixed(2);
+  document.getElementById('s-total').textContent = '$'+total.toFixed(2);
+  document.getElementById('s-adv').textContent = '$'+adv.toFixed(2);
+  document.getElementById('s-rem').textContent = '$'+(total-adv).toFixed(2);
+}
+
+// ── INVOICE NUMBER ────────────────────────────────────
+function updateInvNum(){
+  const name = document.getElementById('c-name').value.trim();
+  const date = document.getElementById('o-date').value;
+  let initials = '';
+  if(name){
+    const parts = name.trim().split(/\s+/);
+    initials = parts.map(p=>p[0].toUpperCase()).join('').slice(0,3);
+  }
+  let dateStr = '';
+  if(date){
+    const d = new Date(date);
+    dateStr = String(d.getDate()).padStart(2,'0') + String(d.getMonth()+1).padStart(2,'0') + String(d.getFullYear()).slice(2);
+  }
+  const num = initials && dateStr ? `SK-${initials}-${dateStr}-01` : '';
+  document.getElementById('inv-num').value = num;
+}
+
+// ── FORMAT DATE ───────────────────────────────────────
+function fmtDate(val){
+  if(!val) return '';
+  const d = new Date(val);
+  return d.toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'});
+}
+function fmtTime(val){
+  if(!val) return '';
+  const [h,m] = val.split(':');
+  const hr = parseInt(h);
+  return `${hr>12?hr-12:hr||12}:${m} ${hr>=12?'PM':'AM'}`;
+}
+
+// ── GENERATE ──────────────────────────────────────────
+function generateInvoice(){
+  const name = document.getElementById('c-name').value.trim();
+  if(!name){alert('Please enter customer name.');return;}
+
+  const rows = document.querySelectorAll('#items-body tr');
+  if(!rows.length){alert('Please add at least one item.');return;}
+
+  // Customer
+  document.getElementById('inv-cname').textContent = name;
+  document.getElementById('inv-cphone').textContent = document.getElementById('c-phone').value||'—';
+  document.getElementById('inv-caddr').textContent = document.getElementById('c-addr').value||'—';
+  document.getElementById('inv-num-display').textContent = document.getElementById('inv-num').value||'SK-INV';
+
+  // Dates
+  document.getElementById('inv-odate').textContent = fmtDate(new Date().toISOString().split('T')[0]);
+  document.getElementById('inv-ddate').textContent = fmtDate(document.getElementById('d-date').value)||'TBC';
+  document.getElementById('inv-dtime').textContent = fmtTime(document.getElementById('d-time').value)||'TBC';
+  const delType = document.getElementById('del-type').value;
+  document.getElementById('inv-dtype').textContent = delType==='pickup'?'Pickup from Tarneit':'Delivery';
+
+  // Items
+  const tbody = document.getElementById('inv-items-body');
+  tbody.innerHTML = '';
+  rows.forEach(row=>{
+    const rid = row.id;
+    const qty = document.getElementById(rid+'-qty').value||1;
+    const desc = document.getElementById(rid+'-desc').value||'';
+    const price = parseFloat(document.getElementById(rid+'-price').value)||0;
+    const total = parseFloat(document.getElementById(rid+'-total').value)||0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${qty}</td><td>${desc}</td><td>$ ${price.toFixed(2)}</td><td>$ ${total.toFixed(2)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Delivery row
+  const del = parseFloat(document.getElementById('del-charge').value)||0;
+  if(del>0){
+    const tr = document.createElement('tr');
+    tr.className = 'delivery-row';
+    tr.innerHTML = `<td>—</td><td>Delivery Charge</td><td>$ ${del.toFixed(2)}</td><td>$ ${del.toFixed(2)}</td>`;
+    tbody.appendChild(tr);
+    document.getElementById('inv-del-row').style.display='flex';
+  }else{
+    document.getElementById('inv-del-row').style.display='none';
+  }
+
+  // Totals
+  const sub = getSubtotal();
+  // Apply discount if promo active - read from localStorage if needed
+  var discount = 0;
+  var promoLabel = "";
+  if(typeof activePromo==="undefined"||!activePromo){
+    try{var sp=localStorage.getItem("sk_active_promo");if(sp)activePromo=JSON.parse(sp);}catch(e){}
+  }
+  if(typeof activePromo !== "undefined" && activePromo){
+    if(activePromo.type==="percent") discount = sub*(activePromo.value/100);
+    else if(activePromo.type==="fixed") discount = Math.min(activePromo.value, sub);
+    promoLabel = activePromo.label || "Discount";
+  }
+  const total = sub - discount + del;
+  const adv = total*0.4;
+  document.getElementById('inv-sub').textContent = '$ '+sub.toFixed(2);
+  document.getElementById('inv-del').textContent = '$ '+del.toFixed(2);
+  // Show discount row in invoice if applicable
+  var discRow = document.getElementById('inv-discount-row');
+  if(!discRow && discount>0){
+    // Create discount row dynamically before total
+    var grandRow = document.getElementById('inv-total').closest('.inv-tot-row');
+    var dr = document.createElement('div');
+    dr.className = 'inv-tot-row';
+    dr.id = 'inv-discount-row';
+    dr.style.color = '#2d8a4e';
+    dr.innerHTML = '<span>'+promoLabel+'</span><span>- $ '+discount.toFixed(2)+'</span>';
+    grandRow.parentNode.insertBefore(dr, grandRow);
+  } else if(discRow){
+    if(discount>0){
+      discRow.style.display='flex';
+      discRow.querySelector('span:last-child').textContent='- $ '+discount.toFixed(2);
+      discRow.querySelector('span:first-child').textContent=promoLabel;
+    } else {
+      discRow.style.display='none';
+    }
+  }
+  // Show free item in invoice if applicable
+  if(typeof activePromo!=="undefined" && activePromo && activePromo.type==="freeitem"){
+    var freeRow = document.getElementById('inv-free-row');
+    if(!freeRow){
+      var grandRow2 = document.getElementById('inv-total').closest('.inv-tot-row');
+      var fr = document.createElement('div');
+      fr.className = 'inv-tot-row';
+      fr.id = 'inv-free-row';
+      fr.style.color = '#2d8a4e';
+      fr.innerHTML = '<span>'+activePromo.item+'</span><span>complimentary</span>';
+      grandRow2.parentNode.insertBefore(fr, grandRow2);
+    }
+  }
+  document.getElementById('inv-total').textContent = '$ '+total.toFixed(2);
+  document.getElementById('inv-adv').textContent = '$ '+adv.toFixed(2);
+  document.getElementById('inv-rem').textContent = '$ '+(total-adv).toFixed(2);
+
+  // Note
+  const note = document.getElementById('inv-note').value.trim();
+  if(note){
+    document.getElementById('inv-note-section').style.display='block';
+    document.getElementById('inv-note-text').textContent = note;
+  }else{
+    document.getElementById('inv-note-section').style.display='none';
+  }
+
+  // Show invoice
+  document.getElementById('invoice-preview').style.display='block';
+  updateInvSendBtn();
+  setTimeout(()=>document.getElementById('invoice-preview').scrollIntoView({behavior:'smooth'}),100);
+}
+
+// ── SEND VIA WA ───────────────────────────────────────
+function sendInvoiceWA(){
+  const name = document.getElementById('c-name').value.trim();
+  const phone = document.getElementById('c-phone').value.trim();
+  const invNum = document.getElementById('inv-num').value;
+  const sub = getSubtotal();
+  const del = parseFloat(document.getElementById('del-charge').value)||0;
+  const total = sub+del;
+  const adv = total*0.4;
+  const ddate = fmtDate(document.getElementById('d-date').value);
+  const dtime = fmtTime(document.getElementById('d-time').value);
+  const delType = document.getElementById('del-type').value;
+
+  const rows = document.querySelectorAll('#items-body tr');
+  const lines = [];
+  rows.forEach(row=>{
+    const rid=row.id;
+    const qty=document.getElementById(rid+'-qty').value||1;
+    const desc=document.getElementById(rid+'-desc').value||'';
+    const tot=parseFloat(document.getElementById(rid+'-total').value)||0;
+    lines.push(`  • ${qty}× ${desc} — $${tot.toFixed(2)}`);
+  });
+
+  const note = document.getElementById('inv-note').value.trim();
+  const msg = [
+    `✅ *Order Accepted — Siri Kitchen*`,``,
+    `Dear ${name}, your order has been accepted! Invoice below.`,``,
+    `🧾 *Invoice #:* ${invNum}`,``,
+    `*Customer:* ${name}`,
+    phone?`*Phone:* ${phone}`:'',
+    ``,`*Order Items:*`,...lines,``,
+    del>0?`*Delivery:* $${del.toFixed(2)}`:'*Delivery:* Free (Pickup)',
+    `*Total:* $${total.toFixed(2)} (tax inclusive)`,``,
+    `*📅 Date:* ${ddate||'TBC'} ${dtime||''}`.trim(),
+    `*Order Type:* ${delType==='pickup'?'Pickup from Tarneit':'Delivery'}`,``,
+    `*💳 Payment Details:*`,
+    `PayID: 0435772552 (Ishrat Parween)`,
+    `*Advance (40%):* $${adv.toFixed(2)}`,
+    `*Remaining after ${delType==='pickup'?'Pickup':'Delivery'}:* $${(total-adv).toFixed(2)}`,``,
+    note?`*Note:* ${note}`:``,'',
+    `_To confirm:_`,
+    `_1. Pay 40% advance via PayID: 0435 772 552 (Ishrat Parween)_`,
+    `_2. Send payment screenshot to this WhatsApp_`,
+    `_3. Final order confirmation will be sent ✅_`,
+    ``,
+    `_Thank you for choosing Siri Kitchen! 🍽️_`
+  ].filter(l=>l!==null&&l!==undefined);
+
+  const waNum = phone ? phone.replace(/\D/g,'').replace(/^0/,'61') : '61432237104';
+  window.open('https://wa.me/'+waNum+'?text='+encodeURIComponent(msg.join('\n')),'_blank');
+}
+
+function clearAll(){
+  if(!confirm('Clear all fields?')) return;
+  document.getElementById('items-body').innerHTML='';
+  document.getElementById('c-name').value='';
+  document.getElementById('c-phone').value='';
+  document.getElementById('c-addr').value='';
+  document.getElementById('o-date').value='';
+  document.getElementById('d-date').value='';
+  document.getElementById('d-time').value='12:00';
+  document.getElementById('inv-num').value='';
+  document.getElementById('del-km').value='';
+  document.getElementById('del-charge').value='';
+  document.getElementById('inv-note').value='';
+  document.getElementById('del-result').style.display='none';
+  document.getElementById('invoice-preview').style.display='none';
+  updateSummary();
+  rowCount=0;
+}
+
+// Init invoice (wrapped to avoid scope conflicts)
+(function(){
+  var invToday = new Date().toISOString().split('T')[0];
+  var odate = document.getElementById('o-date');
+  if(odate) odate.value = invToday;
+  if(typeof updateInvNum === 'function') updateInvNum();
+  var loaded = (typeof loadFromURL === 'function') ? loadFromURL() : false;
+  if(!loaded && typeof addRow === 'function') addRow();
+})();
+
+
+
+/* === STICKY HEADER === */
+(function(){
+  var hdr  = document.getElementById("sticky-hdr");
+  var nav  = document.getElementById("catnav");
+  var hero = document.querySelector(".hero");
+  if(!hdr || !nav || !hero) return;
+  function onScroll() {
+    if(document.getElementById("order-mode").classList.contains("hidden")) return;
+    var hb = hero.getBoundingClientRect().bottom;
+    if(hb <= 0) {
+      hdr.classList.add("show");
+      nav.style.top = hdr.offsetHeight + "px";
+    } else {
+      hdr.classList.remove("show");
+      nav.style.top = "0px";
+    }
+  }
+  // Listen on window AND document for scroll (works in iframes)
+  window.addEventListener("scroll", onScroll, {passive:true});
+  document.addEventListener("scroll", onScroll, {passive:true});
+  window.addEventListener("resize", onScroll, {passive:true});
+})();
+
+// Init EmailJS after page loads
+try { emailjs.init({publicKey: EMAILJS_PUBLIC_KEY}); } catch(e){ console.warn("EmailJS init failed:", e); }
+
+renderAll();
+
+/* === MOBILE & IFRAME COMPATIBILITY === */
+(function(){
+  // Make content always fully visible regardless of iframe or direct view
+  function ensureFullHeight(){
+    var h = Math.max(
+      document.body.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.offsetHeight
+    );
+    // Report to parent frame (Google Sites)
+    try{ window.parent.postMessage({type:'setHeight', height:h}, '*'); }catch(e){}
+    try{ window.parent.postMessage(h, '*'); }catch(e){}
+  }
+
+  // Run on load, tab switch, resize
+  window.addEventListener('load', ensureFullHeight);
+  window.addEventListener('resize', ensureFullHeight);
+  document.addEventListener('click', function(){ setTimeout(ensureFullHeight, 200); });
+
+  if(window.ResizeObserver){
+    new ResizeObserver(function(){ ensureFullHeight(); }).observe(document.body);
+  }
+  // Run immediately and repeatedly for first 5s
+  ensureFullHeight();
+  var t = setInterval(ensureFullHeight, 300);
+  setTimeout(function(){ clearInterval(t); }, 5000);
+})();
+
+
+/* === SHEET STATUS + ORDER QUEUE + ADMIN LINKS === */
 function sendDeclineEmailJS(toEmail, custName, fmtDate){
   var subject = "Re: Your Order Request - Siri Kitchen";
   var body = "Dear "+custName+","
@@ -1490,172 +2536,783 @@ function sendDeclineEmailJS(toEmail, custName, fmtDate){
     +" and are unable to accept your order at this time."
     +"\n\nWe sincerely apologise for any inconvenience. Please feel free to"
     +" send another request for a different date - we would love to cook for you!"
-    +"\n\nWarm regards,\nSiri Kitchen\n0432 237 104";
+    +"\n\nWarm regards,"
+    +"\nSiri Kitchen"
+    +"\n0432 237 104";
+
   var gmailUrl = "https://mail.google.com/mail/?view=cm&fs=1"
     +"&to="+encodeURIComponent(toEmail)
     +"&su="+encodeURIComponent(subject)
     +"&body="+encodeURIComponent(body);
-  window.open(gmailUrl,"_blank");
+
+  window.open(gmailUrl, "_blank");
+}
+
+function updateSheetStatus(id,status){try{if(APPS_SCRIPT_URL)fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'updateStatus',orderId:id,status:status})});}catch(e){}}
+function declineOrder(oid, name, phone, date, custEmail, commMode) {
+  name=name||"Customer"; phone=phone||""; date=date||""; custEmail=custEmail||""; commMode=commMode||"wa";
+
+  // Get from queue
+  try{
+    var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
+    var ord=q.find(function(o){return o.id===oid;});
+    if(ord){commMode=ord.commMode||commMode; custEmail=ord.email||custEmail; phone=ord.phone||phone;}
+  }catch(e){}
+
+  // Check sessionStorage (saved when Approve/Decline link opened)
+  var sessComm  = sessionStorage.getItem("sk_comm_mode")||"";
+  var sessEmail = sessionStorage.getItem("sk_cust_email")||"";
+  if(sessComm)  commMode  = sessComm;
+  if(sessEmail) custEmail = sessEmail;
+
+  // Check URL params as fallback
+  var urlP = new URLSearchParams(window.location.search);
+  if(!commMode||commMode==="wa"){var uc=urlP.get("cm")||urlP.get("comm")||"";if(uc)commMode=uc;}
+  if(!custEmail){var ue=urlP.get("em")||urlP.get("email")||"";if(ue)custEmail=ue;}
+
+  
+  var fmtDate="";
+  if(date){try{var d=new Date(date);fmtDate=d.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});}catch(e){}}
+
+  var msg="Dear "+name+",\n\nThank you for your order request with Siri Kitchen!\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+" and are unable to accept your order at this time.\n\nWe sincerely apologise for any inconvenience. Please feel free to send another request for a different date - we would love to cook for you!\n\nWarm regards,\nSiri Kitchen\n0432 237 104";
+
+  // Confirmation popup
+  var channel = commMode==="email" ? "email to "+custEmail : "WhatsApp to "+phone;
+  if(!confirm("Send decline notification to "+name+" via "+channel+"?")){
+    return;
+  }
+
+  updateOrderStatus(oid,"declined");
+  updateSheetStatus(oid,"Not Available");
+
+  if(commMode==="email"&&custEmail&&custEmail.indexOf("@")>0){
+    sendDeclineEmail(custEmail, name, fmtDate, msg);
+  } else if(phone&&phone.replace(/\D/g,"").length>=10){
+    window.open("https://wa.me/"+phone.replace(/\D/g,"").replace(/^0/,"61")+"?text="+encodeURIComponent(msg),"_blank");
+  } else {
+    alert("Order marked Not Available. No contact details found to notify customer.");
+  }
+  setTimeout(showOrderQueue,600);
+}
+
+function sendDeclineEmail(toEmail, custName, fmtDate, bodyText){
+  if(!toEmail||toEmail.indexOf("@")<0){
+    alert("No email address found for this customer.");
+    return;
+  }
+  // Send via EmailJS REST API directly to customer
+  var params = {
+    to_email:       toEmail,
+    reply_to:       "sirikitchen18@gmail.com",
+    name:           "Siri Kitchen",
+    email:          toEmail,
+    title:          "Re: Your Order Request - Siri Kitchen",
+    customer_name:  custName,
+    customer_phone: "",
+    customer_email: toEmail,
+    order_date:     new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"}),
+    service_type:   "Order Not Available",
+    delivery_date:  fmtDate||"Requested date",
+    delivery_time:  "",
+    address:        "",
+    notes:          "",
+    items_html:     "<tr><td colspan='4' style='padding:20px;font-size:14px;color:#333;text-align:center'>"
+                    +"Unfortunately, we are <strong>not available</strong> on "+(fmtDate||"the requested date")+".<br><br>"
+                    +"Please feel free to send another request for a different date.<br>"
+                    +"We would love to cook for you! 🍛</td></tr>",
+    items_text:     "Order not available on "+(fmtDate||"requested date"),
+    order_date:     new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"}),
+    total:          "0",
+    advance:        "0",
+    remaining:      "0",
+    approval_link:  "#",
+    reject_link:    "#"
+  };
+
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, params)
+    .then(function(){ alert("Decline notification sent to "+toEmail); })
+    .catch(function(err){
+      console.error("Decline email error:", JSON.stringify(err));
+      var s = encodeURIComponent("Re: Your Order Request - Siri Kitchen");
+      var b = encodeURIComponent(bodyText);
+      window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
+    });
+}
+
+function updateOrderStatus(id,status){try{var q=JSON.parse(localStorage.getItem('sk_order_queue')||'[]');q=q.map(function(o){if(o.id===id)o.status=status;return o;});localStorage.setItem('sk_order_queue',JSON.stringify(q));}catch(e){}}
+
+function showOrderQueue(){
+  var ex=document.getElementById('order-queue');if(ex)ex.remove();
+  var queue=[];try{queue=JSON.parse(localStorage.getItem('sk_order_queue')||'[]');}catch(e){}
+  var pending=queue.filter(function(o){return o.status==='pending';});
+  pending.sort(function(a,b){return new Date(b.receivedAt||0)-new Date(a.receivedAt||0);});
+  var inv=document.getElementById('inv-mode');
+  var qDiv=document.createElement('div');qDiv.id='order-queue';
+  if(!pending.length){
+    qDiv.innerHTML='<div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;margin:1rem;text-align:center"><div style="font-size:32px;margin-bottom:8px">&#128237;</div><div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">No pending orders</div><div style="font-size:13px;color:var(--sub)">Customer orders will appear here</div></div>';
+  }else{
+    var html=['<div style="padding:1rem;background:var(--bg)"><div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:12px">Order Queue ('+pending.length+')</div>'];
+    pending.forEach(function(order){
+      var itms=(order.items||[]).map(function(it){return '<div style="font-size:12px;color:var(--sub);padding:2px 0">'+it.qty+'x '+it.name+(it.size||'')+' $'+(it.qty*it.price).toFixed(2)+'</div>';}).join('');
+      var sub=(order.items||[]).reduce(function(s,x){return s+x.qty*x.price;},0);
+      var total=sub+(order.delCharge||0);
+      var recv='';if(order.receivedAt){var d=new Date(order.receivedAt);recv=d.toLocaleDateString('en-AU',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});}
+      var oid=encodeURIComponent(order.id),oname=encodeURIComponent(order.name),ophone=encodeURIComponent(order.phone),odate=encodeURIComponent(order.date||'');
+      html.push('<div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden">');
+      html.push('<div style="background:var(--red);padding:10px 14px;display:flex;justify-content:space-between;align-items:center"><span style="color:#fff;font-weight:700;font-size:16px">'+order.name+'</span><span style="font-size:11px;color:rgba(255,220,160,0.9)">'+recv+'</span></div>');
+      html.push('<div style="padding:12px 14px"><div style="font-size:12px;color:var(--sub);margin-bottom:4px">'+order.phone+' | '+(order.date||'TBC')+' '+(order.time||'')+'</div><div style="font-size:12px;color:var(--sub);margin-bottom:8px">'+(order.addr||'Pickup')+'</div>'+itms+(order.notes?'<div style="font-size:12px;color:var(--sub);margin-top:6px;font-style:italic">Note: '+order.notes+'</div>':'')+'</div>');
+      html.push('<div style="padding:8px 14px;background:var(--bg);display:flex;justify-content:space-between;border-top:1px solid var(--border);border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--sub)">Total</span><span style="font-size:16px;font-weight:800;color:var(--red)">$'+total.toFixed(2)+'</span></div>');
+      html.push('<div style="padding:12px;display:flex;gap:10px">' +
+        '<button onclick="acceptOrder(decodeURIComponent(this.dataset.id))" data-id="' + oid + '" style="flex:1;background:var(--red);color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Accept &amp; Invoice</button>' +
+        '<button onclick="declineOrder(decodeURIComponent(this.dataset.id),decodeURIComponent(this.dataset.name),decodeURIComponent(this.dataset.phone),decodeURIComponent(this.dataset.date))" data-id="' + oid + '" data-name="' + oname + '" data-phone="' + ophone + '" data-date="' + odate + '" style="flex:1;background:#fff;color:var(--sub);border:2px solid var(--border);border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Not Available</button>' +
+        '</div>');
+      html.push('</div>');
+    });
+    html.push('</div>');
+    qDiv.innerHTML=html.join('');
+  }
+  var bb=inv.querySelector('.inv-back-bar');
+  if(bb&&bb.nextSibling)inv.insertBefore(qDiv,bb.nextSibling);else inv.appendChild(qDiv);
+}
+
+function acceptOrder(oid){
+  var queue=[];try{queue=JSON.parse(localStorage.getItem('sk_order_queue')||'[]');}catch(e){}
+  var order=queue.find(function(o){return o.id===oid;});if(!order)return;
+  try{localStorage.setItem('sk_pending_order',JSON.stringify(order));}catch(e){}
+  updateOrderStatus(oid,'processing');
+  var builder=document.querySelector('.builder');if(builder)builder.scrollIntoView({behavior:'smooth'});
+  if(typeof loadFromStorage==='function')loadFromStorage();
+}
+
+
+function sendAcceptWA(){
+  if(typeof generateInvoice==='function')generateInvoice();
+  setTimeout(function(){
+    if(typeof sendInvoiceWA==='function')sendInvoiceWA();
+    try{var q=JSON.parse(localStorage.getItem('sk_order_queue')||'[]');var p=q.find(function(o){return o.status==='processing';});if(p){updateOrderStatus(p.id,'accepted');updateSheetStatus(p.id,'Accepted');}}catch(e){}
+  },300);
+}
+
+// URL params - handle Accept/Decline links from WhatsApp
+(function(){
+  try{
+    var params=new URLSearchParams(window.location.search);
+    var oid=params.get("oid");          // short accept link
+    var acceptId=params.get("accept");  // old long accept link (backward compat)
+    var declineId=params.get("decline");
+    var enc=params.get("d");
+
+    // Accept link - reconstruct order from URL params
+    if(oid){
+      // Save comm params to sessionStorage immediately so they survive navigation
+      var cmParam = params.get("cm")||"";
+      var emParam = params.get("em")||"";
+      if(cmParam) sessionStorage.setItem("sk_comm_mode", cmParam);
+      if(emParam) sessionStorage.setItem("sk_cust_email", emParam);
+
+      setTimeout(function(){
+        try{
+          var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
+          var existing=q.find(function(o){return o.id===oid;});
+          if(existing){
+            localStorage.setItem("sk_pending_order",JSON.stringify(existing));
+          } else {
+            var itemsStr=decodeURIComponent(params.get("it")||"");
+            var items=[];
+            if(itemsStr){
+              items=itemsStr.split(",").map(function(s){
+                var parts=s.split("|");
+                return{qty:parseInt(parts[0])||1,name:decodeURIComponent(parts[1]||""),size:"",price:parseFloat(parts[2])||0};
+              });
+            }
+            var order={
+              id:oid, status:"pending",
+              name:decodeURIComponent(params.get("n")||""),
+              phone:decodeURIComponent(params.get("p")||""),
+              email:decodeURIComponent(params.get("em")||""),
+              commMode:decodeURIComponent(params.get("cm")||"wa"),
+              date:decodeURIComponent(params.get("dt")||""),
+              time:decodeURIComponent(params.get("tm")||""),
+              addr:decodeURIComponent(params.get("ad")||""),
+              delType:decodeURIComponent(params.get("dl")||"pickup"),
+              delCharge:parseFloat(params.get("dc")||0),
+              notes:decodeURIComponent(params.get("nt")||""),
+              items:items,
+              receivedAt:new Date().toISOString()
+            };
+            localStorage.setItem("sk_pending_order",JSON.stringify(order));
+            if(!q.find(function(o){return o.id===oid;})){
+              q.push(order);localStorage.setItem("sk_order_queue",JSON.stringify(q));
+            }
+          }
+        }catch(e){console.error("OID handler error:",e);}
+        showPass();
+      },600);
+    }
+
+    // Old long accept link with encoded data (backward compat)
+    if(acceptId&&enc){
+      setTimeout(function(){
+        try{
+          var order=JSON.parse(decodeURIComponent(escape(atob(enc))));
+          order.id=acceptId;order.status="pending";
+          localStorage.setItem("sk_pending_order",JSON.stringify(order));
+          var q=[];try{q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");}catch(e){}
+          if(!q.find(function(o){return o.id===acceptId;})){
+            q.push(order);localStorage.setItem("sk_order_queue",JSON.stringify(q));
+          }
+        }catch(e){console.error("Accept link error:",e);}
+        showPass();
+      },600);
+    }
+
+    if(declineId){
+      setTimeout(function(){
+        var n       = decodeURIComponent(params.get("name")||"Customer");
+        var p       = decodeURIComponent(params.get("phone")||"");
+        var dt      = decodeURIComponent(params.get("date")||"");
+        var em      = decodeURIComponent(params.get("email")||"");
+        var comm    = decodeURIComponent(params.get("comm")||"wa");
+        var fmtDate = "";
+
+        if(dt){
+          try{
+            var dd=new Date(dt);
+            fmtDate=dd.toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"});
+          }catch(e){}
+        }
+
+        updateSheetStatus(declineId,"Not Available");
+        try{
+          var q=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
+          q=q.map(function(o){if(o.id===declineId)o.status="declined";return o;});
+          localStorage.setItem("sk_order_queue",JSON.stringify(q));
+        }catch(e){}
+
+        if(comm==="email" && em && em.indexOf("@")>0){
+                  sendDeclineEmailJS(em, n, fmtDate);
+        } else if(p && p.replace(/\D/g,"").length>=10){
+          var msg="Dear "+n+",\n\nUnfortunately, we are not available on "+(fmtDate||"the requested date")+".\n\nPlease feel free to send another request.\n\nSiri Kitchen\n0432 237 104";
+          window.open("https://wa.me/"+p.replace(/\D/g,"").replace(/^0/,"61")+"?text="+encodeURIComponent(msg),"_blank");
+        } else {
+                }
+      },300);
+    }
+  }catch(e){}
+})();
+
+function makeInvNum(name, date){
+  // Format: SK-[initials]-[DDMMYY]-01
+  var initials = (name||"").trim().split(/\s+/).map(function(w){return w[0]||"";}).join("").toUpperCase().slice(0,3);
+  var d = date ? new Date(date) : new Date();
+  var dd = String(d.getDate()).padStart(2,"0");
+  var mm = String(d.getMonth()+1).padStart(2,"0");
+  var yy = String(d.getFullYear()).slice(2);
+  return "SK-"+initials+"-"+dd+mm+yy+"-01";
+}
+
+/* === SEND ORDER VIA EMAIL (via EmailJS) === */
+function sendEmail(){
+  var name  = document.getElementById("cname").value.trim();
+  var phone = document.getElementById("cphone").value.trim();
+  var email = document.getElementById("cemail").value.trim();
+  var date  = document.getElementById("cdate").value;
+  var time  = document.getElementById("ctime").value;
+  var notes = document.getElementById("cnotes").value.trim();
+  if(!name){alert("Please enter your name.");return;}
+  if(!email||email.indexOf("@")<0){alert("Please enter a valid email address.");return;}
+  var addrEl = document.getElementById("daddr");
+  var addr   = addrEl ? addrEl.value.trim() : "";
+  if(delType==="delivery"&&!addr){alert("Please enter your delivery address.");return;}
+
+  var a   = Object.values(cart).filter(function(x){return x.qty>0;});
+  var sub = a.reduce(function(s,x){return s+x.qty*x.price;},0);
+  var tot = sub + delCharge;
+
+  var od = {
+    name:name, phone:phone||"", email:email||"", commMode:"email",
+    date:date, time:time, notes:notes,
+    addr: delType==="delivery" ? addr : "Pickup from Tarneit",
+    delType:delType, delCharge:delCharge, distKm:Math.round(km*1.3),
+    id:"ORD-"+Date.now(), receivedAt:new Date().toISOString(), status:"pending",
+    items:a.map(function(x){return{qty:x.qty,name:x.name,size:x.size||"",price:x.price};})
+  };
+
+  // Save to localStorage + Google Sheets
+  try{
+    var queue=[];
+    try{queue=JSON.parse(localStorage.getItem("sk_order_queue")||"[]");}catch(e){}
+    queue.push(od);
+    localStorage.setItem("sk_order_queue",JSON.stringify(queue));
+    localStorage.setItem("sk_pending_order",JSON.stringify(od));
+  }catch(e){}
+  try{
+    if(typeof APPS_SCRIPT_URL!=="undefined"&&APPS_SCRIPT_URL)
+      fetch(APPS_SCRIPT_URL,{method:"POST",mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"newOrder",order:od})});
+  }catch(e){}
+
+  var lines = a.map(function(x){
+    return x.qty+"x "+x.name+(x.size||"")+" - $"+(x.qty*x.price).toFixed(2);
+  }).join("\n");
+
+  var itemsHtml = a.map(function(x){
+    return "<tr><td style='padding:6px 12px'>"+x.qty+"x "+x.name+(x.size||"")+"</td><td style='padding:6px 12px;text-align:right'>$"+(x.qty*x.price).toFixed(2)+"</td></tr>";
+  }).join("");
+
+  var ebtn = document.getElementById("email-send-btn");
+
+  // Send via EmailJS
+  if(ebtn){ebtn.innerHTML="Sending...";ebtn.disabled=true;}
+
+  // Build accept/decline links for Approve/Reject buttons in email
+  var itemsCompact = od.items.map(function(x){
+    return x.qty+"|"+encodeURIComponent(x.name+(x.size||""))+"|"+x.price;
+  }).join(",");
+  var acceptLink = NETLIFY_URL+
+    "?oid="+od.id+"&n="+encodeURIComponent(name)+
+    "&p="+encodeURIComponent(phone||"")+
+    "&dt="+encodeURIComponent(date||"")+
+    "&tm="+encodeURIComponent(time||"")+
+    "&ad="+encodeURIComponent(od.addr)+
+    "&dl="+encodeURIComponent(delType)+
+    "&dc="+delCharge+
+    "&it="+encodeURIComponent(itemsCompact)+
+    (notes?"&nt="+encodeURIComponent(notes):"");
+  var declineLink = NETLIFY_URL+
+    "?decline="+od.id+
+    "&name="+encodeURIComponent(name)+
+    "&phone="+encodeURIComponent(phone||"")+
+    "&date="+encodeURIComponent(date||"")+
+    "&email="+encodeURIComponent(email||"")+
+    "&comm="+encodeURIComponent(comm||"wa");
+
+    var invNum = makeInvNum(name, date);
+  // Pre-render items as HTML table rows to avoid EmailJS {{#each}} corruption
+  var itemsHtml = od.items.map(function(x){
+    var itemName = (x.name+(x.size||"")).replace(/[<>&"]/g,"");
+    return "<tr><td style='padding:6px 10px;border:1px solid #eee'>"+itemName+"</td>"+
+           "<td style='padding:6px 10px;border:1px solid #eee;text-align:center'>"+x.qty+"</td>"+
+           "<td style='padding:6px 10px;border:1px solid #eee;text-align:right'>AUD $"+(x.qty*x.price).toFixed(2)+"</td></tr>";
+  }).join("");
+  var itemsText = od.items.map(function(x){
+    return x.qty+"x "+(x.name+(x.size||""))+" - $"+(x.qty*x.price).toFixed(2);
+  }).join("\n");
+
+  var templateParams = {
+    title:          invNum,
+    name:           name,
+    email:          email,
+    customer_name:  name,
+    customer_phone: phone || "not provided",
+    customer_email: email,
+    order_id:       invNum,
+    order_date:     new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric",timeZone:"Australia/Melbourne"}),
+    service_type:   delType==="delivery" ? "Delivery to: "+addr : "Pickup from Tarneit",
+    delivery_date:  date || "TBC",
+    delivery_time:  time || "",
+    address:        addr || "Pickup from Tarneit",
+    notes:          notes || "None",
+    // Pass items as pre-rendered HTML - no {{#each}} needed
+    items:          [{name:itemsText, qty:"", price:""}],
+    items_text:     itemsText,
+    items_html:     itemsHtml,
+    total:          tot.toFixed(2),
+    advance:        (tot*0.4).toFixed(2),
+    approval_link:  acceptLink,
+    reject_link:    declineLink
+  };
+
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+    .then(function(){
+      if(ebtn){
+        ebtn.innerHTML="&#10003; Order Sent!";
+        ebtn.style.background="#2d8a4e";
+        ebtn.disabled=true;
+        ebtn.style.opacity="0.85";
+      }
+    })
+    .catch(function(err){
+      console.error("EmailJS error:", JSON.stringify(err));
+      if(ebtn){ebtn.innerHTML="&#9993; Email";ebtn.disabled=false;ebtn.style.opacity="1";}
+      var errMsg = err && err.text ? err.text : (err && err.status ? "Error "+err.status : "Unknown error");
+      alert("Email error: " + errMsg + "\nPlease try WhatsApp or call 0432 237 104.");
+    });
+}
+
+function sendInvoiceSmart(){
+  try {
+  // Read from hidden form fields
+  var formComm  = (document.getElementById("inv-comm-mode")||{}).value || "";
+  var formEmail = (document.getElementById("inv-cust-email")||{}).value || "";
+  
+
+
+  // Also check URL params and localStorage as fallback
+  var urlParams = new URLSearchParams(window.location.search);
+  var urlComm   = urlParams.get("cm") || "";
+  var urlEmail  = urlParams.get("em") || "";
+
+  var custOrder = null;
+  try{
+    var q = JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
+    custOrder = q.find(function(o){return o.status==="processing";});
+    if(!custOrder){
+      var raw = localStorage.getItem("sk_pending_order");
+      if(raw) custOrder = JSON.parse(raw);
+    }
+  }catch(e){}
+
+  // Read from sessionStorage (saved when Approve link was first opened)
+  var sessComm  = sessionStorage.getItem("sk_comm_mode")  || "";
+  var sessEmail = sessionStorage.getItem("sk_cust_email") || "";
+
+  // Priority: sessionStorage > URL params > order object > form fields > default wa
+  var commMode  = sessComm  || urlComm  || (custOrder&&custOrder.commMode) || formComm  || "wa";
+  var custEmail = sessEmail || urlEmail || (custOrder&&custOrder.email)    || formEmail || "";
+    var custPhone = (document.getElementById("c-phone")||{}).value||"";
+  
+    // Simple rule: if we have a valid email AND commMode is email -> send email
+  // Otherwise -> WhatsApp
+  var hasEmail = custEmail && custEmail.indexOf("@")>0;
+  if(hasEmail && commMode==="email"){
+    sendInvoiceEmail(custEmail, custOrder);
+    if(custOrder){updateOrderStatus(custOrder.id,"accepted");updateSheetStatus(custOrder.id,"Accepted");}
+  } else {
+    // Show confirmation for WhatsApp
+    var waNum = custPhone.replace(/\D/g,"").replace(/^0/,"61");
+    if(!waNum || waNum.length < 10){
+      alert("No phone number found for WhatsApp. Please check the customer details.");
+      return;
+    }
+    sendInvoiceViaWhatsApp(custPhone, custOrder);
+    if(custOrder){updateOrderStatus(custOrder.id,"accepted");updateSheetStatus(custOrder.id,"Accepted");}
+  }
+  } catch(err){ alert("sendInvoiceSmart error: "+err.message); console.error(err); }
 }
 
 function sendInvoiceViaWhatsApp(phone, order){
-  var name=(document.getElementById("c-name")||{}).value||(order&&order.name)||"";
-  var date=(document.getElementById("d-date")||{}).value||(order&&order.date)||"";
-  var time=(document.getElementById("d-time")||{}).value||(order&&order.time)||"";
-  var sub=typeof getSubtotal==="function"?getSubtotal():0;
-  var del=parseFloat((document.getElementById("del-charge")||{}).value)||0;
-  var tot=sub+del; var adv=tot*0.4;
-  var invNum=makeInvNum(name,date);
-  var waNum=phone?phone.replace(/\D/g,"").replace(/^0/,"61"):"61432237104";
-  var msg=["✅ *Order Confirmed - Siri Kitchen*","","Hi "+name+"! Your order has been accepted.",
-    "*Invoice:* "+invNum,"*Date:* "+date+" at "+time,
-    "*Total:* $"+tot.toFixed(2),"*Advance (40%):* $"+adv.toFixed(2),"",
-    "Please pay the advance via PayID:","*0435 772 552 (Ishrat Parween)*","",
-    "_Invoice image attached._"].filter(Boolean).join("\n");
-  var waUrl="https://wa.me/"+waNum+"?text="+encodeURIComponent(msg);
-  var invEl=document.getElementById("inv-content");
-  var btn=document.getElementById("inv-send-btn");
-  if(!invEl||typeof html2canvas==="undefined"){window.open(waUrl,"_blank");return;}
+  var name   = (document.getElementById("c-name")||{}).value || (order&&order.name) || "";
+  var date   = (document.getElementById("d-date")||{}).value || (order&&order.date) || "";
+  var time   = (document.getElementById("d-time")||{}).value || (order&&order.time) || "";
+  var sub    = typeof getSubtotal==="function" ? getSubtotal() : 0;
+  var del    = parseFloat((document.getElementById("del-charge")||{}).value)||0;
+  var tot    = sub+del;
+  var adv    = tot*0.4;
+  var invNum = makeInvNum(name, date);
+  var waNum  = phone ? phone.replace(/\D/g,"").replace(/^0/,"61") : "61432237104";
+
+  var msg = [
+    "✅ *Order Confirmed - Siri Kitchen*","",
+    "Hi "+name+"! Your order has been accepted.",
+    "*Invoice:* "+invNum,
+    "*Date:* "+date+" at "+time,
+    "*Total:* $"+tot.toFixed(2),
+    "*Advance (40%):* $"+adv.toFixed(2),"",
+    "Please pay the advance via PayID:",
+    "*0435 772 552 (Ishrat Parween)*","",
+    "_Invoice image attached._"
+  ].filter(Boolean).join("\n");
+
+  var waUrl = "https://wa.me/"+waNum+"?text="+encodeURIComponent(msg);
+  var invEl = document.getElementById("inv-content");
+  var btn   = document.getElementById("inv-send-btn");
+
+  if(!invEl || typeof html2canvas==="undefined"){
+    window.open(waUrl,"_blank");
+    return;
+  }
+
   if(btn){btn.innerHTML="📸 Capturing...";btn.disabled=true;}
+
   html2canvas(invEl,{scale:2,backgroundColor:"#ffffff",logging:false,useCORS:true,windowWidth:800,width:Math.max(invEl.scrollWidth,700)})
     .then(function(canvas){
-      var dataUrl=canvas.toDataURL("image/png");
-      var fileName="Invoice-"+invNum+".png";
-      var file=new File([dataURItoBlob(dataUrl)],fileName,{type:"image/png"});
-      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        navigator.share({files:[file],text:msg,title:"Siri Kitchen Invoice"})
-          .then(function(){if(btn){btn.innerHTML="✅ Invoice Shared!";btn.disabled=false;}})
-          .catch(function(e){if(e.name!=="AbortError")fallbackDownload(dataUrl,fileName,waUrl,btn);
-            else if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}});
-      } else { fallbackDownload(dataUrl,fileName,waUrl,btn); }
-    })
-    .catch(function(err){console.error("Screenshot error:",err);window.open(waUrl,"_blank");if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}});
-}
+      // Use dataURL - no blob, no timing issues
+      var dataUrl = canvas.toDataURL("image/png");
+      var fileName = "Invoice-"+invNum+".png";
 
-function dataURItoBlob(dataURI){
-  var byteString=atob(dataURI.split(",")[1]);
-  var mimeString=dataURI.split(",")[0].split(":")[1].split(";")[0];
-  var ab=new ArrayBuffer(byteString.length);
-  var ia=new Uint8Array(ab);
-  for(var i=0;i<byteString.length;i++) ia[i]=byteString.charCodeAt(i);
-  return new Blob([ab],{type:mimeString});
+      // Try Web Share API (mobile - shares directly to WhatsApp)
+      if(navigator.share && navigator.canShare){
+        fetch(dataUrl)
+          .then(function(r){return r.blob();})
+          .then(function(blob){
+            var file = new File([blob], fileName, {type:"image/png"});
+            if(navigator.canShare({files:[file]})){
+              return navigator.share({files:[file], text:msg, title:"Siri Kitchen Invoice"});
+            } else {
+              throw new Error("canShare false");
+            }
+          })
+          .then(function(){
+            if(btn){btn.innerHTML="✅ Invoice Shared!";btn.disabled=false;}
+          })
+          .catch(function(e){
+            if(e.name!=="AbortError") fallbackDownload(dataUrl, fileName, waUrl, btn);
+            else if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}
+          });
+      } else {
+        fallbackDownload(dataUrl, fileName, waUrl, btn);
+      }
+    })
+    .catch(function(err){
+      console.error("Screenshot error:",err);
+      if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;}
+      window.open(waUrl,"_blank");
+    });
 }
 
 function fallbackDownload(dataUrl, fileName, waUrl, btn){
-  var a=document.createElement("a"); a.href=dataUrl; a.download=fileName;
-  a.style.display="none"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  if(btn){btn.innerHTML="📸 Saved! Opening WhatsApp...";btn.disabled=true;}
+  // Download image directly
+  var a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = fileName;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // Auto-open WhatsApp after short delay
+  if(btn){ btn.innerHTML="📸 Saved! Opening WhatsApp..."; btn.disabled=true; }
   setTimeout(function(){
     window.open(waUrl,"_blank");
-    if(btn){btn.innerHTML="📱 Send Invoice via WhatsApp";btn.disabled=false;btn.style.background="#25D366";btn.onclick=null;}
+    if(btn){
+      btn.innerHTML="📱 Send Invoice via WhatsApp";
+      btn.disabled=false;
+      btn.style.background="#25D366";
+      btn.onclick=null;
+    }
   },1200);
 }
 
-function printInvoice(){
-  var invEl=document.getElementById("inv-content");
-  if(!invEl){alert("Please generate invoice first.");return;}
-  var styles="";
-  try{for(var i=0;i<document.styleSheets.length;i++){try{var rules=document.styleSheets[i].cssRules||document.styleSheets[i].rules||[];for(var j=0;j<rules.length;j++)styles+=rules[j].cssText+"\n";}catch(e){}}}catch(e){}
-  var printWin=window.open("","_blank","width=850,height=1100");
-  printWin.document.write("<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Siri Kitchen Invoice</title><style>"+styles
-    +"body{margin:0;padding:20px;background:#f5f0e8!important}#inv-content{max-width:700px;margin:0 auto}"
-    +"@media print{body{padding:0;background:#fff!important}@page{margin:8mm;size:A4}.inv-actions{display:none!important}}"
-    +"</style></head><body>"+invEl.outerHTML+"</body></html>");
-  printWin.document.close(); printWin.focus();
-  setTimeout(function(){printWin.print();},800);
-}
+// Update invoice send button label based on comm mode
+function updateInvSendBtn(){
+  // Read from hidden fields first (most reliable)
+  var commMode  = (document.getElementById("inv-comm-mode")||{}).value || "";
+  var custEmail = (document.getElementById("inv-cust-email")||{}).value || "";
 
-function screenshotInvoice(){
-  var invEl=document.getElementById("inv-content");
-  if(!invEl){alert("Please generate invoice first.");return;}
-  var btn=document.getElementById("inv-screenshot-btn");
-  if(btn){btn.textContent="📸 Capturing...";btn.disabled=true;}
-  html2canvas(invEl,{scale:2,useCORS:true,backgroundColor:"#ffffff",logging:false,windowWidth:800,width:Math.max(invEl.scrollWidth,700)})
-    .then(function(canvas){
-      var link=document.createElement("a");
-      var name=(document.getElementById("c-name")||{}).value||"invoice";
-      var date=(document.getElementById("d-date")||{}).value||"";
-      link.download="SiriKitchen-Invoice-"+name.replace(/\s+/g,"-")+(date?"-"+date:"")+".png";
-      link.href=canvas.toDataURL("image/png"); link.click();
-      if(btn){btn.textContent="✅ Image Saved!";btn.disabled=false;}
-      setTimeout(function(){if(btn)btn.textContent="📸 Save as Image";},2000);
-    }).catch(function(err){console.error("Screenshot error:",err);if(btn){btn.textContent="📸 Save as Image";btn.disabled=false;}});
-}
-
-function searchMenu(q){
-  var clearBtn=document.getElementById("search-clear");
-  if(clearBtn) clearBtn.style.display=q?"block":"none";
-  var synonyms={"lamb":"goat","mutton":"goat","prawn":"shrimp","shrimp":"prawn","paneer":"cottage cheese",
-    "naan":"roti lacchedar paratha","bread":"roti chapati lacchedar","dumpling":"modak",
-    "pudding":"kheer payesh","rice cake":"dhokar","lentil":"dal daal","egg":"devil anda"};
-  var originalQ=q.trim(); var expandedQ=q; var synonymUsed="";
-  var qLower=q.toLowerCase().trim();
-  Object.keys(synonyms).forEach(function(k){
-    if(qLower===k||qLower.indexOf(k)>-1){expandedQ=expandedQ+" "+synonyms[k];synonymUsed=synonyms[k].split(" ")[0];}
-  });
-  q=expandedQ;
-  if(!q.trim()){
-    document.getElementById("catnav").style.display="";
-    document.querySelectorAll(".menu-section").forEach(function(s){s.style.display="";});
-    var sr=document.getElementById("search-results-section"); if(sr) sr.style.display="none"; return;
+  // Check sessionStorage and URL params
+  var urlParams2 = new URLSearchParams(window.location.search);
+  var sessC = sessionStorage.getItem("sk_comm_mode")||"";
+  var sessE = sessionStorage.getItem("sk_cust_email")||"";
+  if(!commMode||commMode==="wa"){
+    commMode  = sessC || urlParams2.get("cm") || commMode;
   }
-  var qWords=q.toLowerCase().split(/\s+/).filter(function(w){return w.length>1;});
-  var results=[];
+  if(!custEmail){
+    custEmail = sessE || urlParams2.get("em") || "";
+  }
+  if(!commMode){
+    try{
+      var q = JSON.parse(localStorage.getItem("sk_order_queue")||"[]");
+      var o = q.find(function(x){return x.status==="processing";});
+      if(!o){ var r=localStorage.getItem("sk_pending_order"); if(r) o=JSON.parse(r); }
+      if(o){ commMode=o.commMode||"wa"; custEmail=o.email||""; }
+    }catch(e){}
+  }
+
+  var btn   = document.getElementById("inv-send-btn");
+  var label = document.getElementById("inv-send-label");
+  var icon  = document.getElementById("inv-send-icon");
+  if(!btn) return;
+
+  if(commMode==="email" && custEmail){
+    btn.style.background  = "#8b2500";
+    if(label) label.textContent = "Send Invoice via Email";
+    if(icon)  icon.textContent  = "📧";
+  } else {
+    btn.style.background  = "#25D366";
+    if(label) label.textContent = "Send Invoice via WhatsApp";
+    if(icon)  icon.textContent  = "📱";
+  }
+}
+
+
+/* === INVOICE SCREENSHOT === */
+function screenshotInvoice(){
+  var invEl = document.getElementById("inv-content");
+  if(!invEl){ alert("Please generate invoice first."); return; }
+  var btn = document.getElementById("inv-screenshot-btn");
+  if(btn){ btn.textContent="📸 Capturing..."; btn.disabled=true; }
+
+  html2canvas(invEl, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#ffffff",
+    logging: false
+  }).then(function(canvas){
+    // Create download link
+    var link = document.createElement("a");
+    var name = (document.getElementById("c-name")||{}).value || "invoice";
+    var date = (document.getElementById("d-date")||{}).value || "";
+    var filename = "SiriKitchen-Invoice-"+name.replace(/\s+/g,"-")+(date?"-"+date:"")+".png";
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+
+    if(btn){ btn.textContent="✅ Image Saved!"; btn.disabled=false; }
+
+    // Also offer to share via WhatsApp/Email
+    setTimeout(function(){
+      if(btn) btn.textContent="📸 Save as Image";
+    }, 2000);
+  }).catch(function(err){
+    console.error("Screenshot error:", err);
+    if(btn){ btn.textContent="📸 Save as Image"; btn.disabled=false; }
+    alert("Screenshot failed. Try Print/Save as PDF instead.");
+  });
+}
+
+function printInvoice(){
+  var invEl = document.getElementById("inv-content");
+  if(!invEl){ alert("Please generate invoice first."); return; }
+  var printWin = window.open("","_blank","width=850,height=1100");
+  var styles = "";
+  try{
+    for(var i=0;i<document.styleSheets.length;i++){
+      try{
+        var rules=document.styleSheets[i].cssRules||document.styleSheets[i].rules||[];
+        for(var j=0;j<rules.length;j++) styles+=rules[j].cssText+"\n";
+      }catch(e){}
+    }
+  }catch(e){}
+  printWin.document.write(
+    "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Siri Kitchen Invoice</title>"
+    +"<style>"+styles
+    +"body{margin:0;padding:20px;background:#f5f0e8!important}"
+    +"#inv-content{max-width:700px;margin:0 auto}"
+    +"@media print{body{padding:0;background:#fff!important}@page{margin:8mm;size:A4}.inv-actions{display:none!important}}"
+    +"</style></head><body>"+invEl.outerHTML+"</body></html>"
+  );
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(function(){ printWin.print(); }, 800);
+}
+
+/* === SEARCH === */
+function searchMenu(q){
+  var clearBtn = document.getElementById("search-clear");
+  if(clearBtn) clearBtn.style.display = q ? "block" : "none";
+
+  var synonyms = {
+    "lamb":"goat","mutton":"goat",
+    "prawn":"shrimp","shrimp":"prawn",
+    "paneer":"cottage cheese",
+    "naan":"roti lacchedar paratha","bread":"roti chapati lacchedar",
+    "dumpling":"modak","pudding":"kheer payesh",
+    "rice cake":"dhokar","lentil":"dal daal","egg":"devil anda"
+  };
+  var originalQ = q.trim();
+  var expandedQ = q;
+  var synonymUsed = "";
+  var qLower = q.toLowerCase().trim();
+  Object.keys(synonyms).forEach(function(k){
+    if(qLower===k || qLower.indexOf(k)>-1){
+      expandedQ = expandedQ+" "+synonyms[k];
+      synonymUsed = synonyms[k].split(" ")[0];
+    }
+  });
+  q = expandedQ;
+
+  if(!q.trim()){
+    document.getElementById("catnav").style.display = "";
+    document.querySelectorAll(".menu-section").forEach(function(s){s.style.display="";});
+    var sr = document.getElementById("search-results-section");
+    if(sr) sr.style.display = "none";
+    return;
+  }
+
+  var qWords = q.toLowerCase().split(/\s+/).filter(function(w){return w.length>1;});
+  var results = [];
   Object.keys(MENU).forEach(function(k){
     (MENU[k]||[]).forEach(function(item){
-      var hay=(item.n+" "+(item.d||"")).toLowerCase();
-      if(qWords.some(function(w){return hay.indexOf(w)>-1;})) results.push({item:item,section:k});
+      var hay = (item.n+" "+(item.d||"")).toLowerCase();
+      if(qWords.some(function(w){return hay.indexOf(w)>-1;})){
+        results.push({item:item,section:k});
+      }
     });
   });
-  document.getElementById("catnav").style.display="none";
+
+  document.getElementById("catnav").style.display = "none";
   document.querySelectorAll(".menu-section").forEach(function(s){s.style.display="none";});
-  var sr=document.getElementById("search-results-section");
-  if(!sr){sr=document.createElement("div");sr.id="search-results-section";sr.className="search-results";
-    var sw=document.getElementById("search-wrap");if(sw&&sw.parentNode)sw.parentNode.insertBefore(sr,sw.nextSibling.nextSibling);}
-  sr.style.display="block"; sr.innerHTML="";
+
+  var sr = document.getElementById("search-results-section");
+  if(!sr){
+    sr = document.createElement("div");
+    sr.id = "search-results-section";
+    sr.className = "search-results";
+    var sw = document.getElementById("search-wrap");
+    if(sw && sw.parentNode) sw.parentNode.insertBefore(sr, sw.nextSibling.nextSibling);
+  }
+  sr.style.display = "block";
+  sr.innerHTML = "";
+
   if(!results.length){
-    var suggestions=[];
-    var words=originalQ.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;});
+    var suggestions = [];
+    var words = originalQ.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;});
     Object.keys(MENU).forEach(function(k){
       (MENU[k]||[]).forEach(function(item){
         var hay=(item.n+" "+(item.d||"")).toLowerCase();
-        if(words.some(function(w){return hay.indexOf(w)>-1;})&&suggestions.length<4) suggestions.push({item:item,section:k});
+        if(words.some(function(w){return hay.indexOf(w)>-1;}) && suggestions.length<4)
+          suggestions.push({item:item,section:k});
       });
     });
-    var noRes=document.createElement("div"); noRes.style.cssText="text-align:center;padding:24px 16px;color:var(--sub)";
-    noRes.textContent="No exact match for \""+originalQ+"\"";
-    var subDiv=document.createElement("div"); subDiv.style.fontSize="13px";
-    subDiv.textContent=suggestions.length?"Did you mean one of these?":"Try a different keyword";
-    noRes.appendChild(subDiv); sr.appendChild(noRes);
+    var noRes = document.createElement("div");
+    noRes.style.cssText = "text-align:center;padding:24px 16px;color:var(--sub)";
+    noRes.textContent = "No exact match for \""+originalQ+"\"";
+    var subDiv = document.createElement("div");
+    subDiv.style.fontSize="13px";
+    subDiv.textContent = suggestions.length ? "Did you mean one of these?" : "Try a different keyword";
+    noRes.appendChild(subDiv);
+    sr.appendChild(noRes);
     if(!suggestions.length) return;
-    suggestions.forEach(function(r){
+    results = suggestions;
+    // Show as suggestions with dashed border
+    results.forEach(function(r){
+      var item=r.item; items[item.id]=item;
       var card=document.createElement("div"); card.className="search-result-item"; card.style.borderStyle="dashed";
       var badge=document.createElement("div"); badge.style.cssText="font-size:11px;color:var(--sub);margin-bottom:4px"; badge.textContent="💡 Suggestion";
-      card.appendChild(badge); items[r.item.id]=r.item; buildSearchCard(card,r.item); sr.appendChild(card);
-    }); return;
+      card.appendChild(badge);
+      buildSearchCard(card, item);
+      sr.appendChild(card);
+    });
+    return;
   }
-  var countDiv=document.createElement("div"); countDiv.style.cssText="font-size:13px;color:var(--sub);margin-bottom:12px";
-  var countMsg=results.length+" result"+(results.length>1?"s":"")+" found";
-  if(synonymUsed&&originalQ.toLowerCase()!==synonymUsed) countMsg+=" — showing results for \""+synonymUsed+"\"";
-  countDiv.textContent=countMsg; sr.appendChild(countDiv);
-  results.forEach(function(r){var card=document.createElement("div");card.className="search-result-item";items[r.item.id]=r.item;buildSearchCard(card,r.item);sr.appendChild(card);});
+
+  var countDiv = document.createElement("div");
+  countDiv.style.cssText = "font-size:13px;color:var(--sub);margin-bottom:12px";
+  var countMsg = results.length+" result"+(results.length>1?"s":"")+" found";
+  if(synonymUsed && originalQ.toLowerCase()!==synonymUsed) countMsg += " — showing results for \""+synonymUsed+"\"";
+  countDiv.textContent = countMsg;
+  sr.appendChild(countDiv);
+
+  results.forEach(function(r){
+    var item=r.item; items[item.id]=item;
+    var card=document.createElement("div"); card.className="search-result-item";
+    buildSearchCard(card, item);
+    sr.appendChild(card);
+  });
 }
 
-function buildSearchCard(card,item){
-  var iid=item.id;
+function buildSearchCard(card, item){
+  var iid = item.id;
+  // Name
   var nameEl=document.createElement("div"); nameEl.style.cssText="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px"; nameEl.textContent=item.n; card.appendChild(nameEl);
+  // Desc
   if(item.d){var dEl=document.createElement("div");dEl.style.cssText="font-size:12px;color:var(--sub);margin-bottom:6px";dEl.textContent=item.d;card.appendChild(dEl);}
+  // Price row
   var foot=document.createElement("div"); foot.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px"; card.appendChild(foot);
   var priceArea=document.createElement("div"); foot.appendChild(priceArea);
   if(item.t==="fj"){
     var sel=document.createElement("select"); sel.className="ssel"; sel.id="sz-"+iid;
-    sel.innerHTML="<option value='f'>Family (4-5 pax) $"+item.f+"</option><option value='j'>Jumbo (8-9 pax) $"+item.j+"</option>";
-    sel.addEventListener("change",function(){upP(iid);}); priceArea.appendChild(sel);
+    sel.innerHTML="<option value='f'>Family (4-5 pax) $"+item.f+"</option><option value='j'>Jumbo (8-9 pax)) $"+item.j+"</option>";
+    sel.addEventListener("change",function(){upP(iid);});
+    priceArea.appendChild(sel);
   } else {
     var p=getP(item); var label=getL(item);
     var pEl=document.createElement("div"); pEl.className="iprice"; pEl.id="p-"+iid;
     pEl.textContent="$"+p.toFixed(2)+(label?" · "+label:""); priceArea.appendChild(pEl);
   }
+  // +/- controls
   var qrow=document.createElement("div"); qrow.className="qrow"; foot.appendChild(qrow);
   var qty=(cart[iid]&&cart[iid].qty)||0;
   var mb=document.createElement("button"); mb.className="qbtn"; mb.textContent="−";
@@ -1667,41 +3324,66 @@ function buildSearchCard(card,item){
 }
 
 function clearSearch(){
-  var input=document.getElementById("menu-search"); if(input) input.value="";
-  searchMenu(""); if(input) input.focus();
+  var input = document.getElementById("menu-search");
+  if(input) input.value = "";
+  searchMenu("");
+  if(input) input.focus();
 }
 
-function renderFullMenu(){
-  var container=document.getElementById("full-menu-list");
-  if(!container||container.dataset.rendered) return;
-  container.dataset.rendered="1";
-  var sectionNames={snacks:"Snacks & Starters",family:"Family Specials",kebab:"Kebabs",
-    ic:"Indo-Chinese",veg:"Veg Mains",nv:"Non-Veg Mains",bir:"Biryani & Rice",
-    roti:"Roti & Breads",dessert:"Desserts",bf:"Bengali Fish",bm:"Bengali Mutton/Chicken",
-    bv:"Bengali Veg",bs:"Bengali Sweets"};
-  Object.keys(sectionNames).forEach(function(k){
-    var items2=MENU[k]||[]; if(!items2.length) return;
-    var secDiv=document.createElement("div"); secDiv.style.cssText="margin-bottom:4px";
-    var hdr=document.createElement("div");
-    hdr.style.cssText="background:var(--red);color:#fff;padding:10px 1rem;font-size:14px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase";
-    hdr.textContent=sectionNames[k]; secDiv.appendChild(hdr);
-    items2.forEach(function(item){
-      var row=document.createElement("div");
-      row.style.cssText="display:flex;justify-content:space-between;align-items:center;padding:10px 1rem;border-bottom:1px solid var(--border);background:#fff;gap:10px";
-      var left=document.createElement("div");
-      var nameEl=document.createElement("div"); nameEl.style.cssText="font-size:14px;font-weight:600;color:var(--text)"; nameEl.textContent=item.n; left.appendChild(nameEl);
-      if(item.d){var desc=document.createElement("div");desc.style.cssText="font-size:12px;color:var(--sub);margin-top:2px";desc.textContent=item.d;left.appendChild(desc);}
-      var right=document.createElement("div"); right.style.cssText="text-align:right;flex-shrink:0";
-      var p=getP(item); var label=getL(item);
-      var priceEl=document.createElement("div"); priceEl.style.cssText="font-size:14px;font-weight:700;color:var(--red)"; priceEl.textContent="$"+p.toFixed(2); right.appendChild(priceEl);
-      if(label){var labelEl=document.createElement("div");labelEl.style.cssText="font-size:11px;color:var(--sub)";labelEl.textContent=label;right.appendChild(labelEl);}
-      var addBtn=document.createElement("button");
-      addBtn.style.cssText="margin-left:10px;width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:18px;cursor:pointer;font-weight:700;flex-shrink:0";
-      addBtn.textContent="+"; addBtn.addEventListener("click",function(){adj(item.id,1);});
-      row.appendChild(left); row.appendChild(right); row.appendChild(addBtn); secDiv.appendChild(row);
-    });
-    container.appendChild(secDiv);
-  });
+/* === PROMO / DISCOUNT === */
+var activePromo = null;
+
+// Define promo codes - admin can update these
+var PROMO_CODES = {
+  "WELCOME10":  {type:"percent", value:10, label:"10% Welcome Discount"},
+  "FLAT20":     {type:"fixed",   value:20, label:"$20 Flat Discount"},
+  "FREESAM":    {type:"freeitem",item:"Punjabi Samosa (15 pcs)", label:"Free Samosa (15 pcs)"},
+  "LOYAL5":     {type:"percent", value:5,  label:"5% Loyalty Discount"},
+  "BENGALI10":  {type:"percent", value:10, label:"10% Bengali Community Discount"}
+};
+
+function applyPromo(){
+  var code = (document.getElementById("promo-input").value||"").trim().toUpperCase();
+  var msg  = document.getElementById("promo-msg");
+  var discRow  = document.getElementById("discount-row");
+  var freeRow  = document.getElementById("free-item-row");
+
+  if(!code){
+    activePromo = null;
+    try{localStorage.removeItem("sk_active_promo");}catch(e){}
+    if(discRow) discRow.style.display="none";
+    if(freeRow) freeRow.style.display="none";
+    if(msg){ msg.style.display="none"; }
+    updTotals(); return;
+  }
+
+  var promo = PROMO_CODES[code];
+  if(!promo){
+    msg.style.cssText="font-size:12px;margin-top:4px;display:block;color:#c00";
+    msg.textContent="❌ Invalid promo code. Please check and try again.";
+    activePromo = null;
+    if(discRow) discRow.style.display="none";
+    if(freeRow) freeRow.style.display="none";
+    updTotals(); return;
+  }
+
+  activePromo = Object.assign({code:code}, promo);
+  // Save to localStorage so invoice generator can read it
+  try{localStorage.setItem("sk_active_promo", JSON.stringify(activePromo));}catch(e){}
+  msg.style.cssText="font-size:12px;margin-top:4px;display:block;color:#2d8a4e";
+  msg.textContent="✅ "+promo.label+" applied!";
+
+  if(promo.type==="freeitem"){
+    if(discRow) discRow.style.display="none";
+    if(freeRow){
+      freeRow.style.display="flex";
+      document.getElementById("free-item-label").textContent=promo.item;
+    }
+  } else {
+    if(freeRow) freeRow.style.display="none";
+    if(discRow) discRow.style.display="flex";
+  }
+  updTotals();
 }
 </script>
 </body>
