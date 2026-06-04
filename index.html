@@ -439,12 +439,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-
-function getMinQty(itemName){
-  return itemName.toLowerCase().includes('egg devil') ? 15 : 20;
-}
-
-
   var EMAILJS_PUBLIC_KEY  = "4HHq8GGC-_F2oYTz7";
   var EMAILJS_SERVICE_ID  = "service_v9tw3q9";
   var EMAILJS_TEMPLATE_ID         = "template_j10vpk5";  // Order received (admin notification)
@@ -555,7 +549,7 @@ function getMinQty(itemName){
 </div>
 
 <div id="tsnacks" class="section">
-  <div class="stitle">Snacks <small>(Egg Devil min 15 pcs · others min 20 pcs)</small></div>
+  <div class="stitle">Snacks <small>(min 15 pcs · per piece)</small></div>
   <div id="r-snacks"></div>
   <div class="stitle" style="margin-top:1.25rem">Family Deals <small>(serves 4–5 people)</small></div>
   <div id="r-family"></div>
@@ -576,7 +570,7 @@ function getMinQty(itemName){
   <div style="background:#fff8f2;border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:9px 14px;font-size:13px;color:#5a1a00;margin-bottom:12px;line-height:1.5"><strong>Family</strong> serves 4–5 people &nbsp;·&nbsp; <strong>Jumbo</strong> serves 8–9 people</div>
   <div class="stitle">Biryani Deals</div><div id="r-bir"></div></div>
 <div id="troti" class="section">
-  <div class="stitle">Roti / Paratha <small>(min 20 pcs · per piece)</small></div>
+  <div class="stitle">Roti / Paratha <small>(min 15 pcs · per piece)</small></div>
   <div id="r-roti"></div>
   <div class="stitle" style="margin-top:1.25rem">Dessert Deals</div>
   <div id="r-dessert"></div>
@@ -985,13 +979,13 @@ var NETLIFY_URL="https://sirikitchen18.github.io";
 const ORIGIN="18 Gunawan Drive, Tarneit VIC 3029, Australia";
 const MENU={
   snacks:[
-    {n:"Spring Rolls (Veg/Chicken)",d:"Crispy golden rolls with veg or chicken filling",t:'pc',v:3,id:"sn1",min:20},
-    {n:"Crispy Cutlet (Veg/Chicken)",d:"Crumb-coated cutlets, shallow fried",t:'pc',v:3,id:"sn2",min:20},
-    {n:"Egg Devil",d:"Spiced devilled eggs — a party favourite",t:'pc',v:3,id:"sn3",min:20},
-    {n:"Bread Pakora",d:"Spiced potato-stuffed bread fritters",t:'pc',v:3,id:"sn4",min:20},
-    {n:"Puff Patties (Veg/Chicken)",d:"Flaky pastry puffs with savoury filling",t:'pc',v:4,id:"sn5",min:20},
-    {n:"Punjabi Samosa",d:"Classic triangular pastry with spiced potato & peas",t:'pc',v:4,id:"sn6",min:20},
-    {n:"Sandwich (Veg/Chicken)",d:"Freshly prepared sandwiches with chutney",t:'pc',v:4,id:"sn7",min:20}
+    {n:"Spring Rolls (Veg/Chicken)",d:"Crispy golden rolls with veg or chicken filling",t:'pc',v:3,id:"sn1",min:15},
+    {n:"Crispy Cutlet (Veg/Chicken)",d:"Crumb-coated cutlets, shallow fried",t:'pc',v:3,id:"sn2",min:15},
+    {n:"Egg Devil",d:"Spiced devilled eggs — a party favourite",t:'pc',v:3,id:"sn3",min:15},
+    {n:"Bread Pakora",d:"Spiced potato-stuffed bread fritters",t:'pc',v:3,id:"sn4",min:15},
+    {n:"Puff Patties (Veg/Chicken)",d:"Flaky pastry puffs with savoury filling",t:'pc',v:4,id:"sn5",min:15},
+    {n:"Punjabi Samosa",d:"Classic triangular pastry with spiced potato & peas",t:'pc',v:4,id:"sn6",min:15},
+    {n:"Sandwich (Veg/Chicken)",d:"Freshly prepared sandwiches with chutney",t:'pc',v:4,id:"sn7",min:15}
   ],
   family:[
     {n:"Onion Bhajji (Veg)",d:"Crispy golden onion fritters",t:'flat',v:32,id:"f1"},
