@@ -2292,9 +2292,12 @@ function generateInvoice(){
 
   // Totals
   const sub = getSubtotal();
-  // Apply discount if promo active
+  // Apply discount if promo active - read from localStorage if needed
   var discount = 0;
   var promoLabel = "";
+  if(typeof activePromo==="undefined"||!activePromo){
+    try{var sp=localStorage.getItem("sk_active_promo");if(sp)activePromo=JSON.parse(sp);}catch(e){}
+  }
   if(typeof activePromo !== "undefined" && activePromo){
     if(activePromo.type==="percent") discount = sub*(activePromo.value/100);
     else if(activePromo.type==="fixed") discount = Math.min(activePromo.value, sub);
@@ -2995,7 +2998,7 @@ function sendInvoiceViaWhatsApp(phone, order){
 
   if(btn){btn.innerHTML="📸 Capturing...";btn.disabled=true;}
 
-  html2canvas(invEl,{scale:2,backgroundColor:"#ffffff",logging:false,useCORS:true,windowWidth:invEl.scrollWidth+40,width:invEl.scrollWidth+40})
+  html2canvas(invEl,{scale:2,backgroundColor:"#ffffff",logging:false,useCORS:true,windowWidth:800,width:Math.max(invEl.scrollWidth,700)})
     .then(function(canvas){
       // Use dataURL - no blob, no timing issues
       var dataUrl = canvas.toDataURL("image/png");
@@ -3318,8 +3321,8 @@ function applyPromo(){
   var freeRow  = document.getElementById("free-item-row");
 
   if(!code){
-    // Clear promo
     activePromo = null;
+    try{localStorage.removeItem("sk_active_promo");}catch(e){}
     if(discRow) discRow.style.display="none";
     if(freeRow) freeRow.style.display="none";
     if(msg){ msg.style.display="none"; }
@@ -3336,7 +3339,9 @@ function applyPromo(){
     updTotals(); return;
   }
 
-  activePromo = {code:code, ...promo};
+  activePromo = Object.assign({code:code}, promo);
+  // Save to localStorage so invoice generator can read it
+  try{localStorage.setItem("sk_active_promo", JSON.stringify(activePromo));}catch(e){}
   msg.style.cssText="font-size:12px;margin-top:4px;display:block;color:#2d8a4e";
   msg.textContent="✅ "+promo.label+" applied!";
 
