@@ -439,6 +439,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
+
+function getMinQty(itemName){
+  return itemName.toLowerCase().includes('egg devil') ? 15 : 20;
+}
+
+
   var EMAILJS_PUBLIC_KEY  = "4HHq8GGC-_F2oYTz7";
   var EMAILJS_SERVICE_ID  = "service_v9tw3q9";
   var EMAILJS_TEMPLATE_ID         = "template_j10vpk5";  // Order received (admin notification)
@@ -549,7 +555,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 </div>
 
 <div id="tsnacks" class="section">
-  <div class="stitle">Snacks <small>(min 20 pcs · per piece)</small></div>
+  <div class="stitle">Snacks <small>(Egg Devil min 15 pcs · others min 20 pcs)</small></div>
   <div id="r-snacks"></div>
   <div class="stitle" style="margin-top:1.25rem">Family Deals <small>(serves 4–5 people)</small></div>
   <div id="r-family"></div>
@@ -981,7 +987,7 @@ const MENU={
   snacks:[
     {n:"Spring Rolls (Veg/Chicken)",d:"Crispy golden rolls with veg or chicken filling",t:'pc',v:3,id:"sn1",min:20},
     {n:"Crispy Cutlet (Veg/Chicken)",d:"Crumb-coated cutlets, shallow fried",t:'pc',v:3,id:"sn2",min:20},
-    {n:"Egg Devil",d:"Spiced devilled eggs — a party favourite",t:'pc',v:3,id:"sn3",min:15},
+    {n:"Egg Devil",d:"Spiced devilled eggs — a party favourite",t:'pc',v:3,id:"sn3",min:20},
     {n:"Bread Pakora",d:"Spiced potato-stuffed bread fritters",t:'pc',v:3,id:"sn4",min:20},
     {n:"Puff Patties (Veg/Chicken)",d:"Flaky pastry puffs with savoury filling",t:'pc',v:4,id:"sn5",min:20},
     {n:"Punjabi Samosa",d:"Classic triangular pastry with spiced potato & peas",t:'pc',v:4,id:"sn6",min:20},
@@ -1095,7 +1101,7 @@ const MENU={
     {n:"Pantua",d:"Bengali gulab jamun — soft & syrup-soaked",t:'pc',v:2,id:"bs1",min:20},
     {n:"Mishti Doi (1000ml)",d:"Bengali sweetened yoghurt — the iconic dessert",t:'flat',v:32,id:"bs2"},
     {n:"Payesh / Rice Kheer (1000ml)",d:"Bengali creamy rice pudding",t:'flat',v:32,id:"bs3"},
-    {n:"Egg Devil",d:"Spiced devilled eggs — Bengali party staple",t:'pc',v:3,id:"bs4",min:15},
+    {n:"Egg Devil",d:"Spiced devilled eggs — Bengali party staple",t:'pc',v:3,id:"bs4",min:20},
     {n:"Khejoor Chutney (1000ml)",d:"Date chutney — the essential Bengali condiment",t:'flat',v:28,id:"bs5"}
   ]
 };
