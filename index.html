@@ -11,23 +11,37 @@
 <title>Siri Kitchen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%238b2500'/><text y='72' x='50' text-anchor='middle' font-size='60'>🍛</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%238b2500'/><text y='72' x='50' text-anchor='middle' font-size='60'>🍛</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 
 /* ── RESET & BASE ───────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --red:#8b2500;--red2:#a83010;
+  --red:#8b2500;--red2:#a83010;--red3:#4d1000;
+  --gold:#c9973a;--gold2:#e8b84b;--gold3:#f5dfa0;
   --bg:#f7efe4;--card:#fff;
   --border:#e8d5b8;--border2:#f0e4d0;
   --text:#1e0e02;--sub:#7a5030;--muted:#b09070;
-  --cream:#fdf5ec;
+  --cream:#fdf5ec;--dark:#1a0800;
 }
 html{font-size:16px;scroll-behavior:smooth}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-text-size-adjust:100%;overflow-x:hidden}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-text-size-adjust:100%;overflow-x:hidden}
 
 /* ── HERO ───────────────────────────────────────────── */
-.hero{background:linear-gradient(160deg,#5a1500 0%,#8b2500 55%,#6b1a0a 100%);padding:env(safe-area-inset-top) 0 0;text-align:center;position:relative}
+.hero{background:linear-gradient(170deg,#1a0400 0%,#3d0c00 35%,#8b2500 70%,#5a1200 100%);padding:env(safe-area-inset-top) 0 0;text-align:center;position:relative;overflow:hidden}
+.hero-layout{display:flex;align-items:stretch;min-height:200px}
+.hero-side{flex:1;position:relative;overflow:hidden;display:none}
+.hero-side-img{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0.85;filter:saturate(1.1) brightness(0.85)}
+.hero-side-fade{position:absolute;top:0;bottom:0;width:60px;z-index:1}
+.hero-side-fade-right{right:0;background:linear-gradient(to right,transparent,#3d0c00)}
+.hero-side-fade-left{left:0;background:linear-gradient(to left,transparent,#3d0c00)}
+.hero-inner{flex:0 0 auto;width:100%;padding:24px 20px 20px;position:relative;z-index:1;text-align:center}
+.hero-title-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px}
+.hero-pot{flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4))}
+@media(min-width:600px){
+  .hero-side{display:block}
+  .hero-inner{flex:0 0 60%;width:60%}
+}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 20%,rgba(255,200,100,0.08) 0%,transparent 60%)}
 .hero-inner{padding:1.25rem 1.25rem 0;position:relative;z-index:1}
 .hero-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,220,160,0.35);color:#f5d9a0;font-size:11px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:12px;text-transform:uppercase;font-weight:600}
@@ -47,7 +61,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .sticky-hdr-title{font-family:'Playfair Display',serif;color:#fff;font-size:17px;font-weight:700;letter-spacing:2px}
 .sticky-hdr-phone{color:rgba(255,220,160,0.9);font-size:12px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:4px}
 .search-wrap{padding:10px 1rem 0;background:#fff;position:sticky;top:56px;z-index:98}
-.search-box{display:flex;align-items:center;gap:8px;background:#f5f0e8;border:1.5px solid var(--border);border-radius:12px;padding:9px 14px}
+.search-box{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#fff,var(--cream));border:1.5px solid var(--border);border-radius:12px;padding:9px 14px;box-shadow:0 2px 8px rgba(139,37,0,0.06)}
 .search-box svg{color:var(--sub);flex-shrink:0}
 .search-box input{flex:1;border:none;background:transparent;font-size:15px;font-family:Inter,sans-serif;color:var(--text);outline:none}
 .search-box input::placeholder{color:#bbb}
@@ -73,13 +87,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .section.active{display:block;min-height:400px;padding-bottom:80px}
 
 /* ── SECTION TITLE ──────────────────────────────────── */
-.stitle{background:var(--red);color:#fff;font-family:'Playfair Display',serif;font-size:18px;padding:11px 16px;border-radius:10px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 3px 10px rgba(139,37,0,0.2)}
+.stitle{background:linear-gradient(135deg,var(--red3),var(--red),var(--red2));color:#fff;font-family:'Playfair Display',serif;font-style:italic;font-size:18px;padding:12px 16px;border-radius:10px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 15px rgba(139,37,0,0.25);border-left:3px solid var(--gold)}
 .stitle small{font-family:'Inter',sans-serif;font-size:11.5px;font-weight:400;opacity:0.8}
 .ssub{background:#a03520;color:#fff;font-size:14px;font-weight:700;padding:8px 14px;border-radius:7px;margin:14px 0 8px;display:flex;justify-content:space-between;align-items:center}
 .ssub span{font-weight:400;font-size:12px;opacity:0.85}
 
 /* ── ITEM CARD ──────────────────────────────────────── */
-.icard{background:var(--card);border-radius:12px;border:1px solid var(--border2);margin-bottom:8px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.icard{background:linear-gradient(135deg,#fff,#fdf8f3);border-radius:12px;border:1px solid var(--border2);margin-bottom:8px;padding:12px 14px;box-shadow:0 2px 8px rgba(139,37,0,0.05)}
 .icard:active{background:#fdf8f4}
 .iname{font-size:15px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:2px}
 .idesc{font-size:12px;color:var(--sub);line-height:1.35;margin-bottom:8px}
@@ -268,7 +282,7 @@ textarea.fi{height:76px;resize:vertical;font-size:15px}
 
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--red:#8b2500;--red2:#a83010;--cream:#fdf5ec;--border:#e8d5b8;--text:#1e0e02;--sub:#7a5030;--bg:#f7efe4}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:1rem}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:1rem}
 
 /* ── BUILDER UI ── */
 .builder{max-width:720px;margin:0 auto}
@@ -470,14 +484,54 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-inner">
-    <div class="hero-badge">⭐ Est. 2023 · Tarneit</div>
-    <h1>SIRI KITCHEN</h1>
-    <div class="hero-tag">Relish the taste of authentic Indian home-made food</div>
-    <div class="hero-info">Near Riverdale Village Shopping Centre, Tarneit · 0432 237 104</div>
-    <div class="hero-notice">📅 Please place orders at least 2 days in advance</div>
+  <div class="hero-layout">
+
+    <!-- Left food photo -->
+    <div class="hero-side hero-side-left">
+      <div class="hero-side-img" style="background-image:url('https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80')"></div>
+      <div class="hero-side-fade hero-side-fade-right"></div>
+    </div>
+
+    <!-- Centre content -->
+    <div class="hero-inner">
+      <div class="hero-badge">⭐ Est. 2023 · Tarneit</div>
+      <div class="hero-title-row">
+        <svg class="hero-pot" width="36" height="36" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="26" cy="35" rx="15" ry="9" fill="none" stroke="#f5dfa0" stroke-width="1.8"/>
+          <ellipse cx="26" cy="29" rx="15" ry="5.5" fill="none" stroke="#f5dfa0" stroke-width="1.8"/>
+          <ellipse cx="26" cy="24" rx="13" ry="4" fill="none" stroke="#f5dfa0" stroke-width="1.8"/>
+          <ellipse cx="26" cy="22" rx="3.5" ry="1.8" fill="#f5dfa0"/>
+          <rect x="9" y="27" width="3.5" height="5" rx="1.75" fill="#f5dfa0"/>
+          <rect x="39.5" y="27" width="3.5" height="5" rx="1.75" fill="#f5dfa0"/>
+          <path d="M18 19 Q18.5 15 18 12" stroke="#f5dfa0" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M26 17 Q26.5 13 26 10" stroke="#f5dfa0" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M34 19 Q34.5 15 34 12" stroke="#f5dfa0" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        </svg>
+        <h1>SIRI KITCHEN</h1>
+        <svg class="hero-pot" width="36" height="36" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="26" cy="35" rx="15" ry="9" fill="none" stroke="#f5dfa0" stroke-width="1.8"/>
+          <ellipse cx="26" cy="29" rx="15" ry="5.5" fill="none" stroke="#f5dfa0" stroke-width="1.8"/>
+          <ellipse cx="26" cy="24" rx="13" ry="4" fill="none" stroke="#f5dfa0" stroke-width="1.8"/>
+          <ellipse cx="26" cy="22" rx="3.5" ry="1.8" fill="#f5dfa0"/>
+          <rect x="9" y="27" width="3.5" height="5" rx="1.75" fill="#f5dfa0"/>
+          <rect x="39.5" y="27" width="3.5" height="5" rx="1.75" fill="#f5dfa0"/>
+          <path d="M18 19 Q18.5 15 18 12" stroke="#f5dfa0" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M26 17 Q26.5 13 26 10" stroke="#f5dfa0" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M34 19 Q34.5 15 34 12" stroke="#f5dfa0" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="hero-tag">Relish the taste of authentic Indian home-made food</div>
+      <div class="hero-info">Near Riverdale Village Shopping Centre, Tarneit · 0432 237 104</div>
+      <div class="hero-notice">📅 Please place orders at least 2 days in advance</div>
+    </div>
+
+    <!-- Right food photo -->
+    <div class="hero-side hero-side-right">
+      <div class="hero-side-fade hero-side-fade-left"></div>
+      <div class="hero-side-img" style="background-image:url('https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&q=80')"></div>
+    </div>
+
   </div>
-  
 </div>
 
 <div class="hero-bottom">
@@ -949,17 +1003,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
 
       <div class="promo-wrap">
-        <div class="mlabel" style="margin-bottom:6px">🎉 Occasion / Event Type</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
-          <button class="occ-btn" onclick="setOccasion(this,'Birthday Party')">🎂 Birthday</button>
-          <button class="occ-btn" onclick="setOccasion(this,'Wedding Function')">💍 Wedding</button>
-          <button class="occ-btn" onclick="setOccasion(this,'Eid Celebration')">🌙 Eid</button>
-          <button class="occ-btn" onclick="setOccasion(this,'Puja / Festival')">🪔 Puja/Festival</button>
-          <button class="occ-btn" onclick="setOccasion(this,'Family Gathering')">👨‍👩‍👧‍👦 Family Get-together</button>
-          <button class="occ-btn" onclick="setOccasion(this,'Corporate Event')">💼 Corporate</button>
-          <button class="occ-btn" onclick="setOccasion(this,'Other')">✨ Other</button>
+        <div class="mlabel" style="margin-bottom:6px">Promo / Discount Code</div>
+        <div style="display:flex;gap:8px">
+          <input class="fi" type="text" id="promo-input" placeholder="Enter code or leave blank" style="flex:1;margin:0">
+          <button onclick="applyPromo()" style="padding:10px 16px;background:var(--red);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">Apply</button>
         </div>
-        <input class="fi" type="text" id="occasion-input" placeholder="Selected occasion (or type your own)" style="margin-top:8px">
+        <div id="promo-msg" style="font-size:12px;margin-top:4px;display:none"></div>
       </div>
 
       <div class="tots">
@@ -1405,13 +1454,6 @@ function setComm(mode){
   if(sub) sub.textContent = mode==="email"
     ? "Review and submit via Email"
     : "Review and submit via WhatsApp";
-  checkWAReady();
-}
-
-function setOccasion(btn, label){
-  document.querySelectorAll(".occ-btn").forEach(function(b){b.classList.remove("on");});
-  btn.classList.add("on");
-  document.getElementById("occasion-input").value = label;
   checkWAReady();
 }
 
