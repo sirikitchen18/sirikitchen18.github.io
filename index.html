@@ -1226,7 +1226,30 @@ function handleOccChange(sel){
 <script>
 
 function getCatIcon(id){
-  var p={'snacks':'https://images.unsplash.com/s1oeDawprxI?w=80&h=80&fit=crop&q=80','kebab_veg':'https://images.unsplash.com/JKzNG58rwOA?w=80&h=80&fit=crop&q=80','kebab_nv':'https://images.unsplash.com/JKzNG58rwOA?w=80&h=80&fit=crop&q=80','noodles':'https://images.unsplash.com/sD2InRYbjBw?w=80&h=80&fit=crop&q=80','manchurian':'https://images.unsplash.com/sD2InRYbjBw?w=80&h=80&fit=crop&q=80','bread':'https://images.unsplash.com/ykiTYB1RAl8?w=80&h=80&fit=crop&q=80','gulab_jamun':'https://images.unsplash.com/bm1dJYcGJLw?w=80&h=80&fit=crop&q=80','dessert':'https://images.unsplash.com/e-63vmbcE3E?w=80&h=80&fit=crop&q=80','prawn':'https://images.unsplash.com/SnCauV1uoLs?w=80&h=80&fit=crop&q=80','fish':'https://images.unsplash.com/Lsiv0oAIfFk?w=80&h=80&fit=crop&q=80'};
+  var p={
+    'snacks':     'https://images.unsplash.com/s1oeDawprxI?w=80&h=80&fit=crop&q=80',
+    'kebab_veg':  'https://images.unsplash.com/JKzNG58rwOA?w=80&h=80&fit=crop&q=80',
+    'kebab_nv':   'https://images.unsplash.com/JKzNG58rwOA?w=80&h=80&fit=crop&q=80',
+    'noodles':    'https://images.unsplash.com/sD2InRYbjBw?w=80&h=80&fit=crop&q=80',
+    'manchurian': 'https://images.unsplash.com/sD2InRYbjBw?w=80&h=80&fit=crop&q=80',
+    'bread':      'https://images.unsplash.com/ykiTYB1RAl8?w=80&h=80&fit=crop&q=80',
+    'luchi':      'https://images.unsplash.com/ykiTYB1RAl8?w=80&h=80&fit=crop&q=80',
+    'gulab_jamun':'https://images.unsplash.com/bm1dJYcGJLw?w=80&h=80&fit=crop&q=80',
+    'sweet':      'https://images.unsplash.com/bm1dJYcGJLw?w=80&h=80&fit=crop&q=80',
+    'mishti':     'https://images.unsplash.com/bm1dJYcGJLw?w=80&h=80&fit=crop&q=80',
+    'dessert':    'https://images.unsplash.com/e-63vmbcE3E?w=80&h=80&fit=crop&q=80',
+    'prawn':      'https://images.unsplash.com/SnCauV1uoLs?w=80&h=80&fit=crop&q=80',
+    'fish':       'https://images.unsplash.com/Lsiv0oAIfFk?w=80&h=80&fit=crop&q=80',
+    'paneer':     'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=80&h=80&fit=crop&q=80',
+    'dal':        'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=80&h=80&fit=crop&q=80',
+    'veg_curry':  'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=80&h=80&fit=crop&q=80',
+    'chicken':    'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=80&h=80&fit=crop&q=80',
+    'mutton':     'https://images.unsplash.com/photo-1545247181-516773cae754?w=80&h=80&fit=crop&q=80',
+    'kosha':      'https://images.unsplash.com/photo-1545247181-516773cae754?w=80&h=80&fit=crop&q=80',
+    'biryani_nv': 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=80&h=80&fit=crop&q=80',
+    'biryani_v':  'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=80&h=80&fit=crop&q=80',
+    'rice':       'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=80&h=80&fit=crop&q=80'
+  };
   var g={"sn1":"snacks","sn2":"snacks","sn3":"snacks","sn4":"snacks","sn5":"snacks","sn6":"snacks","sn7":"snacks","f1":"snacks","f2":"snacks","f3":"snacks","f4":"paneer","f5":"snacks","f6":"chicken","k1":"kebab_veg","k2":"kebab_veg","k3":"kebab_nv","k4":"kebab_nv","k5":"kebab_nv","k6":"kebab_nv","k7":"kebab_nv","k8":"kebab_nv","k9":"kebab_nv","k10":"kebab_nv","ic1":"manchurian","ic2":"manchurian","ic3":"manchurian","ic4":"manchurian","ic5":"manchurian","ic6":"paneer","ic7":"manchurian","ic8":"manchurian","ic9":"noodles","ic10":"noodles","ic11":"noodles","v1":"dal","v2":"paneer","v3":"paneer","v4":"paneer","v5":"paneer","v6":"paneer","v7":"veg_curry","v8":"veg_curry","nv1":"chicken","nv2":"chicken","nv3":"chicken","nv4":"chicken","nv5":"chicken","nv6":"chicken","nv7":"chicken","nv8":"chicken","nv9":"chicken","nv10":"chicken","nv11":"chicken","nv12":"mutton","nv13":"mutton","nv14":"mutton","nv15":"mutton","b1":"biryani_v","b2":"biryani_nv","b3":"biryani_nv","b4":"mutton","b5":"mutton","b6":"rice","b7":"rice","b8":"biryani_v","r1":"bread","r2":"bread","d1":"sweet","d2":"dessert","d3":"dessert","d4":"dessert","d5":"dessert","bf1":"fish","bf2":"fish","bf3":"prawn","bf4":"fish","bf5":"fish","bf6":"prawn","bm1":"kosha","bm2":"mutton","bm3":"chicken","bm4":"chicken","bv1":"dal","bv2":"veg_curry","bv3":"dal","bv4":"veg_curry","bv5":"rice","bv6":"rice","bv7":"luchi","bs1":"sweet","bs2":"mishti","bs3":"sweet","bs4":"snacks","bs5":"sweet"};
   var grp=g[id]; var url=grp?p[grp]:'';
   if(!url) return '<span style="font-size:26px">🍽️</span>';
@@ -1616,13 +1639,13 @@ function updTotals(){
   if(discLabel&&activePromo) discLabel.textContent=activePromo.label||"Discount";
   const effectiveDel = delCharge===-1 ? 0 : delCharge;
   const total=sub-discount+effectiveDel;
-  const dep=total*0.4;
+  const dep=Math.round(total*0.4);
   function setTxt(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
   setTxt('tsub','$'+sub.toFixed(2));
   setTxt('tdel',delCharge>0?'$'+delCharge.toFixed(2):(delType==='pickup'?'Free (pickup)':'—'));
   setTxt('ttotal','$'+total.toFixed(2));
-  setTxt('tdep','$'+dep.toFixed(2));
-  setTxt('payid-amt','$'+dep.toFixed(2)+' (40% deposit)');
+  setTxt('tdep','$'+dep);
+  setTxt('payid-amt','$'+dep+' (40% deposit)');
   // Also update olines delivery row
   var olDel = document.getElementById('ol-del-row');
   var olDelAmt = document.getElementById('ol-del');
