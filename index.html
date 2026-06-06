@@ -2101,7 +2101,7 @@ function sendInvoiceEmail(toEmail, order){
   // Get items from order object, fallback to builder rows
   var items = [];
   if(order&&order.items&&order.items.length){
-    items = order.items.map(function(x){return{qty:x.qty,name:x.name+(x.size||""),price:x.price};});
+    items = order.items.map(function(x){return{qty:parseInt(x.qty)||1,name:x.name+(x.size||""),price:parseFloat(x.price)||0};});
   } else {
     document.querySelectorAll("#items-body tr").forEach(function(row){
       var rid=row.id; if(!rid)return;
@@ -2114,7 +2114,7 @@ function sendInvoiceEmail(toEmail, order){
 
   var sub = items.reduce(function(s,x){return s+x.qty*x.price;},0);
   var tot = sub+delChg;
-  var adv = tot*0.4;
+  var adv = Math.round(tot*0.4);
   var rem = tot-adv;
   var serviceType = delType==="delivery"?"Delivery to: "+invAddr:"Pickup from Tarneit";
 
@@ -2123,7 +2123,7 @@ function sendInvoiceEmail(toEmail, order){
       +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333'>"+x.qty+"</td>"
       +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333'>"+x.name+"</td>"
       +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$"+x.price.toFixed(2)+"</td>"
-      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$"+(x.qty*x.price).toFixed(2)+"</td>"
+      +"<td style='padding:10px 12px;border-bottom:1px solid #f5ede0;font-size:13px;color:#333;text-align:right'>$"+(parseInt(x.qty||1)*parseFloat(x.price||0)).toFixed(2)+"</td>"
       +"</tr>";
   }).join("");
 
@@ -2145,8 +2145,8 @@ function sendInvoiceEmail(toEmail, order){
     notes:          invNote||"",
     items_html:     itemsHtml,
     total:          tot.toFixed(2),
-    advance:        adv.toFixed(2),
-    remaining:      rem.toFixed(2)
+    advance:        String(adv),
+    remaining:      (tot-adv).toFixed(2)
   };
 
   
@@ -2155,7 +2155,7 @@ function sendInvoiceEmail(toEmail, order){
     .catch(function(err){
       console.error("Invoice email error:", JSON.stringify(err));
       var s=encodeURIComponent("Your Order Confirmed - Siri Kitchen - "+invNum);
-      var b=encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+adv.toFixed(2)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
+      var b=encodeURIComponent("Dear "+invName+",\n\nYour order is confirmed!\n\nTotal: $"+tot.toFixed(2)+"\nAdvance (40%): $"+String(adv)+"\n\nPayID: 0435 772 552 (Ishrat Parween)\n\nSiri Kitchen - 0432 237 104");
       window.open("mailto:"+toEmail+"?subject="+s+"&body="+b,"_blank");
     });
 }
@@ -2285,7 +2285,7 @@ window.sendWA = function() {
     var iname=(x.name+(x.size||"")).replace(/[<>&"]/g,"");
     return "<tr><td style='padding:6px 10px;border:1px solid #eee'>"+iname+"</td>"+
            "<td style='padding:6px 10px;border:1px solid #eee;text-align:center'>"+x.qty+"</td>"+
-           "<td style='padding:6px 10px;border:1px solid #eee;text-align:right'>AUD $"+(x.qty*x.price).toFixed(2)+"</td></tr>";
+           "<td style='padding:6px 10px;border:1px solid #eee;text-align:right'>AUD $"+(parseInt(x.qty||1)*parseFloat(x.price||0)).toFixed(2)+"</td></tr>";
   }).join("");
   var itemsText = lines.join("\n");
 
@@ -2534,11 +2534,11 @@ function updateSummary(){
   const sub = getSubtotal();
   const del = parseFloat(document.getElementById('del-charge').value)||0;
   const total = sub+del;
-  const adv = total*0.4;
+  const adv = Math.round(total*0.4);
   document.getElementById('s-sub').textContent = '$'+sub.toFixed(2);
   document.getElementById('s-del').textContent = '$'+del.toFixed(2);
   document.getElementById('s-total').textContent = '$'+total.toFixed(2);
-  document.getElementById('s-adv').textContent = '$'+adv.toFixed(2);
+  document.getElementById('s-adv').textContent = '$'+String(adv);
   document.getElementById('s-rem').textContent = '$'+(total-adv).toFixed(2);
 }
 
@@ -2634,7 +2634,7 @@ function generateInvoice(){
     promoLabel = activePromo.label || "Discount";
   }
   const total = sub - discount + del;
-  const adv = total*0.4;
+  const adv = Math.round(total*0.4);
   document.getElementById('inv-sub').textContent = '$ '+sub.toFixed(2);
   document.getElementById('inv-del').textContent = '$ '+del.toFixed(2);
   // Show discount row in invoice if applicable
@@ -2671,7 +2671,7 @@ function generateInvoice(){
     }
   }
   document.getElementById('inv-total').textContent = '$ '+total.toFixed(2);
-  document.getElementById('inv-adv').textContent = '$ '+adv.toFixed(2);
+  document.getElementById('inv-adv').textContent = '$ '+String(adv);
   document.getElementById('inv-rem').textContent = '$ '+(total-adv).toFixed(2);
 
   // Note
@@ -2697,7 +2697,7 @@ function sendInvoiceWA(){
   const sub = getSubtotal();
   const del = parseFloat(document.getElementById('del-charge').value)||0;
   const total = sub+del;
-  const adv = total*0.4;
+  const adv = Math.round(total*0.4);
   const ddate = fmtDate(document.getElementById('d-date').value);
   const dtime = fmtTime(document.getElementById('d-time').value);
   const delType = document.getElementById('del-type').value;
@@ -2726,7 +2726,7 @@ function sendInvoiceWA(){
     `*Order Type:* ${delType==='pickup'?'Pickup from Tarneit':'Delivery'}`,``,
     `*💳 Payment Details:*`,
     `PayID: 0435772552 (Ishrat Parween)`,
-    `*Advance (40%):* $${adv.toFixed(2)}`,
+    `*Advance (40%):* $${String(adv)}`,
     `*Remaining after ${delType==='pickup'?'Pickup':'Delivery'}:* $${(total-adv).toFixed(2)}`,``,
     note?`*Note:* ${note}`:``,'',
     `_To confirm:_`,
@@ -3167,7 +3167,7 @@ function sendEmail(){
   }).join("\n");
 
   var itemsHtml = a.map(function(x){
-    return "<tr><td style='padding:6px 12px'>"+x.qty+"x "+x.name+(x.size||"")+"</td><td style='padding:6px 12px;text-align:right'>$"+(x.qty*x.price).toFixed(2)+"</td></tr>";
+    return "<tr><td style='padding:6px 12px'>"+x.qty+"x "+x.name+(x.size||"")+"</td><td style='padding:6px 12px;text-align:right'>$"+(parseInt(x.qty||1)*parseFloat(x.price||0)).toFixed(2)+"</td></tr>";
   }).join("");
 
   var ebtn = document.getElementById("email-send-btn");
@@ -3203,7 +3203,7 @@ function sendEmail(){
     var itemName = (x.name+(x.size||"")).replace(/[<>&"]/g,"");
     return "<tr><td style='padding:6px 10px;border:1px solid #eee'>"+itemName+"</td>"+
            "<td style='padding:6px 10px;border:1px solid #eee;text-align:center'>"+x.qty+"</td>"+
-           "<td style='padding:6px 10px;border:1px solid #eee;text-align:right'>AUD $"+(x.qty*x.price).toFixed(2)+"</td></tr>";
+           "<td style='padding:6px 10px;border:1px solid #eee;text-align:right'>AUD $"+(parseInt(x.qty||1)*parseFloat(x.price||0)).toFixed(2)+"</td></tr>";
   }).join("");
   var itemsText = od.items.map(function(x){
     return x.qty+"x "+(x.name+(x.size||""))+" - $"+(x.qty*x.price).toFixed(2);
@@ -3308,7 +3308,7 @@ function sendInvoiceViaWhatsApp(phone, order){
   var sub    = typeof getSubtotal==="function" ? getSubtotal() : 0;
   var del    = parseFloat((document.getElementById("del-charge")||{}).value)||0;
   var tot    = sub+del;
-  var adv    = tot*0.4;
+  var adv = Math.round(tot*0.4);
   var invNum = makeInvNum(name, date);
   var waNum  = phone ? phone.replace(/\D/g,"").replace(/^0/,"61") : "61432237104";
 
@@ -3318,7 +3318,7 @@ function sendInvoiceViaWhatsApp(phone, order){
     "*Invoice:* "+invNum,
     "*Date:* "+date+" at "+time,
     "*Total:* $"+tot.toFixed(2),
-    "*Advance (40%):* $"+adv.toFixed(2),"",
+    "*Advance (40%):* $"+String(adv),"",
     "Please pay the advance via PayID:",
     "*0435 772 552 (Ishrat Parween)*","",
     "_Invoice image attached._"
