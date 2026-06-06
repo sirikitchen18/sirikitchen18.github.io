@@ -666,29 +666,6 @@ function handleOccChange(sel){
 
 
 
-// ── SEARCH PLACEHOLDER CYCLING ───────────────────────────────────────────────
-(function(){
-  var hints = [
-    'Search biryani...',
-    'Search kebab...',
-    'Search paneer...',
-    'Search snacks...',
-    'Search noodles...',
-    'Search fish curry...',
-    'Search gulab jamun...',
-    'Search chicken tikka...',
-    'Search paratha...',
-    'Search halwa...',
-  ];
-  var idx = 0;
-  var el = document.getElementById('menu-search');
-  if(!el) return;
-  setInterval(function(){
-    if(document.activeElement === el) return; // don't change while typing
-    idx = (idx + 1) % hints.length;
-    el.setAttribute('placeholder', hints[idx]);
-  }, 2000);
-})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
@@ -1249,10 +1226,10 @@ function handleOccChange(sel){
 <script>
 
 function getCatIcon(id){
-  var kw={"sn1":"spring+roll+food","sn2":"chicken+cutlet+crispy","sn3":"deviled+egg+spiced","sn4":"bread+pakora+indian","sn5":"puff+pastry+snack","sn6":"samosa+indian+food","sn7":"sandwich+indian","f1":"onion+bhaji+fritter","f2":"cauliflower+pakora","f3":"medu+vada+indian","f4":"paneer+pakora+indian","f5":"cheese+ball+snack","f6":"chicken+pakora","k1":"hara+bhara+kebab+green","k2":"paneer+tikka+grilled","k3":"chicken+tikka+skewer","k4":"fish+tikka+tandoor","k5":"chicken+tikka+skewer","k6":"chicken+tikka+skewer","k7":"mutton+tikka+boti","k8":"seekh+kebab+grilled","k9":"seekh+kebab+grilled","k10":"seekh+kebab+grilled","ic1":"chicken+65+indian","ic2":"chicken+65+indian","ic3":"chicken+lollipop","ic4":"chicken+manchurian+sauce","ic5":"chilli+chicken+indian","ic6":"chilli+paneer+indian","ic7":"veg+manchurian","ic8":"gobi+manchurian","ic9":"hakka+noodles+indian","ic10":"fried+rice+indian","ic11":"chicken+noodles+hakka","v1":"dal+makhani+indian","v2":"matar+paneer+curry","v3":"kadai+paneer+indian","v4":"paneer+butter+masala","v5":"paneer+tikka+masala","v6":"malai+kofta+indian","v7":"veg+curry+indian","v8":"spicy+veg+curry+indian","nv1":"chicken+curry+indian+gravy","nv2":"chicken+korma+indian","nv3":"chicken+curry+spicy","nv4":"chicken+chaap+bengali","nv5":"chicken+rezala+white","nv6":"dum+chicken+curry","nv7":"achari+chicken+curry","nv8":"kadai+chicken+indian","nv9":"chicken+kofta+curry","nv10":"chicken+tikka+masala","nv11":"chicken+handi+indian","nv12":"mutton+bhuna+indian","nv13":"mutton+curry+spicy","nv14":"tawa+gosht+indian","nv15":"mutton+kofta+curry","b1":"veg+biryani+indian","b2":"chicken+biryani+dum","b3":"chicken+biryani+spicy","b4":"yakhni+pulao+mutton","b5":"mutton+biryani+indian","b6":"jeera+rice+indian","b7":"peas+pulao+rice","b8":"veg+pulao+indian","r1":"roti+chapati+indian","r2":"paratha+layered+indian","d1":"gulab+jamun+sweet","d2":"shahi+tukda+dessert","d3":"sheer+khurma+vermicelli","d4":"firni+indian+dessert","d5":"gajar+halwa+carrot","bf1":"fish+curry+bengali+mustard","bf2":"hilsa+fish+mustard+curry","bf3":"prawn+coconut+curry","bf4":"fish+curry+yogurt+indian","bf5":"fish+kalia+bengali","bf6":"steamed+prawn+bengali","bm1":"kosha+mangsho+mutton+bengali","bm2":"mutton+rezala+white+curry","bm3":"bengali+chicken+curry+potato","bm4":"chicken+roast+bengali","bv1":"dhokar+dalna+bengali","bv2":"aloo+posto+potato+poppy","bv3":"cholar+dal+bengali","bv4":"shukto+mixed+veg+bengali","bv5":"basanti+pulao+saffron","bv6":"mishti+pulao+sweet+rice","bv7":"luchi+puri+bengali","bs1":"pantua+bengali+sweet","bs2":"mishti+doi+sweet+yogurt","bs3":"payesh+rice+kheer","bs4":"egg+devil+bengali","bs5":"date+chutney+indian"};
-  var k=kw[id];
-  if(!k) return '<span style="font-size:26px">🍽️</span>';
-  var url='https://source.unsplash.com/80x80/?'+k;
+  var p={"snacks":"https://images.unsplash.com/photo-1601050690597-df0568f70950?w=80&h=80&fit=crop&q=60","kebab_veg":"https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=80&h=80&fit=crop&q=60","kebab_nv":"https://images.unsplash.com/photo-1544025162-d76538b2a5b5?w=80&h=80&fit=crop&q=60","noodles":"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=80&h=80&fit=crop&q=60","manchurian":"https://images.unsplash.com/photo-1626200924573-f2a9c3c9cfe7?w=80&h=80&fit=crop&q=60","paneer":"https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=80&h=80&fit=crop&q=60","dal":"https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=80&h=80&fit=crop&q=60","veg_curry":"https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=80&h=80&fit=crop&q=60","chicken":"https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=80&h=80&fit=crop&q=60","mutton":"https://images.unsplash.com/photo-1545247181-516773cae754?w=80&h=80&fit=crop&q=60","biryani_nv":"https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=80&h=80&fit=crop&q=60","biryani_v":"https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=80&h=80&fit=crop&q=60","rice":"https://images.unsplash.com/photo-1516684732162-798a0062be99?w=80&h=80&fit=crop&q=60","bread":"https://images.unsplash.com/photo-1625398407796-82650a8c135f?w=80&h=80&fit=crop&q=60","sweet":"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=80&h=80&fit=crop&q=60","dessert":"https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=80&h=80&fit=crop&q=60","fish":"https://images.unsplash.com/photo-1626500154907-5a0d2b2b9fd9?w=80&h=80&fit=crop&q=60","prawn":"https://images.unsplash.com/photo-1559847844-5315695dadae?w=80&h=80&fit=crop&q=60","kosha":"https://images.unsplash.com/photo-1545247181-516773cae754?w=80&h=80&fit=crop&q=60","luchi":"https://images.unsplash.com/photo-1625398407796-82650a8c135f?w=80&h=80&fit=crop&q=60","mishti":"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=80&h=80&fit=crop&q=60"};
+  var g={"sn1":"snacks","sn2":"snacks","sn3":"snacks","sn4":"snacks","sn5":"snacks","sn6":"snacks","sn7":"snacks","f1":"snacks","f2":"snacks","f3":"snacks","f4":"paneer","f5":"snacks","f6":"chicken","k1":"kebab_veg","k2":"kebab_veg","k3":"kebab_nv","k4":"kebab_nv","k5":"kebab_nv","k6":"kebab_nv","k7":"kebab_nv","k8":"kebab_nv","k9":"kebab_nv","k10":"kebab_nv","ic1":"manchurian","ic2":"manchurian","ic3":"manchurian","ic4":"manchurian","ic5":"manchurian","ic6":"paneer","ic7":"manchurian","ic8":"manchurian","ic9":"noodles","ic10":"noodles","ic11":"noodles","v1":"dal","v2":"paneer","v3":"paneer","v4":"paneer","v5":"paneer","v6":"paneer","v7":"veg_curry","v8":"veg_curry","nv1":"chicken","nv2":"chicken","nv3":"chicken","nv4":"chicken","nv5":"chicken","nv6":"chicken","nv7":"chicken","nv8":"chicken","nv9":"chicken","nv10":"chicken","nv11":"chicken","nv12":"mutton","nv13":"mutton","nv14":"mutton","nv15":"mutton","b1":"biryani_v","b2":"biryani_nv","b3":"biryani_nv","b4":"mutton","b5":"mutton","b6":"rice","b7":"rice","b8":"biryani_v","r1":"bread","r2":"bread","d1":"sweet","d2":"dessert","d3":"dessert","d4":"dessert","d5":"dessert","bf1":"fish","bf2":"fish","bf3":"prawn","bf4":"fish","bf5":"fish","bf6":"prawn","bm1":"kosha","bm2":"mutton","bm3":"chicken","bm4":"chicken","bv1":"dal","bv2":"veg_curry","bv3":"dal","bv4":"veg_curry","bv5":"rice","bv6":"rice","bv7":"luchi","bs1":"sweet","bs2":"mishti","bs3":"sweet","bs4":"snacks","bs5":"sweet"};
+  var grp=g[id]; var url=grp?p[grp]:'';
+  if(!url) return '<span style="font-size:26px">🍽️</span>';
   var img=document.createElement('img');
   img.src=url; img.alt=''; img.loading='lazy';
   img.style.cssText='width:44px;height:44px;object-fit:cover;border-radius:10px;display:block';
@@ -1992,10 +1969,14 @@ function menuPage(d){
     if(heroBottom <= 0){
       hdr.classList.add('show');
       const {hh, sh} = getStickyHeights();
+      document.documentElement.style.setProperty('--hdr-h', hh+'px');
+      document.documentElement.style.setProperty('--sw-h', sh+'px');
       if(sw) sw.style.top = hh + 'px';
       nav.style.top = (hh + sh) + 'px';
     } else {
       hdr.classList.remove('show');
+      document.documentElement.style.setProperty('--hdr-h','0px');
+      document.documentElement.style.setProperty('--sw-h','0px');
       if(sw) sw.style.top = '0px';
       nav.style.top = '0px';
     }
@@ -3713,6 +3694,19 @@ function applyPromo(){
   }
   updTotals();
 }
+
+// ── SEARCH PLACEHOLDER CYCLING ──────────────────────────────────────────────
+window.addEventListener('load', function(){
+  var hints=['Search biryani...','Search kebab...','Search paneer...','Search snacks...','Search noodles...','Search fish curry...','Search gulab jamun...','Search chicken tikka...','Search paratha...','Search halwa...'];
+  var idx=0;
+  var el=document.getElementById('menu-search');
+  if(!el) return;
+  setInterval(function(){
+    if(document.activeElement===el) return;
+    idx=(idx+1)%hints.length;
+    el.setAttribute('placeholder',hints[idx]);
+  },2500);
+});
 </script>
 </body>
 </html>
