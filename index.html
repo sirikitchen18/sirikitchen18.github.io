@@ -1264,7 +1264,7 @@ function renderSection(data,elId){
   el.innerHTML=data.map(item=>{
     let ctrl='',priceStr='';
     if(item.t==='fj'){
-      ctrl=`<select class="ssel" id="sz-${item.id}" onchange="upP('${item.id}')"><option value="f">Family (4–5 pax) $${item.f}</option><option value="j">Jumbo (8–9 pax) $${item.j}</option></select>`;
+      ctrl=`<select class="ssel" id="sz-${item.id}" onchange="upP('${item.id}')"><option value="f">Family $${item.f}</option><option value="j">Jumbo $${item.j}</option></select>`;
       priceStr=``;  // price shown in dropdown
     }else if(item.t==='flat'){priceStr=`$${item.v}`;}
     else if(item.t==='pc'){priceStr=`$${item.v.toFixed(2)} ea`+(item.min?` · min ${item.min}`:'');}
@@ -3425,7 +3425,7 @@ function buildSearchCard(card, item){
   var priceArea=document.createElement("div"); foot.appendChild(priceArea);
   if(item.t==="fj"){
     var sel=document.createElement("select"); sel.className="ssel"; sel.id="sz-"+iid;
-    sel.innerHTML="<option value='f'>Family (4-5 pax) $"+item.f+"</option><option value='j'>Jumbo (8-9 pax)) $"+item.j+"</option>";
+    sel.innerHTML="<option value='f'>Family $"+item.f+"</option><option value='j'>Jumbo $"+item.j+"</option>";
     sel.addEventListener("change",function(){upP(iid);});
     priceArea.appendChild(sel);
   } else {
