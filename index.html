@@ -229,12 +229,12 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 /* push content above fixed cart */
 
 /* ── MODAL ──────────────────────────────────────────── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:flex-end;justify-content:center;z-index:9999;padding:0}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:flex-end;justify-content:center;z-index:9999;padding:0;overflow:hidden}
 .overlay.on{display:flex}
-.modal{background:var(--cream);width:100%;max-width:540px;max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;margin:0 auto}
+.modal{background:var(--cream);width:100%;max-width:min(540px,100vw);max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;margin:0 auto;box-sizing:border-box}
 .mhandle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
 .mhdr{background:var(--red);padding:1.25rem 1.5rem 1rem;position:sticky;top:0;z-index:10}
-.mbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:0}
+.mbody{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:0;box-sizing:border-box}
 .wa-sticky-footer{padding:14px 1.25rem;padding-bottom:calc(14px + env(safe-area-inset-bottom));background:var(--cream);border-top:1px solid var(--border);flex-shrink:0}
 .wa-sticky-footer .wabtn{margin-top:0}
 
@@ -265,7 +265,7 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .dopt .dsub{font-size:11.5px;color:var(--sub);margin-top:2px}
 #dfields{display:none}
 .awrap{position:relative}
-.asugg{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-top:none;border-radius:0 0 12px 12px;z-index:200;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.1)}
+.asugg{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-top:none;border-radius:0 0 12px 12px;z-index:200;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.1);width:100%;box-sizing:border-box;left:0;right:0}
 .aitem{padding:12px 14px;font-size:13px;color:var(--text);cursor:pointer;border-bottom:1px solid var(--bg);line-height:1.4}
 .aitem strong{font-size:14px;display:block;margin-bottom:2px}
 .aitem small{color:var(--sub);font-size:11px}
@@ -275,7 +275,7 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 /* FORM */
 .fg{margin-bottom:14px}
 .fl{display:block;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px}
-.fi{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;font-family:'Inter',sans-serif;color:var(--text);background:#fffaf6;outline:none;transition:border .15s}
+.fi{width:100%;max-width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;font-family:'Inter',sans-serif;color:var(--text);background:#fffaf6;outline:none;transition:border .15s;box-sizing:border-box}
 .fi:focus{border-color:var(--red);background:#fff}
 textarea.fi{height:76px;resize:vertical;font-size:15px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -556,6 +556,12 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 
 
 .occ-select{padding:8px 12px;border:1.5px solid rgba(201,151,58,0.3);border-radius:10px;font-size:13.5px;font-weight:600;color:var(--text);background:linear-gradient(135deg,#fffdf8,#fdf6ec);font-family:'Nunito',sans-serif;cursor:pointer;width:100%;appearance:auto}
+
+.mbody *{box-sizing:border-box;max-width:100%}
+.mlabel{display:block;font-size:13px;font-weight:700;color:var(--sub);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+
+.addr-hint{font-size:12px;color:#2d8a4e;margin-top:4px;font-weight:600}
+.addr-warn{font-size:12px;color:#c07000;margin-top:4px;font-weight:600}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
 
@@ -1025,8 +1031,10 @@ function handleOccChange(sel){
           </div>
           <label class="fl">Street Address</label>
           <div class="awrap">
-            <input class="fi" type="text" id="daddr" placeholder="Start typing your address..." autocomplete="off" oninput="onAddr()" onkeydown="if(event.key==='Escape')hideSugg()">
+            <input class="fi" type="text" id="daddr" placeholder="Start typing your address..." autocomplete="off" oninput="onAddr();document.getElementById('addr-hint').style.display='none';document.getElementById('addr-warn').style.display='block';" onkeydown="if(event.key==='Escape')hideSugg()">
             <div class="asugg" id="asugg"></div>
+            <div class="addr-hint" id="addr-hint" style="display:none">✅ Address verified</div>
+            <div class="addr-warn" id="addr-warn" style="display:none">⚠️ Type and select from the list for accurate delivery</div>
           </div>
         </div>
         <div class="dcalc" id="dcalc"></div>
@@ -1397,7 +1405,7 @@ function onAddr(){
   const el=document.getElementById('dcalc');el.style.display='none';el.innerHTML='';
   updTotals();
   const q=document.getElementById('daddr').value.trim();
-  if(q.length<2){hideSugg();return;}
+  if(q.length<2){hideSugg();document.getElementById('addr-warn').style.display='none';return;}
   atimer=setTimeout(()=>fetchSugg(q),400);
 }
 async function fetchSugg(q){
@@ -1455,8 +1463,8 @@ async function calcDel(){
     el.innerHTML=msg+'<br><small style="color:var(--sub);font-size:12px">*Estimated. Exact charge confirmed at booking.</small>';
     updTotals();
   }catch(e){
-    el.innerHTML='⚠️ Could not calculate. Call <strong>0432 237 104</strong> to confirm.';
-    delCharge=0;updTotals();
+    el.innerHTML='⚠️ Distance could not be calculated. <strong>Delivery charge will be confirmed by Siri Kitchen before order is accepted.</strong> Call <strong>0432 237 104</strong> if urgent.';
+    delCharge=-1;updTotals();
   }
 }
 
@@ -1474,7 +1482,8 @@ function updTotals(){
   var discLabel=document.getElementById("discount-label");
   if(discEl) discEl.textContent="-$"+discount.toFixed(2);
   if(discLabel&&activePromo) discLabel.textContent=activePromo.label||"Discount";
-  const total=sub-discount+delCharge;
+  const effectiveDel = delCharge===-1 ? 0 : delCharge;
+  const total=sub-discount+effectiveDel;
   const dep=total*0.4;
   function setTxt(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
   setTxt('tsub','$'+sub.toFixed(2));
@@ -1668,7 +1677,7 @@ function sendWA(){
   // Save order to queue
   var od={name:name,phone:phone,date:date,time:time,notes:notes,
     addr:delType==='delivery'?addr:'Pickup from Tarneit',
-    delType:delType,delCharge:delCharge,distKm:Math.round(km*1.3),
+    delType:delType,delCharge:delCharge===-1?0:delCharge, deliveryChargeNote:delCharge===-1?"Unconfirmed — to be advised by Siri Kitchen":"Calculated",distKm:Math.round(km*1.3),
     id:'ORD-'+Date.now(),receivedAt:new Date().toISOString(),status:'pending',
     items:a.map(function(x){return{qty:x.qty,name:x.name,size:x.size||'',price:x.price};})
   };
@@ -2082,7 +2091,7 @@ window.sendWA = function() {
     name:name, phone:phone||"", email:email||"", commMode:comm,
     date:date, time:time, notes:notes,
     addr: delType==="delivery" ? addr : "Pickup from Tarneit",
-    delType:delType, delCharge:delCharge, distKm:Math.round(km*1.3),
+    delType:delType, delCharge:delCharge===-1?0:delCharge, deliveryChargeNote:delCharge===-1?"Unconfirmed — to be advised by Siri Kitchen":"Calculated", distKm:Math.round(km*1.3),
     id:"ORD-"+Date.now(), receivedAt:new Date().toISOString(), status:"pending",
     promo: (typeof activePromo!=="undefined"&&activePromo) ? activePromo : null,
     items:a.map(function(x){return{qty:x.qty,name:x.name,size:x.size||"",price:x.price};})
@@ -2983,6 +2992,10 @@ function sendEmail(){
   var addrEl = document.getElementById("daddr");
   var addr   = addrEl ? addrEl.value.trim() : "";
   if(delType==="delivery"&&!addr){alert("Please enter your delivery address.");return;}
+  if(delType==="delivery"&&addr&&slat===null){
+    var proceed = confirm("⚠️ We couldn\'t verify your address automatically.\n\nYour address will be sent as typed:\n\""+addr+"\"\n\nDelivery charge cannot be calculated — Siri Kitchen will confirm the charge before accepting your order.\n\nTap OK to proceed, or Cancel to re-enter your address.");
+    if(!proceed) return;
+  }
 
   var a   = Object.values(cart).filter(function(x){return x.qty>0;});
   var sub = a.reduce(function(s,x){return s+x.qty*x.price;},0);
@@ -2992,7 +3005,7 @@ function sendEmail(){
     name:name, phone:phone||"", email:email||"", commMode:"email",
     date:date, time:time, notes:notes,
     addr: delType==="delivery" ? addr : "Pickup from Tarneit",
-    delType:delType, delCharge:delCharge, distKm:Math.round(km*1.3),
+    delType:delType, delCharge:delCharge===-1?0:delCharge, deliveryChargeNote:delCharge===-1?"Unconfirmed — to be advised by Siri Kitchen":"Calculated", distKm:Math.round(km*1.3),
     id:"ORD-"+Date.now(), receivedAt:new Date().toISOString(), status:"pending",
     items:a.map(function(x){return{qty:x.qty,name:x.name,size:x.size||"",price:x.price};})
   };
