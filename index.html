@@ -551,15 +551,24 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .iname{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#1e0e02;line-height:1.3}
 .idesc{font-size:11px;color:#9a6040;line-height:1.2;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
-.occasion-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.occ-pill{padding:5px 12px;border-radius:20px;border:1.5px solid rgba(201,151,58,0.3);background:#fff8f0;font-size:12.5px;font-weight:600;color:#7a3b0a;cursor:pointer;transition:all .15s;touch-action:manipulation}
-.occ-pill:hover,.occ-pill.occ-active{background:#8b2500;color:#fff;border-color:#8b2500}
+
+
+
+
+.occ-select{padding:8px 12px;border:1.5px solid rgba(201,151,58,0.3);border-radius:10px;font-size:13.5px;font-weight:600;color:var(--text);background:linear-gradient(135deg,#fffdf8,#fdf6ec);font-family:'Nunito',sans-serif;cursor:pointer;width:100%;appearance:auto}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
-function selectOcc(el, val){
-  document.querySelectorAll('.occ-pill').forEach(p=>p.classList.remove('occ-active'));
-  el.classList.add('occ-active');
-  document.getElementById('promo-input').value = val;
+
+
+function handleOccChange(sel){
+  var other = document.getElementById('occ-other-input');
+  if(sel.value === 'Other'){
+    other.style.display = 'block';
+    other.focus();
+  } else {
+    other.style.display = 'none';
+    other.value = '';
+  }
 }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -1060,16 +1069,23 @@ function selectOcc(el, val){
 
       <div class="promo-wrap">
         <div class="mlabel" style="margin-bottom:6px">🎉 Occasion / Event Type <span style="font-size:11px;font-weight:400;color:#aaa;font-style:italic">(optional)</span></div>
-        <div class="occasion-pills">
-          <span class="occ-pill" onclick="selectOcc(this,'Birthday')">🎂 Birthday</span>
-          <span class="occ-pill" onclick="selectOcc(this,'Wedding')">💍 Wedding</span>
-          <span class="occ-pill" onclick="selectOcc(this,'Eid')">🌙 Eid</span>
-          <span class="occ-pill" onclick="selectOcc(this,'Puja')">🪔 Puja</span>
-          <span class="occ-pill" onclick="selectOcc(this,'Family')">🏠 Family</span>
-          <span class="occ-pill" onclick="selectOcc(this,'Corporate')">💼 Corporate</span>
-          <span class="occ-pill" onclick="selectOcc(this,'Other')">✨ Other</span>
-        </div>
-        <input class="fi" type="text" id="promo-input" placeholder="Or type your occasion..." style="margin-top:8px;width:100%">
+        <select class="fi occ-select" id="promo-input" onchange="handleOccChange(this)" style="width:100%;cursor:pointer">
+          <option value="">— Select occasion —</option>
+          <option>🎂 Birthday</option>
+          <option>🌙 Eid / Ramadan</option>
+          <option>🪔 Puja / Festival</option>
+          <option>🏠 Family Gathering</option>
+          <option>🎉 Weekend Party</option>
+          <option>👫 Friends Reunion</option>
+          <option>🍲 Potluck</option>
+          <option>💼 Corporate / Office</option>
+          <option>🎓 Graduation</option>
+          <option>🏏 Game Night</option>
+          <option>🧕 Community Event</option>
+          <option>✨ Just a Treat</option>
+          <option>Other</option>
+        </select>
+        <input class="fi" type="text" id="occ-other-input" placeholder="Please describe your occasion..." style="display:none;margin-top:8px;width:100%">
       </div>
 
       <div class="tots">
