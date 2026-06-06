@@ -525,7 +525,7 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 }
 
 
-.hero-img-wrap{width:100%;line-height:0;font-size:0;margin:0;padding:0}
+.hero-img-wrap{width:100%;line-height:0;font-size:0;margin:0;padding:0;position:relative;border-radius:0 0 24px 24px;overflow:hidden;box-shadow:0 8px 32px rgba(139,37,0,0.15)}
 .hero-img{width:100%;display:block;height:auto;margin:0;padding:0;vertical-align:top}
 
 @media(max-width:400px){
@@ -562,6 +562,93 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 
 .addr-hint{font-size:12px;color:#2d8a4e;margin-top:4px;font-weight:600}
 .addr-warn{font-size:12px;color:#c07000;margin-top:4px;font-weight:600}
+
+/* ── ITEM CARD ICON ── */
+.icard-icon{width:44px;height:44px;flex-shrink:0;border-radius:10px;overflow:hidden;border:1px solid rgba(201,151,58,0.15);background:#f7efe4}
+
+/* ── CATEGORY BADGE ── */
+.cat-btn{position:relative}
+.cat-badge{position:absolute;top:-6px;right:-6px;background:#8b2500;color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #f7efe4;line-height:1}
+
+/* ── TWO-COLUMN DESKTOP GRID ── */
+@media(min-width:768px){
+  [id^="r-"]{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  [id^="r-"] .icard{margin-bottom:0}
+
+  /* Section padding wider on desktop */
+  .section{padding:0.75rem 2rem}
+  .stitle{margin-left:-2rem;margin-right:-2rem}
+
+  /* Bigger banner on desktop */
+  .hero-img{min-height:320px;object-fit:cover;object-position:center 20%}
+
+  /* Cat nav centered on desktop */
+  .cat-inner{justify-content:center;flex-wrap:wrap;overflow-x:visible}
+}
+@media(min-width:1024px){
+  .section{padding:0.75rem 3rem}
+  .stitle{margin-left:-3rem;margin-right:-3rem}
+  [id^="r-"]{gap:16px}
+}
+
+/* ── SKELETON LOADER ── */
+.skel-grid{display:grid;grid-template-columns:1fr;gap:10px;padding:0.75rem 1rem}
+@media(min-width:768px){.skel-grid{grid-template-columns:1fr 1fr;padding:0.75rem 2rem;gap:12px}}
+@media(min-width:1024px){.skel-grid{padding:0.75rem 3rem}}
+.skel-card{background:linear-gradient(145deg,#fffdf8,#fdf6ec);border-radius:12px;border:1px solid rgba(201,151,58,0.15);padding:10px 12px;display:flex;align-items:center;gap:10px;height:64px}
+.skel-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(90deg,#f0e6d8 25%,#fdf6ec 50%,#f0e6d8 75%);background-size:200% 100%;animation:shimmer 1.2s infinite}
+.skel-lines{flex:1;display:flex;flex-direction:column;gap:6px}
+.skel-line{height:12px;border-radius:6px;background:linear-gradient(90deg,#f0e6d8 25%,#fdf6ec 50%,#f0e6d8 75%);background-size:200% 100%;animation:shimmer 1.2s infinite}
+.skel-line.short{width:60%}
+.skel-right{width:80px;height:28px;border-radius:8px;background:linear-gradient(90deg,#f0e6d8 25%,#fdf6ec 50%,#f0e6d8 75%);background-size:200% 100%;animation:shimmer 1.2s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+@media(max-width:360px){
+  .icard-row{flex-wrap:wrap}
+  .icard-icon{width:44px;height:44px;flex-shrink:0;border-radius:10px;overflow:hidden;border:1px solid rgba(201,151,58,0.15);background:#f7efe4}
+  .icard-ctrl{width:100%;justify-content:space-between;margin-top:6px}
+  .ssel{font-size:11px;padding:4px 6px}
+  .qbtn{width:24px;height:24px;font-size:14px}
+  .iname{font-size:13px}
+  .idesc{font-size:10px}
+  .cat-btn{padding:5px 9px;font-size:11px}
+  .search-label{font-size:13px}
+}
+
+@keyframes pulse-border{
+  0%,100%{box-shadow:0 1px 6px rgba(139,37,0,0.08)}
+  50%{box-shadow:0 0 0 3px rgba(201,151,58,0.2),0 1px 6px rgba(139,37,0,0.08)}
+}
+.search-row{animation:pulse-border 2.5s ease-in-out 3}
+
+.hero-img-wrap::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:80px;
+  background:linear-gradient(to bottom, transparent, #f7efe4);
+  pointer-events:none;
+  z-index:1;
+}
+
+@media(min-width:768px){
+  .section{
+    background:var(--bg);
+    border-radius:16px;
+    box-shadow:0 2px 16px rgba(139,37,0,0.06),0 1px 4px rgba(0,0,0,0.04);
+    margin:0 1rem 1rem;
+    padding:0 0 1rem;
+  }
+  .stitle{border-radius:16px 16px 0 0;margin-left:0;margin-right:0}
+  [id^="r-"]{padding:0.75rem 1rem}
+}
+@media(min-width:1024px){
+  .section{margin:0 2rem 1.5rem}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
 
@@ -577,6 +664,31 @@ function handleOccChange(sel){
   }
 }
 
+
+
+// ── SEARCH PLACEHOLDER CYCLING ───────────────────────────────────────────────
+(function(){
+  var hints = [
+    'Search biryani...',
+    'Search kebab...',
+    'Search paneer...',
+    'Search snacks...',
+    'Search noodles...',
+    'Search fish curry...',
+    'Search gulab jamun...',
+    'Search chicken tikka...',
+    'Search paratha...',
+    'Search halwa...',
+  ];
+  var idx = 0;
+  var el = document.getElementById('menu-search');
+  if(!el) return;
+  setInterval(function(){
+    if(document.activeElement === el) return; // don't change while typing
+    idx = (idx + 1) % hints.length;
+    el.setAttribute('placeholder', hints[idx]);
+  }, 2000);
+})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
@@ -625,16 +737,16 @@ function handleOccChange(sel){
 </div>
 <nav class="cat-nav" id="catnav">
   <div class="cat-inner">
-    <div class="cat-btn" onclick="goTab('tsnacks',this)">🍢 Snacks</div>
-    <div class="cat-btn" onclick="goTab('tkebab',this)">🍖 Kebab</div>
-    <div class="cat-btn" onclick="goTab('tic',this)">🍜 Indo-Chinese</div>
-    <div class="cat-btn" onclick="goTab('tveg',this)">🥦 Veg Mains</div>
-    <div class="cat-btn" onclick="goTab('tnonveg',this)">🍗 Non-Veg</div>
-    <div class="cat-btn active" onclick="goTab('tbiryani',this)">🍛 Biryani</div>
-    <div class="cat-btn" onclick="goTab('troti',this)">🫓 Roti &amp; Dessert</div>
-    <div class="cat-btn" onclick="goTab('tcatering',this)">🎂 Catering</div>
-    <div class="cat-btn" onclick="goTab('tbengali',this)">🐟 Bengali À La Carte</div>
-    <div class="cat-btn" onclick="goTab('tbengpkg',this)">🎁 Bengali Packages</div>
+    <div class="cat-btn" id="cat-tsnacks" onclick="goTab('tsnacks',this)">🔺 Snacks</div>
+    <div class="cat-btn" id="cat-tkebab" onclick="goTab('tkebab',this)">🍢 Kebab</div>
+    <div class="cat-btn" id="cat-tic" onclick="goTab('tic',this)">🥡 Indo-Chinese</div>
+    <div class="cat-btn" id="cat-tveg" onclick="goTab('tveg',this)">🥘 Veg Mains</div>
+    <div class="cat-btn" id="cat-tnonveg" onclick="goTab('tnonveg',this)">🍛 Non-Veg</div>
+    <div class="cat-btn active" id="cat-tbiryani" onclick="goTab('tbiryani',this)">🍚 Biryani</div>
+    <div class="cat-btn" id="cat-troti" onclick="goTab('troti',this)">🫓 Roti &amp; Dessert</div>
+    <div class="cat-btn" id="cat-tcatering" onclick="goTab('tcatering',this)">🎉 Catering</div>
+    <div class="cat-btn" id="cat-tbengali" onclick="goTab('tbengali',this)">🐟 Bengali À La Carte</div>
+    <div class="cat-btn" id="cat-tbengpkg" onclick="goTab('tbengpkg',this)">🎁 Bengali Packages</div>
     <div class="cat-btn hero-menu-btn" onclick="goTab('tmenu', document.getElementById('menu-tab'))" id="menu-tab">📋 Full Menu</div>
   </div>
 </nav>
@@ -678,30 +790,30 @@ function handleOccChange(sel){
 
 <div id="tsnacks" class="section">
   <div class="stitle">Snacks <small>(min 15 pcs · per piece)</small></div>
-  <div id="r-snacks"></div>
+  <div id="r-snacks"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div>
   <div class="stitle" style="margin-top:1.25rem">Family Deals <small>(serves 4–5 people)</small></div>
-  <div id="r-family"></div>
+  <div id="r-family"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div>
 </div>
 <div id="tkebab" class="section">
   <div style="background:transparent;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;padding:5px 12px;font-size:clamp(10px,2.8vw,13px);color:var(--sub);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>Family</strong> serves 4–5 people &nbsp;·&nbsp; <strong>Jumbo</strong> serves 8–9 people</div>
-  <div class="stitle">Kebab Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-kebab"></div></div>
+  <div class="stitle">Kebab Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-kebab"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div></div>
 <div id="tic" class="section">
   <div style="background:transparent;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;padding:5px 12px;font-size:clamp(10px,2.8vw,13px);color:var(--sub);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>Family</strong> serves 4–5 people &nbsp;·&nbsp; <strong>Jumbo</strong> serves 8–9 people</div>
-  <div class="stitle">Indo-Chinese Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-ic"></div></div>
+  <div class="stitle">Indo-Chinese Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-ic"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div></div>
 <div id="tveg" class="section">
   <div style="background:transparent;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;padding:5px 12px;font-size:clamp(10px,2.8vw,13px);color:var(--sub);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>Family</strong> serves 4–5 people &nbsp;·&nbsp; <strong>Jumbo</strong> serves 8–9 people</div>
-  <div class="stitle">Veg Main Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-veg"></div></div>
+  <div class="stitle">Veg Main Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-veg"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div></div>
 <div id="tnonveg" class="section">
   <div style="background:transparent;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;padding:5px 12px;font-size:clamp(10px,2.8vw,13px);color:var(--sub);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>Family</strong> serves 4–5 people &nbsp;·&nbsp; <strong>Jumbo</strong> serves 8–9 people</div>
-  <div class="stitle">Non-Veg Main Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-nv"></div></div>
+  <div class="stitle">Non-Veg Main Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-nv"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div></div>
 <div id="tbiryani" class="section active">
   <div style="background:transparent;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;padding:5px 12px;font-size:clamp(10px,2.8vw,13px);color:var(--sub);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>Family</strong> serves 4–5 people &nbsp;·&nbsp; <strong>Jumbo</strong> serves 8–9 people</div>
-  <div class="stitle">Biryani Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-bir"></div></div>
+  <div class="stitle">Biryani Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-bir"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div></div>
 <div id="troti" class="section">
   <div class="stitle">Roti / Paratha <small>(min 15 pcs · per piece)</small></div>
-  <div id="r-roti"></div>
+  <div id="r-roti"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div>
   <div class="stitle" style="margin-top:1.25rem">Dessert Deals</div>
-  <div id="r-dessert"></div>
+  <div id="r-dessert"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div>
 </div>
 
 <!-- CATERING -->
@@ -749,10 +861,10 @@ function handleOccChange(sel){
 <div id="tbengali" class="section">
   <div class="stitle">Bengali À La Carte<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
   <div style="background:transparent;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;padding:5px 12px;font-size:clamp(10px,2.8vw,13px);color:var(--sub);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>Family</strong> serves 4–5 people &nbsp;·&nbsp; <strong>Jumbo</strong> serves 8–9 people</div>
-  <div class="ssub">🐟 Fish & Prawn <span>Family / Jumbo</span></div><div id="r-bf"></div>
-  <div class="ssub">🍖 Mutton & Chicken <span>Family / Jumbo</span></div><div id="r-bm"></div>
-  <div class="ssub">🌿 Veg & Rice <span>Family / Jumbo</span></div><div id="r-bv"></div>
-  <div class="ssub">🍮 Sweets & Accompaniments <span>Per piece / box</span></div><div id="r-bs"></div>
+  <div class="ssub">🐟 Fish & Prawn <span>Family / Jumbo</span></div><div id="r-bf"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div>
+  <div class="ssub">🍖 Mutton & Chicken <span>Family / Jumbo</span></div><div id="r-bm"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div>
+  <div class="ssub">🌿 Veg & Rice <span>Family / Jumbo</span></div><div id="r-bv"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div>
+  <div class="ssub">🍮 Sweets & Accompaniments <span>Per piece / box</span></div><div id="r-bs"><div class="skel-grid"><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div><div class="skel-card"><div class="skel-icon"></div><div class="skel-lines"><div class="skel-line"></div><div class="skel-line short"></div></div><div class="skel-right"></div></div></div></div>
 </div>
 
 <!-- BENGALI PACKAGES -->
@@ -879,6 +991,27 @@ function handleOccChange(sel){
       <div class="del-calc-result" id="del-result"></div>
     </div>
 
+    <div class="promo-wrap">
+        <div class="mlabel" style="margin-bottom:6px">🎉 Occasion / Event Type <span style="font-size:11px;font-weight:400;color:#aaa;font-style:italic">(optional)</span></div>
+        <select class="fi occ-select" id="promo-input" onchange="handleOccChange(this)" style="width:100%;cursor:pointer">
+          <option value="">— Select occasion —</option>
+          <option>🎂 Birthday</option>
+          <option>🌙 Eid / Ramadan</option>
+          <option>🪔 Puja / Festival</option>
+          <option>🏠 Family Gathering</option>
+          <option>🎉 Weekend Party</option>
+          <option>👫 Friends Reunion</option>
+          <option>🍲 Potluck</option>
+          <option>💼 Corporate / Office</option>
+          <option>🎓 Graduation</option>
+          <option>🏏 Game Night</option>
+          <option>🧕 Community Event</option>
+          <option>✨ Just a Treat</option>
+          <option>Other</option>
+        </select>
+        <input class="fi" type="text" id="occ-other-input" placeholder="Please describe your occasion..." style="display:none;margin-top:8px;width:100%">
+      </div>
+    
     <!-- Note -->
     <div class="section-hdr">Note / Special Instructions</div>
     <div class="fg"><textarea class="fi" id="inv-note" rows="2" placeholder="e.g. Less salt and oil. No onion in Fish Tikka."></textarea></div>
@@ -1076,26 +1209,7 @@ function handleOccChange(sel){
         <div class="fstep"><div class="fnum">5</div><div class="ftxt">We process your order and deliver on the confirmed date ✅</div></div>
       </div>
 
-      <div class="promo-wrap">
-        <div class="mlabel" style="margin-bottom:6px">🎉 Occasion / Event Type <span style="font-size:11px;font-weight:400;color:#aaa;font-style:italic">(optional)</span></div>
-        <select class="fi occ-select" id="promo-input" onchange="handleOccChange(this)" style="width:100%;cursor:pointer">
-          <option value="">— Select occasion —</option>
-          <option>🎂 Birthday</option>
-          <option>🌙 Eid / Ramadan</option>
-          <option>🪔 Puja / Festival</option>
-          <option>🏠 Family Gathering</option>
-          <option>🎉 Weekend Party</option>
-          <option>👫 Friends Reunion</option>
-          <option>🍲 Potluck</option>
-          <option>💼 Corporate / Office</option>
-          <option>🎓 Graduation</option>
-          <option>🏏 Game Night</option>
-          <option>🧕 Community Event</option>
-          <option>✨ Just a Treat</option>
-          <option>Other</option>
-        </select>
-        <input class="fi" type="text" id="occ-other-input" placeholder="Please describe your occasion..." style="display:none;margin-top:8px;width:100%">
-      </div>
+      
 
       <div class="tots">
         <div class="trow"><span>Subtotal</span><span id="tsub">$0.00</span></div>
@@ -1133,6 +1247,19 @@ function handleOccChange(sel){
 </div>
 
 <script>
+
+function getCatIcon(id){
+  var kw={"sn1":"spring+roll+food","sn2":"chicken+cutlet+crispy","sn3":"deviled+egg+spiced","sn4":"bread+pakora+indian","sn5":"puff+pastry+snack","sn6":"samosa+indian+food","sn7":"sandwich+indian","f1":"onion+bhaji+fritter","f2":"cauliflower+pakora","f3":"medu+vada+indian","f4":"paneer+pakora+indian","f5":"cheese+ball+snack","f6":"chicken+pakora","k1":"hara+bhara+kebab+green","k2":"paneer+tikka+grilled","k3":"chicken+tikka+skewer","k4":"fish+tikka+tandoor","k5":"chicken+tikka+skewer","k6":"chicken+tikka+skewer","k7":"mutton+tikka+boti","k8":"seekh+kebab+grilled","k9":"seekh+kebab+grilled","k10":"seekh+kebab+grilled","ic1":"chicken+65+indian","ic2":"chicken+65+indian","ic3":"chicken+lollipop","ic4":"chicken+manchurian+sauce","ic5":"chilli+chicken+indian","ic6":"chilli+paneer+indian","ic7":"veg+manchurian","ic8":"gobi+manchurian","ic9":"hakka+noodles+indian","ic10":"fried+rice+indian","ic11":"chicken+noodles+hakka","v1":"dal+makhani+indian","v2":"matar+paneer+curry","v3":"kadai+paneer+indian","v4":"paneer+butter+masala","v5":"paneer+tikka+masala","v6":"malai+kofta+indian","v7":"veg+curry+indian","v8":"spicy+veg+curry+indian","nv1":"chicken+curry+indian+gravy","nv2":"chicken+korma+indian","nv3":"chicken+curry+spicy","nv4":"chicken+chaap+bengali","nv5":"chicken+rezala+white","nv6":"dum+chicken+curry","nv7":"achari+chicken+curry","nv8":"kadai+chicken+indian","nv9":"chicken+kofta+curry","nv10":"chicken+tikka+masala","nv11":"chicken+handi+indian","nv12":"mutton+bhuna+indian","nv13":"mutton+curry+spicy","nv14":"tawa+gosht+indian","nv15":"mutton+kofta+curry","b1":"veg+biryani+indian","b2":"chicken+biryani+dum","b3":"chicken+biryani+spicy","b4":"yakhni+pulao+mutton","b5":"mutton+biryani+indian","b6":"jeera+rice+indian","b7":"peas+pulao+rice","b8":"veg+pulao+indian","r1":"roti+chapati+indian","r2":"paratha+layered+indian","d1":"gulab+jamun+sweet","d2":"shahi+tukda+dessert","d3":"sheer+khurma+vermicelli","d4":"firni+indian+dessert","d5":"gajar+halwa+carrot","bf1":"fish+curry+bengali+mustard","bf2":"hilsa+fish+mustard+curry","bf3":"prawn+coconut+curry","bf4":"fish+curry+yogurt+indian","bf5":"fish+kalia+bengali","bf6":"steamed+prawn+bengali","bm1":"kosha+mangsho+mutton+bengali","bm2":"mutton+rezala+white+curry","bm3":"bengali+chicken+curry+potato","bm4":"chicken+roast+bengali","bv1":"dhokar+dalna+bengali","bv2":"aloo+posto+potato+poppy","bv3":"cholar+dal+bengali","bv4":"shukto+mixed+veg+bengali","bv5":"basanti+pulao+saffron","bv6":"mishti+pulao+sweet+rice","bv7":"luchi+puri+bengali","bs1":"pantua+bengali+sweet","bs2":"mishti+doi+sweet+yogurt","bs3":"payesh+rice+kheer","bs4":"egg+devil+bengali","bs5":"date+chutney+indian"};
+  var k=kw[id];
+  if(!k) return '<span style="font-size:26px">🍽️</span>';
+  var url='https://source.unsplash.com/80x80/?'+k;
+  var img=document.createElement('img');
+  img.src=url; img.alt=''; img.loading='lazy';
+  img.style.cssText='width:44px;height:44px;object-fit:cover;border-radius:10px;display:block';
+  img.onerror=function(){this.parentNode.innerHTML='<span style="font-size:26px">🍽️</span>';};
+  return img.outerHTML;
+}
+
 
 function restoreCart(){
   try{
@@ -1300,6 +1427,7 @@ function renderSection(data,elId){
     else if(item.t==='pc'){priceStr=`$${item.v.toFixed(2)} ea`+(item.min?` · min ${item.min}`:'');}
     return `<div class="icard">
       <div class="icard-row">
+        <div class="icard-icon">${getCatIcon(item.id)}</div>
         <div class="icard-info">
           <div class="iname">${item.n}</div>
           ${item.d?`<div class="idesc">${item.d}</div>`:''}
@@ -1374,7 +1502,30 @@ function addPkg(id,name){
 }
 
 // ── CART BAR ─────────────────────────────────────────
+function updCatBadges(){
+  var catItems={
+    tsnacks:['sn'], tkebab:['kb'], tic:['ic'], tveg:['vg'],
+    tnonveg:['nv'], tbiryani:['bir','b'], troti:['rt','ds'],
+    tcatering:['fam'], tbengali:['bf','bm','bv','bs']
+  };
+  Object.keys(catItems).forEach(function(tab){
+    var prefixes=catItems[tab];
+    var qty=Object.keys(cart).filter(function(id){
+      return cart[id].qty>0 && prefixes.some(function(p){return id.startsWith(p);});
+    }).reduce(function(s,id){return s+cart[id].qty;},0);
+    var btn=document.getElementById('cat-'+tab);
+    if(!btn) return;
+    var badge=btn.querySelector('.cat-badge');
+    if(qty>0){
+      if(!badge){badge=document.createElement('span');badge.className='cat-badge';btn.appendChild(badge);}
+      badge.textContent=qty;
+    } else {
+      if(badge) badge.remove();
+    }
+  });
+}
 function updBar(){
+  updCatBadges();
   const a=Object.values(cart).filter(c=>c.qty>0);
   const cnt=a.reduce((s,c)=>s+c.qty,0);
   const sub=a.reduce((s,c)=>s+c.qty*c.price,0);
@@ -1383,7 +1534,11 @@ function updBar(){
     cb.classList.add('on');
     // Pad body so last item isn't hidden behind fixed cart bar
     document.body.style.paddingBottom='80px';
-    document.getElementById('ctotal').textContent=cnt+' item'+(cnt!==1?'s':'')+' · $'+sub.toFixed(2);
+    var lastItem=a[a.length-1];
+    var preview=lastItem?lastItem.name.split('(')[0].trim():'';
+    var moreCount=cnt-lastItem.qty;
+    var moreStr=moreCount>0?' +'+moreCount+' more':'';
+    document.getElementById('ctotal').textContent=preview+moreStr+' · $'+sub.toFixed(2);
   }else{
     cb.classList.remove('on');
     document.body.style.paddingBottom='0';
