@@ -1787,7 +1787,7 @@ function menuPage(d){
 (function(){
   const hdr = document.getElementById('sticky-hdr');
   const nav = document.getElementById('catnav');
-  const hero = document.querySelector('.hero');
+  const hero = document.querySelector('.hero-img-wrap') || document.querySelector('.hero');
   let hdrH = 0;
 
   function onScroll(){
