@@ -649,6 +649,37 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 @media(min-width:1024px){
   .section{margin:0 2rem 1.5rem}
 }
+
+/* ===== UPDATED TRUST LINE ===== */
+.trust-line{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:14px;
+  padding:10px 16px;
+  font-size:18px;
+  font-weight:700;
+  letter-spacing:.2px;
+  color:#7a3b00;
+  background:#f8f0e3;
+  border-top:1px solid #ebd0a3;
+  border-bottom:1px solid #ebd0a3;
+  text-align:center;
+}
+
+@media(max-width:768px){
+  .trust-line{
+    justify-content:space-evenly;
+    gap:8px;
+    font-size:13px;
+    padding:10px 8px;
+    line-height:1.5;
+    font-weight:700;
+  }
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
 
@@ -676,6 +707,18 @@ function handleOccChange(sel){
 </script>
 </head>
 <body>
+
+<!-- UPDATED IMAGE ASSETS
+snacks.jpg -> Snacks
+kebab.jpg -> Kebabs
+noodle.jpg -> Indo Chinese
+bread.jpg -> Roti & Paratha
+gulab.jpg -> Gulab Jamun
+dessert.jpg -> Desserts
+prawn.jpg -> Prawn Curry
+fish.jpg -> Fish Curry
+-->
+
 <div class="pm-overlay" id="pm-overlay">
   <div class="pm-box">
     <h3>&#128272; Admin</h3>
@@ -3513,7 +3556,50 @@ function printInvoice(){
     +"body{margin:0;padding:20px;background:#f5f0e8!important}"
     +"#inv-content{max-width:700px;margin:0 auto}"
     +"@media print{body{padding:0;background:#fff!important}@page{margin:8mm;size:A4}.inv-actions{display:none!important}}"
-    +"</style></head><body>"+invEl.outerHTML+"</body></html>"
+    +"
+/* ===== UPDATED TRUST LINE ===== */
+.trust-line{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:14px;
+  padding:10px 16px;
+  font-size:18px;
+  font-weight:700;
+  letter-spacing:.2px;
+  color:#7a3b00;
+  background:#f8f0e3;
+  border-top:1px solid #ebd0a3;
+  border-bottom:1px solid #ebd0a3;
+  text-align:center;
+}
+
+@media(max-width:768px){
+  .trust-line{
+    justify-content:space-evenly;
+    gap:8px;
+    font-size:13px;
+    padding:10px 8px;
+    line-height:1.5;
+    font-weight:700;
+  }
+}
+
+</style></head><body>
+
+<!-- UPDATED IMAGE ASSETS
+snacks.jpg -> Snacks
+kebab.jpg -> Kebabs
+noodle.jpg -> Indo Chinese
+bread.jpg -> Roti & Paratha
+gulab.jpg -> Gulab Jamun
+dessert.jpg -> Desserts
+prawn.jpg -> Prawn Curry
+fish.jpg -> Fish Curry
+-->
+"+invEl.outerHTML+"</body></html>"
   );
   printWin.document.close();
   printWin.focus();
