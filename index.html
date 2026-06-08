@@ -575,51 +575,57 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .modal,.wa-modal,.cart-modal{max-width:100vw;overflow-x:hidden;box-sizing:border-box}
 .fi,.ssel{max-width:100%;box-sizing:border-box}
 
-/* ══ FULL-WIDTH RESPONSIVE LAYOUT ══════════════════════════════════════════ */
 
-/* Desktop: centre content with max-width, generous padding */
-@media(min-width:1024px){
-  .order-mode > .section,
-  .order-mode > nav.cat-nav,
-  .order-mode > .search-wrap{
-    max-width:1280px;
-    margin-left:auto;
-    margin-right:auto;
-  }
-  .section{padding:1rem 2.5rem 1.5rem}
-  [id^="r-"]{grid-template-columns:1fr 1fr 1fr;gap:16px}
-  .hero-img-wrap{margin:0.75rem 1.5rem 0;border-radius:20px}
-  .mob-hero{display:none!important}
-  .search-wrap{padding:12px 2.5rem}
-  .cat-inner{padding:8px 2.5rem}
-  .sticky-hdr{padding:8px 2.5rem}
-}
 
-/* Tablet: 2-col, comfortable padding */
-@media(min-width:600px) and (max-width:1023px){
-  .section{padding:0.75rem 1.5rem}
-  [id^="r-"]{grid-template-columns:1fr 1fr;gap:14px}
-  .hero-img-wrap{margin:0.5rem 0.5rem 0;border-radius:16px}
-  .search-wrap{padding:10px 1.5rem}
-  .cat-inner{padding:8px 1.5rem}
-}
 
-/* Mobile: edge-to-edge, no wasted margins */
+
+/* ══ FULL-WIDTH LAYOUT ═════════════════════════════════════════════════════ */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+
+/* Banner always full width */
+.hero-img-wrap{width:100%;margin:0;padding:0;border-radius:0;box-shadow:none;overflow:hidden}
+.mob-hero{width:100%;margin:0}
+
+/* Sections full width, padding only for readability */
+.section,.search-wrap,.cat-nav{width:100%;box-sizing:border-box}
+
+/* Mobile ≤599px: 2-col, edge-to-edge */
 @media(max-width:599px){
-  .hero-img-wrap{margin:0!important;border-radius:0!important;box-shadow:none!important}
-  .mob-hero{margin:0;border-radius:0}
-  .section{padding:0.5rem 0.75rem}
+  .section{padding:0.5rem 0.6rem}
+  .search-wrap{padding:8px 0.6rem}
+  .cat-inner{padding:6px 0.6rem}
   [id^="r-"]{grid-template-columns:1fr 1fr;gap:8px}
-  .search-wrap{padding:8px 0.75rem}
-  .cat-inner{padding:6px 0.75rem}
-  .icard{padding:10px 10px}
-  .iname{font-size:13px}
-  .idesc{font-size:11px}
+  .icard{padding:8px 8px}
+  .iname{font-size:12.5px}
+  .idesc{font-size:10.5px}
+  .ssel{font-size:11px;max-width:100%}
 }
 
-/* Ensure full width always */
-html,body{width:100%;max-width:100%}
-.order-mode{width:100%;max-width:100%;overflow-x:hidden}
+/* Tablet 600–1023px: 2-col */
+@media(min-width:600px) and (max-width:1023px){
+  .section{padding:0.75rem 1.25rem}
+  .search-wrap{padding:10px 1.25rem}
+  .cat-inner{padding:8px 1.25rem}
+  [id^="r-"]{grid-template-columns:1fr 1fr;gap:12px}
+}
+
+/* Desktop ≥1024px: 3-col, wider padding */
+@media(min-width:1024px){
+  .section{padding:1rem 3rem}
+  .search-wrap{padding:12px 3rem}
+  .cat-inner{padding:8px 3rem}
+  [id^="r-"]{grid-template-columns:1fr 1fr 1fr;gap:18px}
+  .icard{padding:14px 16px}
+  .mob-hero{display:none!important}
+}
+
+/* Ultra-wide ≥1600px: 4-col */
+@media(min-width:1600px){
+  [id^="r-"]{grid-template-columns:1fr 1fr 1fr 1fr;gap:20px}
+  .section{padding:1rem 4rem}
+  .search-wrap{padding:12px 4rem}
+  .cat-inner{padding:8px 4rem}
+}
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
@@ -1169,14 +1175,7 @@ function updCatBadges(){
       </div>
       <div class="fg"><label class="fl">Special Instructions</label><textarea class="fi" id="cnotes" placeholder="Allergies, spice level, requests..."></textarea></div>
 
-      <div class="flow">
-        <h4>📋 How it works</h4>
-        <div class="fstep"><div class="fnum">1</div><div class="ftxt">Submit your order request with preferred date & time — <strong>no payment needed yet</strong></div></div>
-        <div class="fstep"><div class="fnum">2</div><div class="ftxt">We review availability and send you an <strong>Accept or Reject</strong> via WhatsApp</div></div>
-        <div class="fstep"><div class="fnum">3</div><div class="ftxt">If accepted, we send you a <strong>formal invoice</strong> with payment details</div></div>
-        <div class="fstep"><div class="fnum">4</div><div class="ftxt">Pay <strong>40% deposit via PayID</strong> and send screenshot to confirm</div></div>
-        <div class="fstep"><div class="fnum">5</div><div class="ftxt">We process your order and deliver on the confirmed date ✅</div></div>
-      </div>
+      
 
       <div class="promo-wrap">
         <div class="mlabel" style="margin-bottom:6px">🎉 Occasion / Event Type <span style="font-size:11px;font-weight:400;color:#aaa;font-style:italic">(optional)</span></div>
@@ -1223,13 +1222,13 @@ function updCatBadges(){
         <div class="tdep"><span>40% deposit (payable after acceptance)</span><strong id="tdep" style="color:var(--sub)">$0.00</strong></div>
       </div>
 
-      <div class="payid">
-        <div class="payid-t">ℹ️ No payment required yet</div>
-        <div class="payid-n" style="margin-top:0;border:none;padding:0"><span id="payid-amt" style="display:none"></span>
-          Once we confirm availability and send your invoice, payment details will be provided.<br><br>
-          <strong>PayID:</strong> 0435 772 552 &nbsp;·&nbsp; <strong>Ishrat Parween</strong><br>
-          40% deposit required after order acceptance.
-        </div>
+      <div class="flow" style="margin-top:16px">
+        <h4>📋 How it works</h4>
+        <div class="fstep"><div class="fnum">1</div><div class="ftxt">Submit your order request with preferred date &amp; time — <strong>no payment needed yet</strong></div></div>
+        <div class="fstep"><div class="fnum">2</div><div class="ftxt">We review availability and get back to you via WhatsApp to <strong>confirm or suggest an alternative</strong></div></div>
+        <div class="fstep"><div class="fnum">3</div><div class="ftxt">Once confirmed, we send you a <strong>formal invoice</strong> with all payment details</div></div>
+        <div class="fstep"><div class="fnum">4</div><div class="ftxt">Pay the <strong>40% deposit</strong> via the invoice and send screenshot to confirm</div></div>
+        <div class="fstep"><div class="fnum">5</div><div class="ftxt">We lovingly prepare your order and deliver on the confirmed date ✅</div></div>
       </div>
 
     </div>
