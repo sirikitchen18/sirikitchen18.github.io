@@ -62,7 +62,7 @@
   border-radius:0;
 }
 /* Cards keep normal padding */
-.icard{margin-bottom:14px}
+.icard{background:linear-gradient(145deg,#fffdf8,#fdf6ec);border-radius:12px;border:1px solid rgba(201,151,58,0.2);margin-bottom:10px;padding:10px 12px;box-shadow:0 2px 8px rgba(139,37,0,0.07);overflow:hidden}
 
 /* Responsive */
 @media(max-width:480px){
@@ -231,10 +231,10 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 /* ── MODAL ──────────────────────────────────────────── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:flex-end;justify-content:center;z-index:9999;padding:0}
 .overlay.on{display:flex}
-.modal{background:var(--cream);width:100%;max-width:540px;max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;margin:0 auto}
+.modal{background:var(--cream);width:100%;max-width:540px;max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;margin:0 auto;box-sizing:border-box}
 .mhandle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
 .mhdr{background:var(--red);padding:1.25rem 1.5rem 1rem;position:sticky;top:0;z-index:10}
-.mbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:0}
+.mbody{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:0}
 .wa-sticky-footer{padding:14px 1.25rem;padding-bottom:calc(14px + env(safe-area-inset-bottom));background:var(--cream);border-top:1px solid var(--border);flex-shrink:0}
 .wa-sticky-footer .wabtn{margin-top:0}
 
@@ -275,7 +275,7 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 /* FORM */
 .fg{margin-bottom:14px}
 .fl{display:block;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px}
-.fi{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;font-family:'Inter',sans-serif;color:var(--text);background:#fffaf6;outline:none;transition:border .15s}
+.fi{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;font-family:'Inter',sans-serif;color:var(--text);background:#fffaf6;outline:none;transition:border .15s;box-sizing:border-box}
 .fi:focus{border-color:var(--red);background:#fff}
 textarea.fi{height:76px;resize:vertical;font-size:15px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -366,7 +366,7 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 
 .section-hdr{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:0.6px;margin:1.25rem 0 0.6rem;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .section-hdr:first-child{margin-top:0}
-.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;box-sizing:border-box;width:100%}
 .fg{margin-bottom:12px}
 .fl{display:block;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px}
 .fi{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:#fffaf6;outline:none;transition:border .15s}
@@ -540,8 +540,8 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .qbtn{width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(201,151,58,0.4);background:linear-gradient(135deg,#fff,#fdf6ec);cursor:pointer;font-size:17px;font-weight:700;color:var(--red);display:flex;align-items:center;justify-content:center;transition:all .15s;touch-action:manipulation;flex-shrink:0;box-shadow:0 1px 4px rgba(139,37,0,0.1)}
 
 /* ── ITEM CARD: single horizontal row ── */
-.icard-row{display:flex;align-items:center;gap:10px;width:100%}
-.icard-info{flex:1;min-width:0}
+.icard-row{display:flex;align-items:center;gap:8px;width:100%;min-width:0}
+.icard-info{flex:1;min-width:0;overflow:hidden}
 .icard-ctrl{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .ifoot-sel{flex-shrink:0}
 .ssel{padding:5px 8px;border:1.5px solid rgba(201,151,58,0.3);border-radius:8px;font-size:12px;font-weight:600;color:var(--text);background:linear-gradient(135deg,#fffdf8,#fdf6ec);font-family:'Nunito',sans-serif;cursor:pointer;touch-action:manipulation;max-width:150px}
