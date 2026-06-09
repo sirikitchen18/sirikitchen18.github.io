@@ -1808,6 +1808,7 @@ function sendWA(){
     '',`*Subtotal:* $${sub.toFixed(2)}`,
     delCharge>0?`*Delivery:* $${delCharge.toFixed(2)} (est.)`:'*Delivery:* Free (Pickup)',
     `*Estimated Total:* $${total.toFixed(2)}`,
+    `*40% Deposit (on acceptance):* $${Math.round(total*0.4)}`,
     notes?`
 *Instructions:* ${notes}`:'',
     '','_This is an order REQUEST — no payment required yet._',
@@ -2143,8 +2144,8 @@ function sendInvoiceEmail(toEmail, order){
     notes:          invNote||"",
     items_html:     itemsHtml,
     total:          tot.toFixed(2),
-    advance:        adv.toFixed(2),
-    remaining:      rem.toFixed(2)
+    advance:        String(Math.round(adv)),
+    remaining:      String(Math.round(rem))
   };
 
   
@@ -2308,7 +2309,7 @@ window.sendWA = function() {
     items_text:     itemsText,
     items_html:     itemsHtml,
     total:          tot.toFixed(2),
-    advance:        (tot*0.4).toFixed(2),
+    advance:        String(Math.round(tot*0.4)),
     approval_link:  acceptLink,
     reject_link:    declineLink
   };
@@ -3213,7 +3214,7 @@ function sendEmail(){
     items_text:     itemsText,
     items_html:     itemsHtml,
     total:          tot.toFixed(2),
-    advance:        (tot*0.4).toFixed(2),
+    advance:        String(Math.round(tot*0.4)),
     approval_link:  acceptLink,
     reject_link:    declineLink
   };
