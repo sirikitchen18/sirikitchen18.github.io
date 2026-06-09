@@ -250,7 +250,7 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .mlabel:first-child{margin-top:0}
 
 /* ORDER LINES */
-.osum{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;max-height:160px;overflow-y:auto;margin-bottom:4px}
+.osum{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-y:auto;margin-bottom:4px}
 .oline{display:flex;justify-content:space-between;align-items:flex-start;font-size:13.5px;padding:5px 0;border-bottom:1px dotted var(--border);color:var(--text);gap:8px}
 .oline:last-child{border:none;font-weight:700;color:var(--red);font-size:15px;padding-top:8px}
 .oline-name{flex:1;line-height:1.35}
@@ -628,6 +628,12 @@ html,body{margin:0;padding:0;width:100%}
 .cart-item-qty{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:middle;flex-shrink:0}
 .cart-item-price{font-size:12px;font-weight:700;color:var(--sub);white-space:nowrap;flex-shrink:0}
 
+
+.form-group{background:#fff;border-radius:12px;border:1px solid rgba(201,151,58,0.15);padding:14px 16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(139,37,0,0.05)}
+.form-group-title{font-size:13px;font-weight:800;color:var(--red);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;padding-bottom:8px;border-bottom:1px solid rgba(201,151,58,0.15)}
+
+.oline-remove{background:#fff0f0;border:1.5px solid #ffcccc;color:#e05555;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;font-weight:800;flex-shrink:0;transition:all .15s;line-height:1;padding:0;margin-left:6px}
+.oline-remove:hover{background:var(--red);border-color:var(--red);color:#fff;transform:scale(1.1)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
 
@@ -1003,7 +1009,8 @@ function handleOccChange(sel){
       <table class="inv-tbl">
         <thead><tr>
           <th>QTY</th><th>DESCRIPTION</th><th>PRICE</th><th>TOTAL</th>
-        </tr></thead>
+        </tr>
+  <tr id="inv-discount-row" style="display:none;color:#2d8a4e"><td colspan="3" style="text-align:right;padding:3px 8px;font-weight:600">Promo Discount</td><td style="padding:3px 8px;font-weight:700" id="inv-discount-amt">-$0.00</td></tr></thead>
         <tbody id="inv-items-body"></tbody>
       </table>
     </div>
@@ -1077,13 +1084,17 @@ function handleOccChange(sel){
     </div>
     <div class="mbody">
 
-      <div class="mlabel">Your Order</div>
+      <div class="form-group">
+      <div class="form-group-title">🛒 Your Order</div>
       <div class="osum" id="olines"></div>
-      <button onclick="closeModal()" style="width:100%;margin-top:6px;padding:8px;background:transparent;border:1.5px dashed var(--border);border-radius:8px;color:var(--sub);font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">
+      <button onclick="closeModal()" style="width:100%;margin-top:10px;padding:8px;background:transparent;border:1.5px dashed var(--border);border-radius:8px;color:var(--sub);font-size:13px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif">
         ✏️ Edit Cart
       </button>
+      </div>
 
-      <div class="mlabel">Delivery or Pickup?</div>
+      <div class="form-group">
+      <div class="form-group-title">🚚 Delivery Details</div>
+      <div class="mlabel" style="margin-top:0">Delivery or Pickup?</div>
       <div class="dtoggle">
         <div class="dopt on" id="dpickup" onclick="setDel('pickup')">
           <div class="dicon">🏠</div><div class="dlbl">Pickup</div><div class="dsub">Free · Tarneit</div>
@@ -1108,8 +1119,11 @@ function handleOccChange(sel){
         </div>
         <div class="dcalc" id="dcalc"></div>
       </div>
+      </div>
 
-      <div class="mlabel">How would you like us to contact you?</div>
+      <div class="form-group">
+      <div class="form-group-title">👤 Your Details</div>
+      <div class="mlabel" style="margin-top:0">How would you like us to contact you?</div>
       <div class="comm-toggle">
         <div class="comm-opt on" id="comm-wa" onclick="setComm('wa')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -1124,7 +1138,7 @@ function handleOccChange(sel){
       <div class="mlabel">Your Details</div>
       <div class="frow">
         <div class="fg"><label class="fl">Full Name</label><input class="fi" type="text" id="cname" placeholder="Your name"></div>
-        <div class="fg"><label class="fl">Phone</label><input class="fi" type="tel" id="cphone" placeholder="04xx xxx xxx" id="cphone-wrap"></div>
+        <div class="fg"><label class="fl">Phone <span id="phone-optional-label" style="font-size:11px;font-weight:400;color:#aaa;font-style:italic;display:none">(optional)</span></label><input class="fi" type="tel" id="cphone" placeholder="04xx xxx xxx" id="cphone-wrap"></div>
       </div>
       <div class="fg" id="cemail-wrap" style="display:none;margin-bottom:10px">
         <label class="fl">Email Address</label>
@@ -1134,7 +1148,11 @@ function handleOccChange(sel){
         <div class="fg"><label class="fl">Preferred Date</label><input class="fi" type="date" id="cdate"></div>
         <div class="fg"><label class="fl">Preferred Time</label><input class="fi" type="time" id="ctime" value="18:00"></div>
       </div>
-      <div class="fg"><label class="fl">Special Instructions</label><textarea class="fi" id="cnotes" placeholder="Allergies, spice level, requests..."></textarea></div>
+      </div>
+
+      <div class="form-group">
+      <div class="form-group-title">✏️ Special Requests</div>
+      <div class="fg"><label class="fl">Special Instructions <span style="font-size:11px;font-weight:400;color:#aaa;font-style:italic">(optional)</span></label><textarea class="fi" id="cnotes" placeholder="Allergies, spice level, requests..."></textarea></div>
 
       <div class="promo-wrap">
         <div class="mlabel" style="margin-bottom:6px">🎉 Occasion / Event Type <span style="font-size:11px;font-weight:400;color:#aaa;font-style:italic">(optional)</span></div>
@@ -1153,7 +1171,7 @@ function handleOccChange(sel){
       <div style="margin-top:10px">
         <div class="mlabel" style="margin-bottom:6px">🏷️ Promo / Discount Code <span style="font-size:11px;font-weight:400;color:#aaa;font-style:italic">(optional)</span></div>
         <div style="display:flex;gap:8px;align-items:stretch">
-          <input class="fi" type="text" id="promo-input" placeholder="Enter promo code if you have one" style="flex:1;margin:0;text-transform:uppercase;letter-spacing:1px;box-sizing:border-box">
+          <input class="fi" type="text" id="promo-input" placeholder="Enter promo code or leave blank" style="flex:1;margin:0;box-sizing:border-box">
           <button onclick="applyPromo()" style="background:var(--red);color:#fff;border:none;border-radius:10px;padding:0 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">Apply</button>
         </div>
         <div id="promo-msg" style="margin-top:6px;font-size:12px;font-weight:600"></div>
@@ -1165,6 +1183,8 @@ function handleOccChange(sel){
       
 
       
+
+      </div>
 
       <div class="tots">
         <div class="trow"><span>Subtotal</span><span id="tsub">$0.00</span></div>
@@ -1178,7 +1198,7 @@ function handleOccChange(sel){
       <div class="flow">
         <h4>📋 How it works</h4>
         <div class="fstep"><div class="fnum">1</div><div class="ftxt">Submit your order request with preferred date &amp; time — <strong>no payment needed yet</strong></div></div>
-        <div class="fstep"><div class="fnum">2</div><div class="ftxt">We review availability and get back to you via WhatsApp to <strong>confirm or suggest an alternative</strong></div></div>
+        <div class="fstep"><div class="fnum">2</div><div class="ftxt">We review availability and get back to you via <strong>WhatsApp or Email</strong> to confirm or suggest an alternative</div></div>
         <div class="fstep"><div class="fnum">3</div><div class="ftxt">Once confirmed, we send you a <strong>formal invoice</strong> with all payment details</div></div>
         <div class="fstep"><div class="fnum">4</div><div class="ftxt">Pay the <strong>40% deposit</strong> via the invoice and send screenshot to confirm</div></div>
         <div class="fstep"><div class="fnum">5</div><div class="ftxt">We lovingly prepare your order and deliver on the confirmed date ✅</div></div>
@@ -1382,29 +1402,50 @@ function getL(item){
   if(item.t==='fj'){const s=document.getElementById('sz-'+item.id);return s&&s.value==='j'?' (Jumbo)':' (Family)';}
   return '';
 }
-function upP(id){
-  const item=items[id];if(!item)return;
-  const p=getP(item);
-  if(cart[id]&&cart[id].qty>0){cart[id].price=p;cart[id].size=getL(item);updBar();}
-}
+
 function adj(id,d){
   const item=items[id];if(!item)return;
-  const cur=(cart[id]&&cart[id].qty)||0;
+  var cartKey=id;
+  if(item.t==='fj'){
+    var sel=document.getElementById('sz-'+id);
+    var sz=sel?sel.value:'f';
+    cartKey=id+'-'+sz;
+    // Remove old non-suffixed entry if it exists
+    if(cart[id]){delete cart[id];}
+  }
+  const cur=(cart[cartKey]&&cart[cartKey].qty)||0;
   let nq=Math.max(0,cur+d);
   if(item.min){
     if(d>0&&nq>0&&nq<item.min) nq=item.min;
     if(d<0&&nq>0&&nq<=item.min) nq=0;
   }
-  if(!cart[id])cart[id]={qty:0,price:getP(item),name:item.n,size:getL(item)};
-  cart[id].qty=nq;cart[id].price=getP(item);cart[id].size=getL(item);
+  if(!cart[cartKey])cart[cartKey]={qty:0,price:getP(item),name:item.n,size:getL(item),id:cartKey};
+  cart[cartKey].qty=nq;cart[cartKey].price=getP(item);cart[cartKey].size=getL(item);
+  // Show current size qty in counter
   document.getElementById('q-'+id).textContent=nq;
+  // Highlight based on ANY size having qty > 0
+  var hasAny=Object.keys(cart).some(function(k){
+    return (k===id||k.startsWith(id+'-'))&&cart[k]&&cart[k].qty>0;
+  });
   var card=document.getElementById('q-'+id).closest('.icard');
-  if(card) card.classList.toggle('selected', nq>0);
+  if(card) card.classList.toggle('selected', hasAny);
   updBar();
   updCatBadges();
   try{localStorage.setItem('sk_cart',JSON.stringify(cart));}catch(e){}
 }
 
+// Update qval display when dropdown size changes
+function upP(id){
+  const item=items[id];if(!item)return;
+  const p=getP(item);
+  // Update price for existing cart entry of this size
+  var sel=document.getElementById('sz-'+id);
+  var sz=sel?sel.value:'f';
+  var cartKey=id+'-'+sz;
+  if(cart[cartKey]&&cart[cartKey].qty>0){cart[cartKey].price=p;cart[cartKey].size=getL(item);updBar();}
+  // Show qty for selected size
+  document.getElementById('q-'+id).textContent=(cart[cartKey]&&cart[cartKey].qty)||0;
+}
 // ── PACKAGES ─────────────────────────────────────────
 function ag(id,d){
   const inp=document.getElementById(id+'-guests');if(!inp)return;
@@ -1469,7 +1510,9 @@ function updBar(){
           +'</div>';
       }).join('');
     }
-    document.getElementById('ctotal').textContent=cnt+' item'+(cnt>1?'s':'')+' · $'+sub.toFixed(2);
+    var _first=a[0].name+(a[0].size?' '+a[0].size:'');
+    var _more=a.length>1?' +'+(a.length-1)+' more item'+(a.length-1>1?'s':''):'';
+    document.getElementById('ctotal').textContent=_first+_more+' — $'+sub.toFixed(2);
   }else{
     cb.classList.remove('on');
     document.body.style.paddingBottom='0';
@@ -1591,15 +1634,19 @@ function updTotals(){
 }
 // ── MODAL ────────────────────────────────────────────
 function openModal(){
-  const a=Object.values(cart).filter(c=>c.qty>0);
-  ;
-  if(!a.length)return;
+  const a=Object.keys(cart).filter(function(k){return cart[k]&&cart[k].qty>0;}).map(function(k){return Object.assign({id:k},cart[k]);});
+  if(!a.length){ closeModal(); return; }
   const ol=document.getElementById('olines');
   if(!ol){console.error('olines not found');return;}
   ol.innerHTML=a.map(function(x){
     var nm=x.name+(x.size?' '+x.size:'');
-    var qtyLabel='+'+x.qty+(x.qty>1?' items':' item');
-    return '<div class="oline"><span class="oline-name">'+nm+'</span><span class="oline-qty">'+qtyLabel+'</span><span class="oline-price"> — $'+(x.qty*x.price).toFixed(2)+'</span></div>';
+    var qtyLabel='(qty '+x.qty+')';
+    return '<div class="oline">'
+      +'<span class="oline-name">'+nm+'</span>'
+      +'<span class="oline-qty">'+qtyLabel+'</span>'
+      +'<span class="oline-price"> — $'+(x.qty*x.price).toFixed(2)+'</span>'
+      +'<button class="oline-remove" data-id="'+x.id+'" onclick="removeOline(this.dataset.id)" title="Remove">&#10005;</button>'
+      +'</div>';
   }).join('');
   const sub=a.reduce((s,c)=>s+c.qty*c.price,0);
   ol.innerHTML+=`<div class="oline"><span class="oline-name">Subtotal</span><span class="oline-price">$${sub.toFixed(2)}</span></div>`;
@@ -1651,6 +1698,7 @@ function setComm(mode){
     if(label) label.textContent = "Send Order Request via WhatsApp";
     if(icon)  icon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="vertical-align:middle;margin-right:8px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
   }
+  var phoneLbl=document.getElementById("phone-optional-label"); if(phoneLbl) phoneLbl.style.display=mode==="email"?"inline":"none";
   // Update modal subtitle
   var sub = document.getElementById("modal-subtitle");
   if(sub) sub.textContent = mode==="email"
@@ -2482,13 +2530,26 @@ function getSubtotal(){
 function updateSummary(){
   const sub = getSubtotal();
   const del = parseFloat(document.getElementById('del-charge').value)||0;
-  const total = sub+del;
-  const adv = total*0.4;
+  // Apply promo discount if any
+  var discount=0;
+  try{
+    var promo=JSON.parse(localStorage.getItem('sk_active_promo')||'null');
+    if(promo&&promo.type==='percent') discount=sub*(promo.value/100);
+    else if(promo&&promo.type==='fixed') discount=promo.value;
+    discount=Math.min(discount,sub);
+  }catch(e){}
+  const total = sub-discount+del;
+  const adv = Math.round(total*0.4);
   document.getElementById('s-sub').textContent = '$'+sub.toFixed(2);
   document.getElementById('s-del').textContent = '$'+del.toFixed(2);
   document.getElementById('s-total').textContent = '$'+total.toFixed(2);
   document.getElementById('s-adv').textContent = '$'+adv.toFixed(2);
   document.getElementById('s-rem').textContent = '$'+(total-adv).toFixed(2);
+  // Show discount row in invoice if applicable
+  var discRow=document.getElementById('inv-discount-row');
+  if(discRow) discRow.style.display=discount>0?'':'none';
+  var discAmt=document.getElementById('inv-discount-amt');
+  if(discAmt) discAmt.textContent='-$'+discount.toFixed(2);
 }
 
 // ── INVOICE NUMBER ────────────────────────────────────
@@ -3707,6 +3768,25 @@ function closeConfirm(){
   document.querySelectorAll('.icard.selected').forEach(function(el){el.classList.remove('selected');});
 }
 
+
+function removeOline(id){
+  if(!cart[id]) return;
+  cart[id].qty=0;
+  var baseId=id.replace(/-[fj]$/,'');
+  var el=document.getElementById('q-'+baseId);
+  if(el){
+    // Recalculate total qty for this item
+    var total=Object.keys(cart).filter(function(k){return k===baseId||k.startsWith(baseId+'-');}).reduce(function(s,k){return s+(cart[k]?cart[k].qty:0);},0);
+    el.textContent=total;
+    var card=el.closest('.icard');
+    if(card) card.classList.toggle('selected', total>0);
+  }
+  try{localStorage.setItem('sk_cart',JSON.stringify(cart));}catch(e){}
+  updBar();
+  if(typeof updCatBadges==='function') updCatBadges();
+  openModal();
+}
+
 </script>
 
 <!-- ORDER CONFIRMATION OVERLAY -->
@@ -3714,7 +3794,7 @@ function closeConfirm(){
   <div class="order-confirm-box">
     <div style="font-size:56px;margin-bottom:12px">✅</div>
     <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--red);margin-bottom:10px">Order Sent!</h2>
-    <p style="font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:16px">Thank you! We'll review your order and get back to you via <strong>WhatsApp within 24 hours</strong> to confirm or suggest an alternative.</p>
+    <p style="font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:16px">Thank you! We'll review your order and get back to you via <strong>WhatsApp or Email within 24 hours</strong> to confirm or suggest an alternative.</p>
     <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid rgba(201,151,58,0.2);margin-bottom:20px;text-align:left">
       <div style="display:flex;gap:10px;align-items:center;padding:5px 0;font-size:13px;color:var(--sub)">📋 <span>Order received by Siri Kitchen</span></div>
       <div style="display:flex;gap:10px;align-items:center;padding:5px 0;font-size:13px;color:var(--sub)">✉️ <span>We'll confirm via WhatsApp</span></div>
