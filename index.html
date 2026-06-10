@@ -1855,7 +1855,7 @@ function sendWA(){
 
   // Build order data object for invoice pre-fill
   const orderData={
-    name, phone, date, time, notes,
+    name, phone, date, time, notes, occasion: occasionVal,
     addr: delType==='delivery'?addr:'Pickup from Tarneit',
     delType, delCharge,
     distKm: Math.round(km*1.3),
@@ -2482,7 +2482,8 @@ function loadFromStorage() {
   }
   setVal("d-date",    od.date);
   setVal("d-time",    od.time);
-  setVal("inv-note",  od.notes);
+  setVal("inv-note",  od.notes||"");
+  if(od.occasion && od.occasion!=="Not specified") document.getElementById("inv-note").value += (od.notes?"\nOccasion: ":"Occasion: ")+od.occasion;
   setVal("del-type",  od.delType);
   if(od.delCharge > 0) {
     setVal("del-charge", parseFloat(od.delCharge).toFixed(2));
@@ -2640,10 +2641,11 @@ function updateSummary(){
 
   // Tier discount
   var tierD=0, tierDLabel='';
-  if(typeof PROMO_CODES!=='undefined'&&PROMO_CODES._tiers){
-    var trs=PROMO_CODES._tiers;
-    for(var t=0;t<trs.length;t++){if(sub>=trs[t].minOrder){tierD=trs[t].discount;break;}}
-  }
+  var tiersData=(typeof PROMO_CODES!=='undefined'&&PROMO_CODES._tiers)?PROMO_CODES._tiers:[
+    {minOrder:400,discount:30},{minOrder:300,discount:20},{minOrder:200,discount:15},
+    {minOrder:150,discount:10},{minOrder:100,discount:5}
+  ];
+  for(var t=0;t<tiersData.length;t++){if(sub>=tiersData[t].minOrder){tierD=tiersData[t].discount;break;}}
   if(tierD>0) tierDLabel=tierD===30?'$30 off orders $400+':tierD===20?'$20 off orders $300+':tierD===15?'$15 off orders $200+':tierD===10?'$10 off orders $150+':'$5 off orders $100+';
 
   // Promo discount
@@ -2660,7 +2662,7 @@ function updateSummary(){
   document.getElementById('s-sub').textContent = '$'+sub.toFixed(2);
   document.getElementById('s-del').textContent = '$'+del.toFixed(2);
   document.getElementById('s-total').textContent = '$'+total.toFixed(2);
-  document.getElementById('s-adv').textContent = '$'+adv;
+  document.getElementById('s-adv').textContent = '$'+Math.round(adv);
   document.getElementById('s-rem').textContent = '$'+Math.round(total-adv);
 
   // Tier discount row
