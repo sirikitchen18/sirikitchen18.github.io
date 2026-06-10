@@ -2211,7 +2211,7 @@ function sendInvoiceEmail(toEmail, order){
   var promoDisc=0;
   var activePromoLocal=null;
   try{activePromoLocal=JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(e){}
-  if(activePromoLocal){if(activePromoLocal.type==='percent')promoDisc=tot*(activePromoLocal.value/100);else if(activePromoLocal.type==='fixed')promoDisc=Math.min(activePromoLocal.value,tot);}
+  if(activePromoLocal){if(activePromoLocal.type==='percent')promoDisc=sub*(activePromoLocal.value/100);else if(activePromoLocal.type==='fixed')promoDisc=Math.min(activePromoLocal.value,sub);}
   var params = {
     to_email:       toEmail,
     reply_to:       "sirikitchen18@gmail.com",
@@ -2311,14 +2311,16 @@ window.sendWA = function() {
   var tot = sub + delCharge;
   // Tier discount
   var tierDisc=0, tierDiscLabel='';
-  if(typeof PROMO_CODES!=='undefined'&&PROMO_CODES._tiers){
-    var _trs=PROMO_CODES._tiers;
-    for(var _ti=0;_ti<_trs.length;_ti++){if(sub>=_trs[_ti].minOrder){tierDisc=_trs[_ti].discount;break;}}
-    if(tierDisc>0) tierDiscLabel=tierDisc===30?'$30 off orders $400+':tierDisc===20?'$20 off orders $300+':tierDisc===15?'$15 off orders $200+':tierDisc===10?'$10 off orders $150+':'$5 off orders $100+';
-  }
-  // Promo discount
+  var tierDisc=0, tierDiscLabel='';
+  var _tierList=(typeof PROMO_CODES!=='undefined'&&PROMO_CODES._tiers)?PROMO_CODES._tiers:[{minOrder:400,discount:30},{minOrder:300,discount:20},{minOrder:200,discount:15},{minOrder:150,discount:10},{minOrder:100,discount:5}];
+  for(var _ti=0;_ti<_tierList.length;_ti++){if(sub>=_tierList[_ti].minOrder){tierDisc=_tierList[_ti].discount;break;}}
+  if(tierDisc>0) tierDiscLabel=tierDisc===30?'$30 off orders $400+':tierDisc===20?'$20 off orders $300+':tierDisc===15?'$15 off orders $200+':tierDisc===10?'$10 off orders $150+':'$5 off orders $100+';
+
+
   var promoDisc=0, activePromoLocal=null;
   try{activePromoLocal=JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(_e){}
+  if(!activePromoLocal&&typeof activePromo!=='undefined'&&activePromo) activePromoLocal=activePromo;
+  if(!activePromoLocal&&od&&od.promo) activePromoLocal=od.promo;
   if(activePromoLocal){if(activePromoLocal.type==='percent')promoDisc=sub*(activePromoLocal.value/100);else if(activePromoLocal.type==='fixed')promoDisc=Math.min(activePromoLocal.value,sub);}
   var netTot = tot - tierDisc - promoDisc;
   var adv = Math.round(netTot*0.4);
@@ -2481,6 +2483,10 @@ function loadFromStorage() {
   setVal("d-time",    od.time);
   setVal("inv-note",  od.notes||"");
   if(od.occasion && od.occasion!=="Not specified") document.getElementById("inv-note").value += (od.notes?"\nOccasion: ":"Occasion: ")+od.occasion;
+  if(od.occasion && od.occasion!=='Not specified' && od.occasion!==''){
+    var occMeta=document.getElementById('inv-occasion-meta'); if(occMeta) occMeta.style.display='block';
+    var occMetaText=document.getElementById('inv-occasion-meta-text'); if(occMetaText) occMetaText.textContent=' '+od.occasion;
+  }
   setVal("del-type",  od.delType);
   if(od.delCharge > 0) {
     setVal("del-charge", parseFloat(od.delCharge).toFixed(2));
