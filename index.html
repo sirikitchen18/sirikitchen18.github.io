@@ -2713,6 +2713,7 @@ function fmtTime(val){
 
 // ── GENERATE ──────────────────────────────────────────
 function generateInvoice(){
+  try {
   const name = document.getElementById('c-name').value.trim();
   if(!name){alert('Please enter customer name.');return;}
 
@@ -2867,6 +2868,11 @@ function generateInvoice(){
   document.getElementById('invoice-preview').style.display='block';
   updateInvSendBtn();
   setTimeout(()=>document.getElementById('invoice-preview').scrollIntoView({behavior:'smooth'}),100);
+
+  } catch(err) {
+    console.error("generateInvoice ERROR:", err);
+    alert("Invoice error: " + err.message);
+  }
 }
 
 // ── SEND VIA WA ───────────────────────────────────────
