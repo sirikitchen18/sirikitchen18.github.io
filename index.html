@@ -2760,7 +2760,15 @@ function generateInvoice(){
 
   // Totals
   const sub = getSubtotal();
-  // Apply discount if promo active - read from localStorage if needed
+  // Tier discount
+  var tierDiscount = 0, tierLabel = '';
+  var tiersData2 = (typeof PROMO_CODES!=='undefined'&&PROMO_CODES._tiers)?PROMO_CODES._tiers:[
+    {minOrder:400,discount:30},{minOrder:300,discount:20},{minOrder:200,discount:15},
+    {minOrder:150,discount:10},{minOrder:100,discount:5}
+  ];
+  for(var ti=0;ti<tiersData2.length;ti++){if(sub>=tiersData2[ti].minOrder){tierDiscount=tiersData2[ti].discount;break;}}
+  if(tierDiscount>0) tierLabel=tierDiscount===30?'$30 off orders $400+':tierDiscount===20?'$20 off orders $300+':tierDiscount===15?'$15 off orders $200+':tierDiscount===10?'$10 off orders $150+':'$5 off orders $100+';
+  // Promo discount
   var discount = 0;
   var promoLabel = "";
   if(typeof activePromo==="undefined"||!activePromo){
@@ -2771,10 +2779,25 @@ function generateInvoice(){
     else if(activePromo.type==="fixed") discount = Math.min(activePromo.value, sub);
     promoLabel = activePromo.label || "Discount";
   }
-  const total = sub - discount + del;
-  const adv = total*0.4;
+  const total = sub - tierDiscount - discount + del;
+  const adv = Math.round(total*0.4);
   document.getElementById('inv-sub').textContent = '$ '+sub.toFixed(2);
   document.getElementById('inv-del').textContent = '$ '+del.toFixed(2);
+  // Tier discount row in generated invoice
+  var tierGenRow = document.getElementById('inv-tier-gen-row');
+  if(tierDiscount>0){
+    if(!tierGenRow){
+      var grandRowT = document.getElementById('inv-total').closest('.inv-tot-row');
+      var tr2 = document.createElement('div');
+      tr2.className='inv-tot-row'; tr2.id='inv-tier-gen-row'; tr2.style.color='#2d8a4e';
+      tr2.innerHTML='<span>Order Discount ('+tierLabel+')</span><span>- $ '+tierDiscount.toFixed(2)+'</span>';
+      grandRowT.parentNode.insertBefore(tr2, grandRowT);
+    } else {
+      tierGenRow.style.display='flex';
+      tierGenRow.querySelector('span:last-child').textContent='- $ '+tierDiscount.toFixed(2);
+      tierGenRow.querySelector('span:first-child').textContent='Order Discount ('+tierLabel+')';
+    }
+  } else if(tierGenRow){ tierGenRow.style.display='none'; }
   // Show discount row in invoice if applicable
   var discRow = document.getElementById('inv-discount-row');
   if(!discRow && discount>0){
@@ -2809,11 +2832,22 @@ function generateInvoice(){
     }
   }
   document.getElementById('inv-total').textContent = '$ '+total.toFixed(2);
-  document.getElementById('inv-adv').textContent = '$ '+adv.toFixed(2);
-  document.getElementById('inv-rem').textContent = '$ '+(total-adv).toFixed(2);
+  document.getElementById('inv-adv').textContent = '$ '+adv;
+  document.getElementById('inv-rem').textContent = '$ '+Math.round(total-adv);
 
+  // Occasion
+  var invNoteVal = document.getElementById('inv-note').value;
+  var occasionMatch = invNoteVal.match(/Occasion: (.+?)(?:\n|$)/);
+  var occasionText = occasionMatch ? occasionMatch[1].trim() : '';
+  var pureNote = invNoteVal.replace(/\nOccasion: .+/, '').replace(/^Occasion: .+\n?/, '').trim();
+  if(occasionText){
+    document.getElementById('inv-occasion-section').style.display='block';
+    document.getElementById('inv-occasion-text').textContent = occasionText;
+  } else {
+    document.getElementById('inv-occasion-section').style.display='none';
+  }
   // Note
-  const note = document.getElementById('inv-note').value.trim();
+  const note = pureNote;
   if(note){
     document.getElementById('inv-note-section').style.display='block';
     document.getElementById('inv-note-text').textContent = note;
