@@ -1431,7 +1431,7 @@ function adj(id,d){
   if(card) card.classList.toggle('selected', hasAny);
   updBar();
   updCatBadges();
-  try{localStorage.setItem('sk_cart',JSON.stringify(cart));}catch(e){}
+  try{localStorage.setItem('sk_cart',JSON.stringify(cart));localStorage.setItem('sk_cart_ts',Date.now());}catch(e){}
 }
 
 // Update qval display when dropdown size changes
@@ -1455,7 +1455,7 @@ function ag(id,d){
     inp.value=20;
     delete cart['pkg-'+id];
     updBar();
-    try{localStorage.setItem('sk_cart',JSON.stringify(cart));}catch(e){}
+    try{localStorage.setItem('sk_cart',JSON.stringify(cart));localStorage.setItem('sk_cart_ts',Date.now());}catch(e){}
     const t=document.getElementById(id+'-tot');
     if(t)t.textContent='$0';
     return;
@@ -1467,7 +1467,7 @@ function ag(id,d){
   var pk='pkg-'+id;
   if(cart[pk]){cart[pk].price=v*20;cart[pk].size='('+v+' guests)';}
   updBar();
-  try{localStorage.setItem('sk_cart',JSON.stringify(cart));}catch(e){}
+  try{localStorage.setItem('sk_cart',JSON.stringify(cart));localStorage.setItem('sk_cart_ts',Date.now());}catch(e){}
 }
 function cg(id){
   const inp=document.getElementById(id+'-guests');if(!inp)return;
@@ -1488,7 +1488,7 @@ function addPkg(id,name){
   const btn=document.getElementById(id+'-btn');
   if(btn){btn.textContent='Added ✓';btn.classList.add('done');setTimeout(()=>{btn.textContent='Add to Order';btn.classList.remove('done');},2000);}
   updBar();
-  try{localStorage.setItem('sk_cart',JSON.stringify(cart));}catch(e){}
+  try{localStorage.setItem('sk_cart',JSON.stringify(cart));localStorage.setItem('sk_cart_ts',Date.now());}catch(e){}
 }
 
 // ── CART BAR ─────────────────────────────────────────
@@ -3629,23 +3629,11 @@ function clearSearch(){
 var activePromo = null;
 
 // Define promo codes - admin can update these
-var PROMO_CODES = {
-  "WELCOME10":  {type:"percent", value:10, label:"10% Welcome Discount"},
-  "FLAT10":     {type:"percent", value:10, label:"10% Flat Discount"},
-  "LOYAL5":     {type:"percent", value:5,  label:"5% Loyalty Discount"},
-  "REFER15":    {type:"percent", value:15, label:"15% Referral Discount"},
-  "EID2027":    {type:"percent", value:15, label:"15% Eid Mubarak Special"},
-  "RAMADAN10":  {type:"percent", value:10, label:"10% Ramadan Offer"},
-  "DIWALI10":   {type:"percent", value:10, label:"10% Diwali Special"},
-  "PUJA10":     {type:"percent", value:10, label:"10% Durga Puja Special"},
-  "XMAS15":     {type:"percent", value:15, label:"15% Christmas Special"},
-  "NEWYEAR10":  {type:"percent", value:10, label:"10% New Year Offer"},
-  "MELB10":     {type:"percent", value:10, label:"10% Australia Day Special"},
-  "BENGALI10":  {type:"percent", value:10, label:"10% Bengali Community Discount"},
-  "TARNEIT10":  {type:"percent", value:10, label:"10% Local Tarneit Resident"},
-  "BULK15":     {type:"percent", value:15, label:"15% Bulk Order Discount"},
-  "CATERING10": {type:"percent", value:10, label:"10% Catering Booking Discount"}
-};
+var PROMO_CODES = {};  // loaded from promoCodes.json
+fetch('promoCodes.json')
+  .then(function(r){ return r.json(); })
+  .then(function(data){ PROMO_CODES = data; })
+  .catch(function(){ console.warn('Promo codes file not found, using empty set'); });
 
 function applyPromo(){
   var code = (document.getElementById("promo-input").value||"").trim().toUpperCase();
@@ -3701,6 +3689,13 @@ function applyPromo(){
 // ── CART PERSISTENCE ─────────────────────────────────────────────────────────
 function restoreCart(){
   try{
+    // Auto-expire cart after 24 hours
+    var ts=parseInt(localStorage.getItem('sk_cart_ts')||'0');
+    if(ts && Date.now()-ts > 24*60*60*1000){
+      localStorage.removeItem('sk_cart');
+      localStorage.removeItem('sk_cart_ts');
+      return;
+    }
     var saved=JSON.parse(localStorage.getItem('sk_cart')||'{}');
     Object.keys(saved).forEach(function(id){
       var entry=saved[id];
@@ -3782,7 +3777,7 @@ function removeOline(id){
     var card=el.closest('.icard');
     if(card) card.classList.toggle('selected', total>0);
   }
-  try{localStorage.setItem('sk_cart',JSON.stringify(cart));}catch(e){}
+  try{localStorage.setItem('sk_cart',JSON.stringify(cart));localStorage.setItem('sk_cart_ts',Date.now());}catch(e){}
   updBar();
   if(typeof updCatBadges==='function') updCatBadges();
   openModal();
