@@ -2314,7 +2314,7 @@ window.sendWA = function() {
   var tot = sub + delCharge;
   // Tier discount
   var tierDisc=0, tierDiscLabel='';
-  var tierDisc=0, tierDiscLabel='';
+
   var _tierList=(typeof PROMO_CODES!=='undefined'&&PROMO_CODES._tiers)?PROMO_CODES._tiers:[{minOrder:400,discount:30},{minOrder:300,discount:20},{minOrder:200,discount:15},{minOrder:150,discount:10},{minOrder:100,discount:5}];
   for(var _ti=0;_ti<_tierList.length;_ti++){if(sub>=_tierList[_ti].minOrder){tierDisc=_tierList[_ti].discount;break;}}
   if(tierDisc>0) tierDiscLabel=tierDisc===30?'$30 off orders $400+':tierDisc===20?'$20 off orders $300+':tierDisc===15?'$15 off orders $200+':tierDisc===10?'$10 off orders $150+':'$5 off orders $100+';
@@ -3161,9 +3161,10 @@ function showOrderQueue(){
       for(var ti=0;ti<trs.length;ti++){if(sub>=trs[ti].minOrder){tierD=trs[ti].discount;break;}}
       // Apply promo discount
       var promoD=0;
-      if(order.promo){
-        if(order.promo.type==='percent') promoD=sub*(order.promo.value/100);
-        else if(order.promo.type==='fixed') promoD=Math.min(order.promo.value,sub);
+      var _qpromo=order.promo||(function(){try{return JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(e){return null;}})();
+      if(_qpromo){
+        if(_qpromo.type==='percent') promoD=sub*(_qpromo.value/100);
+        else if(_qpromo.type==='fixed') promoD=Math.min(_qpromo.value,sub);
       }
       var total=sub-tierD-promoD+(order.delCharge||0);
       var recv='';if(order.receivedAt){var d=new Date(order.receivedAt);recv=d.toLocaleDateString('en-AU',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});}
@@ -4059,5 +4060,14 @@ document.addEventListener('visibilitychange',function(){
 
 <!-- ORDER CONFIRMATION OVERLAY -->
 
+
+<!-- DEBUG: remove before final deploy -->
+<button onclick="
+  var od=localStorage.getItem('sk_pending_order');
+  var promo=localStorage.getItem('sk_active_promo');
+  var occ=localStorage.getItem('sk_occasion');
+  var parsed=od?JSON.parse(od):{};
+  alert('od.promo: '+JSON.stringify(parsed.promo)+'\n\nsk_active_promo: '+promo+'\n\nsk_occasion: '+occ);
+" style="position:fixed;bottom:120px;right:16px;background:#333;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:11px;z-index:9999;cursor:pointer">🔍 Debug</button>
 </body>
 </html>
