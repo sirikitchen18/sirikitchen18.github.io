@@ -634,6 +634,18 @@ html,body{margin:0;padding:0;width:100%}
 
 .oline-remove{background:#fff0f0;border:1.5px solid #ffcccc;color:#e05555;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;font-weight:800;flex-shrink:0;transition:all .15s;line-height:1;padding:0;margin-left:6px}
 .oline-remove:hover{background:var(--red);border-color:var(--red);color:#fff;transform:scale(1.1)}
+
+/* ── ITEM TAGS ── */
+.item-tag{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:10px;font-weight:800;border-radius:20px;
+  padding:2px 8px;margin-bottom:4px;letter-spacing:0.3px;
+  width:fit-content;
+}
+.item-tag-best{background:#fff3e0;color:#e65100;border:1px solid #ffcc80}
+.item-tag-chef{background:#fce4ec;color:#880e4f;border:1px solid #f48fb1}
+.item-tag-popular{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
 
@@ -1192,7 +1204,7 @@ function handleOccChange(sel){
         <div class="trow" id="free-item-row" style="display:none;color:#2d8a4e"><span id="free-item-label">Free Item</span><span>complimentary</span></div>
         <div class="trow"><span>Delivery</span><span id="tdel">Free (pickup)</span></div>
         <div class="trow tbig"><span>Total</span><span id="ttotal">$0.00</span></div>
-        <div class="tdep"><span>40% deposit (payable after acceptance)</span><strong id="tdep" style="color:var(--sub)">$0.00</strong></div>
+        <div class="tdep"><span>40% deposit (payable after acceptance)</span><strong id="tdep" style="color:var(--sub)">$0</strong></div>
       </div>
 
       <div class="flow">
@@ -1233,7 +1245,7 @@ const MENU={
   snacks:[
     {n:"Spring Rolls (Veg/Chicken)",d:"Crispy golden rolls with veg or chicken filling",t:'pc',v:3,id:"sn1",min:20},
     {n:"Crispy Cutlet (Veg/Chicken)",d:"Crumb-coated cutlets, shallow fried",t:'pc',v:3,id:"sn2",min:20},
-    {n:"Egg Devil",d:"Spiced devilled eggs — a party favourite",t:'pc',v:3,id:"sn3",min:20},
+    {n:"Egg Devil",d:"Spiced devilled eggs — a party favourite",t:'pc',v:3,id:"sn3",tag:"best",min:20},
     {n:"Bread Pakora",d:"Spiced potato-stuffed bread fritters",t:'pc',v:3,id:"sn4",min:20},
     {n:"Puff Patties (Veg/Chicken)",d:"Flaky pastry puffs with savoury filling",t:'pc',v:4,id:"sn5",min:20},
     {n:"Punjabi Samosa",d:"Classic triangular pastry with spiced potato & peas",t:'pc',v:4,id:"sn6",min:20},
@@ -1248,19 +1260,19 @@ const MENU={
     {n:"Chicken Pakoda",d:"Tender chicken in spiced gram flour, deep fried",t:'flat',v:46,id:"f6"}
   ],
   kebab:[
-    {n:"HaraBhara Kebab (Veg)",d:"Spinach, pea & potato green kebabs",t:'fj',f:42,j:58,id:"k1"},
-    {n:"Paneer Tikka (Veg)",d:"Cottage cheese marinated & tandoor cooked",t:'fj',f:46,j:67,id:"k2"},
-    {n:"Chicken Tikka",d:"Chicken marinated in tandoori spices",t:'fj',f:46,j:67,id:"k3"},
+    {n:"HaraBhara Kebab (Veg)",d:"Spinach, pea & potato green kebabs",t:'fj',f:42,j:58,id:"k1",tag:"popular"},
+    {n:"Paneer Tikka (Veg)",d:"Cottage cheese marinated & tandoor cooked",t:'fj',f:46,j:67,id:"k2",tag:"popular"},
+    {n:"Chicken Tikka",d:"Chicken marinated in tandoori spices",t:'fj',f:46,j:67,id:"k3",tag:"best"},
     {n:"Tandoori Fish Tikka",d:"Fish fillets in spiced marinade, tandoor cooked",t:'fj',f:46,j:67,id:"k4"},
     {n:"Chicken Tandoori",d:"Classic whole chicken in tandoori masala",t:'fj',f:45,j:66,id:"k5"},
     {n:"Chicken Reshmi Kebab",d:"Silky cream & cashew marinated minced chicken",t:'fj',f:48,j:69,id:"k6"},
     {n:"Mutton Tikka Boti (Goat)",d:"Cubed goat marinated in bold spices",t:'fj',f:60,j:82,id:"k7"},
-    {n:"Mutton Seekh Kebab (Goat)",d:"Minced goat kebab on skewer",t:'fj',f:60,j:82,id:"k8"},
+    {n:"Mutton Seekh Kebab (Goat)",d:"Minced goat kebab on skewer",t:'fj',f:60,j:82,id:"k8",tag:"best"},
     {n:"Chapli Kebab (Goat)",d:"Flat Peshawari minced goat kebab",t:'fj',f:60,j:82,id:"k9"},
     {n:"Gola Kebab (Goat)",d:"Round minced goat kebab, juicy & aromatic",t:'fj',f:60,j:82,id:"k10"}
   ],
   ic:[
-    {n:"Chicken 65",d:"Fiery South Indian deep-fried chicken",t:'fj',f:49,j:71,id:"ic1"},
+    {n:"Chicken 65",d:"Fiery South Indian deep-fried chicken",t:'fj',f:49,j:71,id:"ic1",tag:"best"},
     {n:"Chicken Majestic",d:"Hyderabadi-style fried chicken with curry leaves",t:'fj',f:49,j:71,id:"ic2"},
     {n:"Chicken Lollipop",d:"Glazed chicken lollipops in Indo-Chinese sauce",t:'fj',f:52,j:73,id:"ic3"},
     {n:"Chicken Manchurian (Dry/Gravy)",d:"Crispy chicken in sweet & spicy Manchurian sauce",t:'fj',f:52,j:73,id:"ic4"},
@@ -1285,7 +1297,7 @@ const MENU={
   nv:[
     {n:"Chicken Afghani",d:"Creamy white yoghurt marinated chicken",t:'fj',f:62,j:83,id:"nv1"},
     {n:"Chicken Korma",d:"Rich fragrant chicken in almond & cream gravy",t:'fj',f:62,j:83,id:"nv2"},
-    {n:"Chicken Changezi",d:"Delhi-style chicken in rich tangy tomato gravy",t:'fj',f:62,j:83,id:"nv3"},
+    {n:"Chicken Changezi",d:"Delhi-style chicken in rich tangy tomato gravy",t:'fj',f:62,j:83,id:"nv3",tag:"chef"},
     {n:"Chicken Chaap",d:"Mughlai braised chicken in delicate spice gravy",t:'fj',f:62,j:83,id:"nv4"},
     {n:"Chicken Rezala",d:"Delicate white Mughal-style chicken curry",t:'fj',f:62,j:83,id:"nv5"},
     {n:"Dum ka Chicken (Red Chicken)",d:"Slow-cooked spicy red chicken, dum sealed",t:'fj',f:62,j:83,id:"nv6"},
@@ -1294,7 +1306,7 @@ const MENU={
     {n:"Chicken Kofta",d:"Spiced minced chicken dumplings in rich gravy",t:'fj',f:64,j:87,id:"nv9"},
     {n:"Chicken Tikka Masala",d:"Grilled chicken tikka in creamy masala",t:'fj',f:64,j:87,id:"nv10"},
     {n:"Chicken Mughlai Handi",d:"Royal Mughlai chicken in a handi pot",t:'fj',f:64,j:87,id:"nv11"},
-    {n:"Mutton Bhuna Gosht (Goat)",d:"Slow-cooked dry goat with caramelised spices",t:'fj',f:72,j:98,id:"nv12"},
+    {n:"Mutton Bhuna Gosht (Goat)",d:"Slow-cooked dry goat with caramelised spices",t:'fj',f:72,j:98,id:"nv12",tag:"chef"},
     {n:"Mutton Chaap (Goat)",d:"Tender goat chops marinated & braised",t:'fj',f:72,j:98,id:"nv13"},
     {n:"Tawa Gosht (Goat)",d:"Goat cooked on iron griddle with bold spices",t:'fj',f:74,j:99,id:"nv14"},
     {n:"Mutton Kofta (Goat)",d:"Spiced minced goat balls in aromatic gravy",t:'fj',f:74,j:99,id:"nv15"}
@@ -1311,10 +1323,10 @@ const MENU={
   ],
   roti:[
     {n:"Chapati / Roti",d:"Soft whole wheat flatbread",t:'pc',v:1.5,id:"r1",min:20},
-    {n:"Lacchedar Paratha",d:"Flaky multi-layered flatbread",t:'pc',v:2.5,id:"r2",min:20}
+    {n:"Lacchedar Paratha",d:"Flaky multi-layered flatbread",t:'pc',v:2.5,id:"r2",tag:"popular",min:20}
   ],
   dessert:[
-    {n:"Gulab Jamun",d:"Milk dumplings in rose sugar syrup",t:'pc',v:2,id:"d1",min:20},
+    {n:"Gulab Jamun",d:"Milk dumplings in rose sugar syrup",t:'pc',v:2,id:"d1",tag:"best",min:20},
     {n:"Shahi Tukda / Maal Pua (10 pcs)",d:"Royal bread pudding or sweet pancakes",t:'flat',v:31,id:"d2"},
     {n:"Sheer Khurma (1000ml)",d:"Vermicelli & nut dessert in sweetened milk",t:'flat',v:31,id:"d3"},
     {n:"Shahi Firni (1000ml)",d:"Creamy ground rice pudding with cardamom",t:'flat',v:31,id:"d4"},
@@ -1329,17 +1341,17 @@ const MENU={
     {n:"Chingri Bhapa",d:"Steamed prawns in mustard & coconut paste",t:'fj',f:58,j:80,id:"bf6"}
   ],
   bm:[
-    {n:"Kosha Mangsho (Slow-Cooked Spicy Goat)",d:"Bengali signature — goat slow-cooked until deeply caramelised & rich",t:'fj',f:74,j:99,id:"bm1"},
+    {n:"Kosha Mangsho (Slow-Cooked Spicy Goat)",d:"Bengali signature — goat slow-cooked until deeply caramelised & rich",t:'fj',f:74,j:99,id:"bm1",tag:"chef"},
     {n:"Mutton Rezala (Mughal-style White Curry)",d:"Delicate white Mughal-style aromatic gravy with whole spices",t:'fj',f:74,j:99,id:"bm2"},
     {n:"Bengali Chicken Curry (Aloo Diye)",d:"Home-style chicken curry with potato",t:'fj',f:62,j:83,id:"bm3"},
     {n:"Dhakai Chicken Roast (Festive Style)",d:"Dhaka-style celebration chicken, rich & golden",t:'fj',f:64,j:87,id:"bm4"}
   ],
   bv:[
-    {n:"Dhokar Dalna",d:"Lentil cakes in spiced gravy",t:'fj',f:45,j:63,id:"bv1"},
+    {n:"Dhokar Dalna",d:"Lentil cakes in spiced gravy",t:'fj',f:45,j:63,id:"bv1",tag:"chef"},
     {n:"Aloo Posto",d:"Potatoes in fragrant poppy seed paste",t:'fj',f:45,j:63,id:"bv2"},
     {n:"Cholar Dal",d:"Bengal gram dal with coconut & spices",t:'fj',f:45,j:63,id:"bv3"},
     {n:"Shukto (Mixed Veg Bittersweet Medley)",d:"Traditional Bengali bitter-sweet vegetables",t:'fj',f:48,j:68,id:"bv4"},
-    {n:"Basanti Pulao",d:"Sweet fragrant Bengali saffron rice",t:'fj',f:54,j:76,id:"bv5"},
+    {n:"Basanti Pulao",d:"Sweet fragrant Bengali saffron rice",t:'fj',f:54,j:76,id:"bv5",tag:"chef"},
     {n:"Mishti Pulao",d:"Aromatic sweet rice with spices & raisins",t:'fj',f:54,j:76,id:"bv6"},
     {n:"Luchi — Deep-fried Puffed Bread",d:"Soft pillowy Bengali puri",t:'pc',v:2,id:"bv7",min:20}
   ],
@@ -1378,6 +1390,7 @@ function renderSection(data,elId){
     return `<div class="icard" style="border-left:4px solid ${cc}">
       <div class="icard-row">
         <div class="icard-info">
+          ${item.tag ? `<div class="item-tag item-tag-${item.tag}">${item.tag==='best'?'🏆 Best Seller':item.tag==='chef'?'👨‍🍳 Chef\'s Special':'🔥 Popular'}</div>` : ''}
           <div class="iname">${item.n}</div>
           ${item.d?`<div class="idesc">${item.d}</div>`:''}
         </div>
@@ -1604,16 +1617,31 @@ function updTotals(){
   const sub=a.reduce((s,c)=>s+c.qty*c.price,0);
   // Apply discount if promo active
   var discount=0;
-  if(typeof activePromo!=="undefined"&&activePromo){
-    if(activePromo.type==="percent") discount=sub*(activePromo.value/100);
-    else if(activePromo.type==="fixed") discount=Math.min(activePromo.value,sub);
+  // Tiered order discount (from promoCodes.json _tiers)
+  var tierDiscount=0;
+  if(typeof PROMO_CODES._tiers !== 'undefined'){
+    var tiers=PROMO_CODES._tiers;
+    for(var t=0;t<tiers.length;t++){
+      if(sub>=tiers[t].minOrder){ tierDiscount=tiers[t].discount; break; }
+    }
   }
+  // Promo discount (applied on top of tiered)
+  var promoDiscount=0;
+  if(typeof activePromo!=="undefined"&&activePromo){
+    if(activePromo.type==="percent") promoDiscount=sub*(activePromo.value/100);
+    else if(activePromo.type==="fixed") promoDiscount=Math.min(activePromo.value,sub);
+  }
+  discount=tierDiscount+promoDiscount;
   var discEl=document.getElementById("tdiscount");
   var discLabel=document.getElementById("discount-label");
   var totsDiscRow=document.getElementById("tots-discount-row");
   var totsDiscAmt=document.getElementById("tots-discount-amt");
   if(discEl) discEl.textContent="-$"+discount.toFixed(2);
-  if(discLabel&&activePromo) discLabel.textContent=activePromo.label||"Discount";
+  var discLabelText = '';
+  if(tierDiscount>0&&promoDiscount>0) discLabelText='Order Discount + '+activePromo.label;
+  else if(tierDiscount>0) discLabelText='Order Discount ($'+tierDiscount+' off)';
+  else if(activePromo) discLabelText=activePromo.label||'Discount';
+  if(discLabel) discLabel.textContent=discLabelText;
   if(totsDiscRow) totsDiscRow.style.display=discount>0?"flex":"none";
   if(totsDiscAmt) totsDiscAmt.textContent="-$"+discount.toFixed(2);
   const total=sub-discount+delCharge;
@@ -1622,7 +1650,7 @@ function updTotals(){
   setTxt('tsub','$'+sub.toFixed(2));
   setTxt('tdel',delCharge>0?'$'+delCharge.toFixed(2):(delType==='pickup'?'Free (pickup)':'—'));
   setTxt('ttotal','$'+total.toFixed(2));
-  setTxt('tdep','$'+dep);
+  setTxt('tdep','$'+dep.toLocaleString());
   setTxt('payid-amt','$'+dep+' (40% deposit)');
   // Also update olines delivery row
   var olDel = document.getElementById('ol-del-row');

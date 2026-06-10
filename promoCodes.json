@@ -1,17 +1,99 @@
 {
-  "WELCOME10":  { "type": "percent", "value": 10, "label": "10% Welcome Discount" },
-  "FLAT10":     { "type": "percent", "value": 10, "label": "10% Flat Discount" },
-  "LOYAL5":     { "type": "percent", "value": 5,  "label": "5% Loyalty Discount" },
-  "REFER15":    { "type": "percent", "value": 15, "label": "15% Referral Discount" },
-  "EID2027":    { "type": "percent", "value": 15, "label": "15% Eid Mubarak Special" },
-  "RAMADAN10":  { "type": "percent", "value": 10, "label": "10% Ramadan Offer" },
-  "DIWALI10":   { "type": "percent", "value": 10, "label": "10% Diwali Special" },
-  "PUJA10":     { "type": "percent", "value": 10, "label": "10% Durga Puja Special" },
-  "XMAS15":     { "type": "percent", "value": 15, "label": "15% Christmas Special" },
-  "NEWYEAR10":  { "type": "percent", "value": 10, "label": "10% New Year Offer" },
-  "MELB10":     { "type": "percent", "value": 10, "label": "10% Australia Day Special" },
-  "BENGALI10":  { "type": "percent", "value": 10, "label": "10% Bengali Community Discount" },
-  "TARNEIT10":  { "type": "percent", "value": 10, "label": "10% Local Tarneit Resident" },
-  "BULK15":     { "type": "percent", "value": 15, "label": "15% Bulk Order Discount" },
-  "CATERING10": { "type": "percent", "value": 10, "label": "10% Catering Booking Discount" }
+  "_tiers": [
+    {
+      "minOrder": 400,
+      "discount": 30
+    },
+    {
+      "minOrder": 300,
+      "discount": 20
+    },
+    {
+      "minOrder": 200,
+      "discount": 15
+    },
+    {
+      "minOrder": 150,
+      "discount": 10
+    },
+    {
+      "minOrder": 100,
+      "discount": 5
+    }
+  ],
+  "WELCOME10": {
+    "type": "percent",
+    "value": 10,
+    "label": "10% Welcome Discount"
+  },
+  "FLAT10": {
+    "type": "percent",
+    "value": 10,
+    "label": "10% Flat Discount"
+  },
+  "LOYAL5": {
+    "type": "percent",
+    "value": 5,
+    "label": "5% Loyalty Discount"
+  },
+  "REFER15": {
+    "type": "percent",
+    "value": 15,
+    "label": "15% Referral Discount"
+  },
+  "EID2027": {
+    "type": "percent",
+    "value": 15,
+    "label": "15% Eid Mubarak Special"
+  },
+  "RAMADAN10": {
+    "type": "percent",
+    "value": 10,
+    "label": "10% Ramadan Offer"
+  },
+  "DIWALI10": {
+    "type": "percent",
+    "value": 10,
+    "label": "10% Diwali Special"
+  },
+  "PUJA10": {
+    "type": "percent",
+    "value": 10,
+    "label": "10% Durga Puja Special"
+  },
+  "XMAS15": {
+    "type": "percent",
+    "value": 15,
+    "label": "15% Christmas Special"
+  },
+  "NEWYEAR10": {
+    "type": "percent",
+    "value": 10,
+    "label": "10% New Year Offer"
+  },
+  "MELB10": {
+    "type": "percent",
+    "value": 10,
+    "label": "10% Australia Day Special"
+  },
+  "BENGALI10": {
+    "type": "percent",
+    "value": 10,
+    "label": "10% Bengali Community Discount"
+  },
+  "TARNEIT10": {
+    "type": "percent",
+    "value": 10,
+    "label": "10% Local Tarneit Resident"
+  },
+  "BULK15": {
+    "type": "percent",
+    "value": 15,
+    "label": "15% Bulk Order Discount"
+  },
+  "CATERING10": {
+    "type": "percent",
+    "value": 10,
+    "label": "10% Catering Booking Discount"
+  }
 }
