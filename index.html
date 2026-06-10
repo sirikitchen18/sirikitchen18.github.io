@@ -1828,18 +1828,7 @@ function closeModal(){
   var fr=document.getElementById("free-item-row"); if(fr) fr.style.display="none";var ov=document.getElementById('overlay');ov.classList.remove('on');ov.style.display='none';}
 document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
 
-// Ensure overlay works in Google Sites iframe
-(function(){
-  const ov = document.getElementById('overlay');
-  // When modal opens, try to scroll it into view
-  const origOpen = window.openModal;
-  window.openModal = function(){
-    origOpen();
-    setTimeout(()=>{
-      try{ window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); }catch(e){}
-    }, 100);
-  };
-})();
+// Google Sites iframe scroll removed - was hiding modal
 
 // ── WHATSAPP ─────────────────────────────────────────
 function sendWA(){
