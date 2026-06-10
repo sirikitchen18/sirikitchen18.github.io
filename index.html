@@ -2329,13 +2329,15 @@ window.sendWA = function() {
   var adv = Math.round(netTot*0.4);
   var rem = Math.round(netTot - adv);
 
+  var _promoForOd=(typeof activePromo!=="undefined"&&activePromo)?activePromo:(function(){try{return JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(e){return null;}})();
   var od = {
     name:name, phone:phone||"", email:email||"", commMode:comm,
     date:date, time:time, notes:notes,
+    occasion: occasionValOD||localStorage.getItem('sk_occasion')||'',
     addr: delType==="delivery" ? addr : "Pickup from Tarneit",
     delType:delType, delCharge:delCharge, distKm:Math.round(km*1.3),
     id:"ORD-"+Date.now(), receivedAt:new Date().toISOString(), status:"pending",
-    promo: (typeof activePromo!=="undefined"&&activePromo) ? activePromo : (function(){try{return JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(e){return null;}})(),
+    promo: _promoForOd,
     items:a.map(function(x){return{qty:x.qty,name:x.name,size:x.size||"",price:x.price};})
   };
 
