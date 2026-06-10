@@ -412,9 +412,9 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .btn-wa:hover{background:#1fba58}
 
 /* ── INVOICE PREVIEW ── */
-#invoice-preview{display:none;max-width:720px;margin:2rem auto 0}
+#invoice-preview{display:none;max-width:720px;margin:2rem auto 0;overflow-x:hidden;width:100%;box-sizing:border-box}
 
-.inv{background:#fff;font-family:'Inter',sans-serif;color:#1a1a1a;box-shadow:0 4px 24px rgba(0,0,0,0.12);border-radius:12px;overflow:hidden}
+.inv{background:#fff;font-family:'Inter',sans-serif;color:#1a1a1a;box-shadow:0 4px 24px rgba(0,0,0,0.12);border-radius:12px;overflow:hidden;width:100%;box-sizing:border-box}
 
 /* Invoice header */
 .inv-hdr{background:linear-gradient(135deg,#6b1a0a 0%,#8b2500 60%,#6b1a0a 100%);padding:2rem 2rem 2rem;text-align:center;position:relative}
@@ -645,6 +645,10 @@ html,body{margin:0;padding:0;width:100%}
 .item-tag-best{background:#fff3e0;color:#e65100;border:1px solid #ffcc80}
 .item-tag-chef{background:#fce4ec;color:#880e4f;border:1px solid #f48fb1}
 .item-tag-popular{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+
+
+#invoice-preview *{box-sizing:border-box;max-width:100%}
+#invoice-preview table{width:100%;table-layout:fixed}
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -972,7 +976,9 @@ function handleOccChange(sel){
 
     <!-- Summary -->
     <div class="summary-box">
-      <div class="sum-row"><span>Subtotal (tax inclusive)</span><span id="s-sub">$0.00</span></div>
+      <div class="sum-row"><span>Subtotal</span><span id="s-sub">$0.00</span></div>
+      <div class="sum-row" id="inv-tier-row" style="display:none;color:#2d8a4e"><span id="inv-tier-lbl">Order Discount</span><span id="inv-tier-amt">-$0</span></div>
+      <div class="sum-row" id="inv-promo-row" style="display:none;color:#1565c0"><span id="inv-promo-lbl">Promo Discount</span><span id="inv-promo-amt">-$0.00</span></div>
       <div class="sum-row"><span>Delivery charge</span><span id="s-del">$0.00</span></div>
       <div class="sum-row sum-big"><span>Grand Total</span><span id="s-total">$0.00</span></div>
       <div class="sum-dep"><span>40% Advance Payment</span><strong id="s-adv" style="color:var(--red)">$0.00</strong></div>
@@ -989,7 +995,7 @@ function handleOccChange(sel){
 
 <!-- INVOICE PREVIEW -->
 <div id="invoice-preview">
-  <div class="inv" id="inv-content">
+  <div class="inv" id="inv-content" style="width:100%;box-sizing:border-box;overflow-x:hidden">
 
     <div class="inv-hdr">
       <div class="inv-brand">SIRI KITCHEN</div>
@@ -1020,14 +1026,7 @@ function handleOccChange(sel){
         <thead><tr>
           <th>QTY</th><th>DESCRIPTION</th><th>PRICE</th><th>TOTAL</th>
         </tr>
-  <tr id="inv-tier-row" style="display:none;color:#2d8a4e">
-    <td colspan="3" style="text-align:right;padding:3px 8px;font-weight:600" id="inv-tier-lbl">Order Discount</td>
-    <td style="padding:3px 8px;font-weight:700;color:#2d8a4e" id="inv-tier-amt">-$0</td>
-  </tr>
-  <tr id="inv-promo-row" style="display:none;color:#1565c0">
-    <td colspan="3" style="text-align:right;padding:3px 8px;font-weight:600" id="inv-promo-lbl">Promo Discount</td>
-    <td style="padding:3px 8px;font-weight:700;color:#1565c0" id="inv-promo-amt">-$0.00</td>
-  </tr></thead>
+</thead>
         <tbody id="inv-items-body"></tbody>
       </table>
     </div>
@@ -2389,7 +2388,7 @@ window.sendWA = function() {
     var iname=(x.name+(x.size||"")).replace(/[<>&"]/g,"");
     return "<tr><td style='padding:6px 10px;border:1px solid #eee'>"+iname+"</td>"+
            "<td style='padding:6px 10px;border:1px solid #eee;text-align:center'>"+x.qty+"</td>"+
-           "<td style='padding:6px 10px;border:1px solid #eee;text-align:right'>AUD $"+(x.qty*x.price).toFixed(2)+"</td></tr>";
+           "<td style='padding:6px 10px;border:1px solid #eee;text-align:right'>$"+(x.qty*x.price).toFixed(2)+"</td></tr>";
   }).join("");
   var itemsText = lines.join("\n");
 
@@ -2419,6 +2418,7 @@ window.sendWA = function() {
     subtotal:       sub.toFixed(2),
     total:          netTot.toFixed(2),
     advance:        String(Math.round(netTot*0.4)),
+    remaining:      String(Math.round(netTot - Math.round(netTot*0.4))),
     tier_discount:  tierDisc>0?("- $"+tierDisc+" ("+tierDiscLabel+")"):"",
     promo_discount: promoDisc>0?("- $"+promoDisc.toFixed(2)+" ("+(activePromoLocal?activePromoLocal.label:"Promo")+")"):"",
     approval_link:  acceptLink,
@@ -3328,7 +3328,7 @@ function sendEmail(){
     var itemName = (x.name+(x.size||"")).replace(/[<>&"]/g,"");
     return "<tr><td style='padding:6px 10px;border:1px solid #eee'>"+itemName+"</td>"+
            "<td style='padding:6px 10px;border:1px solid #eee;text-align:center'>"+x.qty+"</td>"+
-           "<td style='padding:6px 10px;border:1px solid #eee;text-align:right'>AUD $"+(x.qty*x.price).toFixed(2)+"</td></tr>";
+           "<td style='padding:6px 10px;border:1px solid #eee;text-align:right'>$"+(x.qty*x.price).toFixed(2)+"</td></tr>";
   }).join("");
   var itemsText = od.items.map(function(x){
     return x.qty+"x "+(x.name+(x.size||""))+" - $"+(x.qty*x.price).toFixed(2);
@@ -3355,6 +3355,7 @@ function sendEmail(){
     subtotal:       sub.toFixed(2),
     total:          netTot.toFixed(2),
     advance:        String(Math.round(netTot*0.4)),
+    remaining:      String(Math.round(netTot - Math.round(netTot*0.4))),
     tier_discount:  tierDisc>0?("- $"+tierDisc+" ("+tierDiscLabel+")"):"",
     promo_discount: promoDisc>0?("- $"+promoDisc.toFixed(2)+" ("+(activePromoLocal?activePromoLocal.label:"Promo")+")"):"",
     approval_link:  acceptLink,
