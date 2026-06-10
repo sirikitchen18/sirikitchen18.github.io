@@ -1047,7 +1047,7 @@ function handleOccChange(sel){
 
     <div class="inv-totals">
       <div class="inv-totals-box">
-        <div class="inv-tot-row"><span>Sub Total <small style="color:#999">(including tax)</small></span><span id="inv-sub"></span></div>
+        <div class="inv-tot-row"><span>Sub Total </span><span id="inv-sub"></span></div>
         <div class="inv-tot-row" id="inv-del-row"><span>Delivery Charge</span><span id="inv-del"></span></div>
         <div class="inv-tot-row inv-tot-grand"><span>Grand Total</span><span id="inv-total"></span></div>
       </div>
@@ -1849,9 +1849,12 @@ function sendWA(){
   const total=sub+delCharge;
 
   // Build order data object for invoice pre-fill
+  // Read occasion
+  var occasionValOD = (function(){ var el=document.getElementById('occ-select'); if(!el) return ''; var v=el.value; if(v==='Other'){ var oi=document.getElementById('occ-other-input'); return oi?oi.value.trim():''; } return v; })();
+  try{if(occasionValOD) localStorage.setItem('sk_occasion',occasionValOD); else localStorage.removeItem('sk_occasion');}catch(_e){}
+  // Build order data object for invoice pre-fill
   const orderData={
-    name, phone, date, time, notes, occasion: occasionVal||'',
-    addr: delType==='delivery'?addr:'Pickup from Tarneit',
+    name, phone, date, time, notes, occasion: occasionValOD||'',
     delType, delCharge,
     distKm: Math.round(km*1.3),
     items: a.map(i=>({qty:i.qty,name:i.name,size:i.size,price:i.price}))
@@ -2332,7 +2335,7 @@ window.sendWA = function() {
     addr: delType==="delivery" ? addr : "Pickup from Tarneit",
     delType:delType, delCharge:delCharge, distKm:Math.round(km*1.3),
     id:"ORD-"+Date.now(), receivedAt:new Date().toISOString(), status:"pending",
-    promo: (typeof activePromo!=="undefined"&&activePromo) ? activePromo : null,
+    promo: (typeof activePromo!=="undefined"&&activePromo) ? activePromo : (function(){try{return JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(e){return null;}})(),
     items:a.map(function(x){return{qty:x.qty,name:x.name,size:x.size||"",price:x.price};})
   };
 
@@ -2418,8 +2421,8 @@ window.sendWA = function() {
     total:          netTot.toFixed(2),
     advance:        String(Math.round(netTot*0.4)),
     remaining:      String(Math.round(netTot - Math.round(netTot*0.4))),
-    tier_discount:  tierDisc>0?("- $"+tierDisc+" ("+tierDiscLabel+")"):"",
-    promo_discount: promoDisc>0?("- $"+promoDisc.toFixed(2)+" ("+(activePromoLocal?activePromoLocal.label:"Promo")+")"):"",
+    tier_discount:  tierDisc>0?("Order Discount ("+tierDiscLabel+"): - $"+tierDisc):"",
+    promo_discount: promoDisc>0?((activePromoLocal?activePromoLocal.label:"Promo")+" (Code: "+(activePromoLocal&&activePromoLocal.code?activePromoLocal.code:"applied")+"): - $"+promoDisc.toFixed(2)):"",
     approval_link:  acceptLink,
     reject_link:    declineLink
   };
@@ -2483,9 +2486,10 @@ function loadFromStorage() {
   setVal("d-time",    od.time);
   setVal("inv-note",  od.notes||"");
   if(od.occasion && od.occasion!=="Not specified") document.getElementById("inv-note").value += (od.notes?"\nOccasion: ":"Occasion: ")+od.occasion;
-  if(od.occasion && od.occasion!=='Not specified' && od.occasion!==''){
+  var _occToShow = (od.occasion && od.occasion!=='Not specified' && od.occasion!=='') ? od.occasion : (localStorage.getItem('sk_occasion')||'');
+  if(_occToShow){
     var occMeta=document.getElementById('inv-occasion-meta'); if(occMeta) occMeta.style.display='block';
-    var occMetaText=document.getElementById('inv-occasion-meta-text'); if(occMetaText) occMetaText.textContent=' '+od.occasion;
+    var occMetaText=document.getElementById('inv-occasion-meta-text'); if(occMetaText) occMetaText.textContent=' '+_occToShow;
   }
   setVal("del-type",  od.delType);
   if(od.delCharge > 0) {
@@ -2783,7 +2787,7 @@ function generateInvoice(){
   if(typeof activePromo !== "undefined" && activePromo){
     if(activePromo.type==="percent") discount = sub*(activePromo.value/100);
     else if(activePromo.type==="fixed") discount = Math.min(activePromo.value, sub);
-    promoLabel = activePromo.label || "Discount";
+    promoLabel = (activePromo.label || "Discount") + (activePromo.code ? " (Code: "+activePromo.code+")" : "");
   }
   const total = sub - tierDiscount - discount + del;
   const adv = Math.round(total*0.4);
@@ -2858,8 +2862,12 @@ function generateInvoice(){
   // Also try reading from stored order
   if(!occasionText){
     try{
-      var storedOd=JSON.parse(localStorage.getItem('sk_pending_order')||localStorage.getItem('sk_last_order')||'null');
-      if(storedOd&&storedOd.occasion&&storedOd.occasion!=='Not specified') occasionText=storedOd.occasion;
+      var _occ=localStorage.getItem('sk_occasion');
+      if(_occ) occasionText=_occ;
+      else {
+        var storedOd=JSON.parse(localStorage.getItem('sk_pending_order')||'null');
+        if(storedOd&&storedOd.occasion&&storedOd.occasion!=='Not specified') occasionText=storedOd.occasion;
+      }
     }catch(_e){}
   }
   var pureNote = invNoteVal.replace(/\nOccasion: .+/, '').replace(/^Occasion: .+\n?/, '').trim();
