@@ -1205,11 +1205,12 @@ function handleOccChange(sel){
       <div class="mlabel">Your Details</div>
       <div class="frow">
         <div class="fg"><label class="fl">Full Name <span style="color:var(--red)">*</span></label><input class="fi" type="text" id="cname" placeholder="Your name"></div>
-        <div class="fg"><label class="fl">Phone <span style="color:var(--red)" id="phone-required-star">*</span> <span id="phone-optional-label" style="font-size:11px;font-weight:400;color:#aaa;font-style:italic;display:none">(optional)</span></label><input class="fi" type="tel" id="cphone" placeholder="04xx xxx xxx" maxlength="10" inputmode="numeric" id="cphone-wrap" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"></div>
+        <div class="fg"><label class="fl">Phone <span style="color:var(--red)" id="phone-required-star">*</span> <span id="phone-optional-label" style="font-size:11px;font-weight:400;color:#aaa;font-style:italic;display:none">(optional)</span></label><input class="fi" type="tel" id="cphone" placeholder="04xx xxx xxx" maxlength="10" inputmode="numeric" id="cphone-wrap" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10);checkWAReady();"><span id="cphone-err" style="display:none;font-size:11px;color:var(--red);margin-top:3px;display:none"></span></div>
       </div>
       <div class="fg" id="cemail-wrap" style="display:none;margin-bottom:10px">
         <label class="fl">Email Address <span style="color:var(--red)">*</span></label>
-        <input class="fi" type="email" id="cemail" placeholder="your@email.com">
+        <input class="fi" type="email" id="cemail" placeholder="your@email.com" oninput="checkWAReady()">
+        <span id="cemail-err" style="display:none;font-size:11px;color:var(--red);margin-top:3px"></span>
       </div>
       <div class="frow">
         <div class="fg"><label class="fl">Preferred Date <span style="color:var(--red)">*</span></label><input class="fi" type="date" id="cdate"></div>
@@ -1795,6 +1796,8 @@ function setComm(mode){
   }
   var phoneLbl=document.getElementById("phone-optional-label"); if(phoneLbl) phoneLbl.style.display=mode==="email"?"inline":"none";
   var phoneStar=document.getElementById("phone-required-star"); if(phoneStar) phoneStar.style.display=mode==="email"?"none":"inline";
+  var pe=document.getElementById("cphone-err"); if(pe){pe.textContent="";pe.style.display="none";}
+  var ee=document.getElementById("cemail-err"); if(ee){ee.textContent="";ee.style.display="none";}
   // Update modal subtitle
   var sub = document.getElementById("modal-subtitle");
   if(sub) sub.textContent = mode==="email"
@@ -1813,14 +1816,36 @@ function checkWAReady(){
     addr=addrEl?addrEl.value.trim():"";
   }
   var contactOk = false;
+  var phoneErr = document.getElementById("cphone-err");
+  var emailErr = document.getElementById("cemail-err");
   if(commMode==="wa"){
     var phone=(document.getElementById("cphone")||{}).value||"";
-    contactOk = !!phone.trim();
+    var phVal = phone.trim();
+    if(!phVal){
+      if(phoneErr){phoneErr.textContent="";phoneErr.style.display="none";}
+      contactOk = false;
+    } else if(!/^04\d{8}$/.test(phVal)){
+      if(phoneErr){phoneErr.textContent="Must start with 04 and be 10 digits (e.g. 0412 345 678)";phoneErr.style.display="block";}
+      contactOk = false;
+    } else {
+      if(phoneErr){phoneErr.textContent="";phoneErr.style.display="none";}
+      contactOk = true;
+    }
   } else {
     var email=(document.getElementById("cemail")||{}).value||"";
-    contactOk = !!email.trim() && email.indexOf("@")>0;
+    var emVal = email.trim();
+    if(!emVal){
+      if(emailErr){emailErr.textContent="";emailErr.style.display="none";}
+      contactOk = false;
+    } else if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emVal)){
+      if(emailErr){emailErr.textContent="Enter a valid email address (e.g. name@example.com)";emailErr.style.display="block";}
+      contactOk = false;
+    } else {
+      if(emailErr){emailErr.textContent="";emailErr.style.display="none";}
+      contactOk = true;
+    }
   }
-  var ready = name.trim() && contactOk && date && time && addr;
+  var ready = !!(name.trim() && contactOk && date && time && addr);
   var btn = document.getElementById("wa-send-btn");
   if(btn){ btn.disabled=!ready; btn.style.opacity=ready?"1":"0.55"; }
 }
