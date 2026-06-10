@@ -1031,6 +1031,12 @@ function handleOccChange(sel){
       </table>
     </div>
 
+    <div id="inv-occasion-section" style="display:none">
+      <div class="inv-note">
+        <label>Occasion</label>
+        <span id="inv-occasion-text"></span>
+      </div>
+    </div>
     <div id="inv-note-section" style="display:none">
       <div class="inv-note">
         <label>Note</label>
@@ -2870,8 +2876,7 @@ function generateInvoice(){
   setTimeout(()=>document.getElementById('invoice-preview').scrollIntoView({behavior:'smooth'}),100);
 
   } catch(err) {
-    console.error("generateInvoice ERROR:", err);
-    alert("Invoice error: " + err.message);
+    console.error("generateInvoice ERROR:", err.message, err);
   }
 }
 
