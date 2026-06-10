@@ -616,7 +616,7 @@ html,body{margin:0;padding:0;width:100%}
 }
 
 
-.order-confirm{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem}
+.order-confirm{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:none;align-items:center;justify-content:center;padding:1rem}
 .order-confirm-box{background:var(--cream);border-radius:20px;padding:2rem 1.5rem;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
 
 
@@ -1022,7 +1022,14 @@ function handleOccChange(sel){
         <thead><tr>
           <th>QTY</th><th>DESCRIPTION</th><th>PRICE</th><th>TOTAL</th>
         </tr>
-  <tr id="inv-discount-row" style="display:none;color:#2d8a4e"><td colspan="3" style="text-align:right;padding:3px 8px;font-weight:600">Promo Discount</td><td style="padding:3px 8px;font-weight:700" id="inv-discount-amt">-$0.00</td></tr></thead>
+  <tr id="inv-tier-row" style="display:none;color:#2d8a4e">
+    <td colspan="3" style="text-align:right;padding:3px 8px;font-weight:600" id="inv-tier-lbl">Order Discount</td>
+    <td style="padding:3px 8px;font-weight:700;color:#2d8a4e" id="inv-tier-amt">-$0</td>
+  </tr>
+  <tr id="inv-promo-row" style="display:none;color:#1565c0">
+    <td colspan="3" style="text-align:right;padding:3px 8px;font-weight:600" id="inv-promo-lbl">Promo Discount</td>
+    <td style="padding:3px 8px;font-weight:700;color:#1565c0" id="inv-promo-amt">-$0.00</td>
+  </tr></thead>
         <tbody id="inv-items-body"></tbody>
       </table>
     </div>
@@ -1200,7 +1207,14 @@ function handleOccChange(sel){
 
       <div class="tots">
         <div class="trow"><span>Subtotal</span><span id="tsub">$0.00</span></div>
-        <div class="trow" id="tots-discount-row" style="display:none;color:#2d8a4e"><span id="tots-discount-label">Discount</span><span id="tots-discount-amt">-$0.00</span></div>
+        <div class="trow" id="tier-discount-row" style="display:none;color:#2d8a4e">
+          <span id="tier-discount-label">Order Discount</span>
+          <span id="tier-discount-amt">-$0.00</span>
+        </div>
+        <div class="trow" id="promo-discount-row" style="display:none;color:#2d8a4e">
+          <span id="promo-discount-label">Promo Discount</span>
+          <span id="promo-discount-amt">-$0.00</span>
+        </div>
         <div class="trow" id="free-item-row" style="display:none;color:#2d8a4e"><span id="free-item-label">Free Item</span><span>complimentary</span></div>
         <div class="trow"><span>Delivery</span><span id="tdel">Free (pickup)</span></div>
         <div class="trow tbig"><span>Total</span><span id="ttotal">$0.00</span></div>
@@ -1631,18 +1645,36 @@ function updTotals(){
     else if(activePromo.type==="fixed") promoDiscount=Math.min(activePromo.value,sub);
   }
   discount=tierDiscount+promoDiscount;
+  // Tier discount row
+  var tierRow=document.getElementById("tier-discount-row");
+  var tierAmt=document.getElementById("tier-discount-amt");
+  var tierLbl=document.getElementById("tier-discount-label");
+  if(tierRow) tierRow.style.display=tierDiscount>0?"flex":"none";
+  if(tierAmt) tierAmt.textContent="-$"+tierDiscount.toFixed(2);
+  if(tierLbl&&tierDiscount>0){
+    var tierLabel='Order Discount';
+    if(sub>=400) tierLabel='Order Discount ($30 off orders $400+)';
+    else if(sub>=300) tierLabel='Order Discount ($20 off orders $300+)';
+    else if(sub>=200) tierLabel='Order Discount ($15 off orders $200+)';
+    else if(sub>=150) tierLabel='Order Discount ($10 off orders $150+)';
+    else if(sub>=100) tierLabel='Order Discount ($5 off orders $100+)';
+    tierLbl.textContent=tierLabel;
+  }
+  // Promo discount row
+  var promoRow=document.getElementById("promo-discount-row");
+  var promoAmt=document.getElementById("promo-discount-amt");
+  var promoLbl=document.getElementById("promo-discount-label");
+  if(promoRow) promoRow.style.display=promoDiscount>0?"flex":"none";
+  if(promoAmt) promoAmt.textContent="-$"+promoDiscount.toFixed(2);
+  if(promoLbl&&activePromo) promoLbl.textContent=(activePromo.label||'Promo Discount');
+  // Legacy single row (keep for compatibility)
   var discEl=document.getElementById("tdiscount");
   var discLabel=document.getElementById("discount-label");
   var totsDiscRow=document.getElementById("tots-discount-row");
   var totsDiscAmt=document.getElementById("tots-discount-amt");
   if(discEl) discEl.textContent="-$"+discount.toFixed(2);
-  var discLabelText = '';
-  if(tierDiscount>0&&promoDiscount>0) discLabelText='Order Discount + '+activePromo.label;
-  else if(tierDiscount>0) discLabelText='Order Discount ($'+tierDiscount+' off)';
-  else if(activePromo) discLabelText=activePromo.label||'Discount';
-  if(discLabel) discLabel.textContent=discLabelText;
-  if(totsDiscRow) totsDiscRow.style.display=discount>0?"flex":"none";
-  if(totsDiscAmt) totsDiscAmt.textContent="-$"+discount.toFixed(2);
+  if(discLabel) discLabel.textContent=discount>0?'Total Discount':'Discount';
+  if(totsDiscRow) totsDiscRow.style.display="none";
   const total=sub-discount+delCharge;
   const dep=Math.round(total*0.4);
   function setTxt(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
@@ -1834,6 +1866,18 @@ function sendWA(){
     ...a.map(i=>`  • ${i.qty}× ${i.name}${i.size} — $${(i.qty*i.price).toFixed(2)}`),
     '',`*Subtotal:* $${sub.toFixed(2)}`,
     delCharge>0?`*Delivery:* $${delCharge.toFixed(2)} (est.)`:'*Delivery:* Free (Pickup)',
+    ...(function(){
+      var a=Object.values(cart).filter(function(x){return x.qty>0;});
+      var s=a.reduce(function(t,x){return t+x.qty*x.price;},0);
+      var td=0,pd=0;
+      if(typeof PROMO_CODES._tiers!=='undefined'){var trs=PROMO_CODES._tiers;for(var t=0;t<trs.length;t++){if(s>=trs[t].minOrder){td=trs[t].discount;break;}}}
+      if(typeof activePromo!=='undefined'&&activePromo){if(activePromo.type==='percent')pd=s*(activePromo.value/100);else if(activePromo.type==='fixed')pd=Math.min(activePromo.value,s);}
+      var lines=[];
+      if(td>0) lines.push('*Order Discount:* -$'+td+' ('+
+        (s>=400?'$30 off orders $400+':s>=300?'$20 off orders $300+':s>=200?'$15 off orders $200+':s>=150?'$10 off orders $150+':'$5 off orders $100+')+')');
+      if(pd>0) lines.push('*Promo Discount ('+activePromo.code+'):* -$'+pd.toFixed(2));
+      return lines;
+    })(),
     `*Estimated Total:* $${total.toFixed(2)}`,
     `*40% Deposit (on acceptance):* $${Math.round(total*0.4)}`,
     notes?`
@@ -2153,6 +2197,14 @@ function sendInvoiceEmail(toEmail, order){
       +"</tr>";
   }).join("");
 
+  // Discount calculations for email
+  var tierDisc=0;
+  if(typeof PROMO_CODES._tiers!=='undefined'){var trs=PROMO_CODES._tiers;for(var ti=0;ti<trs.length;ti++){if(tot>=trs[ti].minOrder){tierDisc=trs[ti].discount;break;}}}
+  var tierDiscLabel=tierDisc>0?(tierDisc===30?'$30 off orders $400+':tierDisc===20?'$20 off orders $300+':tierDisc===15?'$15 off orders $200+':tierDisc===10?'$10 off orders $150+':'$5 off orders $100+'):'';
+  var promoDisc=0;
+  var activePromoLocal=null;
+  try{activePromoLocal=JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(e){}
+  if(activePromoLocal){if(activePromoLocal.type==='percent')promoDisc=tot*(activePromoLocal.value/100);else if(activePromoLocal.type==='fixed')promoDisc=Math.min(activePromoLocal.value,tot);}
   var params = {
     to_email:       toEmail,
     reply_to:       "sirikitchen18@gmail.com",
@@ -2171,6 +2223,8 @@ function sendInvoiceEmail(toEmail, order){
     notes:          invNote||"",
     items_html:     itemsHtml,
     total:          tot.toFixed(2),
+    tier_discount:  tierDisc>0?('-$'+tierDisc+' ('+tierDiscLabel+')'):'',
+    promo_discount: promoDisc>0?('-$'+promoDisc.toFixed(2)+' ('+(activePromoLocal?activePromoLocal.label:'Promo')+')'):'',
     advance:        String(Math.round(adv)),
     remaining:      String(Math.round(rem))
   };
