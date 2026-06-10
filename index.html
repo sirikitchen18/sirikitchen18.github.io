@@ -237,8 +237,8 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .overlay.on{display:flex}
 .modal{background:var(--cream);width:100%;max-width:540px;max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;margin:0 auto;box-sizing:border-box}
 .mhandle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
-.mhdr{background:var(--red);padding:1.25rem 1.5rem 1rem;position:sticky;top:0;z-index:10}
-.mbody{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:0}
+.mhdr{background:var(--red);padding:1.25rem 1.5rem 1rem;position:sticky;top:0;z-index:10;flex-shrink:0}
+.mbody{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:0;width:100%;box-sizing:border-box}
 .wa-sticky-footer{padding:14px 1.25rem;padding-bottom:calc(14px + env(safe-area-inset-bottom));background:var(--cream);border-top:1px solid var(--border);flex-shrink:0}
 .wa-sticky-footer .wabtn{margin-top:0}
 
@@ -629,7 +629,7 @@ html,body{margin:0;padding:0;width:100%}
 .cart-item-price{font-size:12px;font-weight:700;color:var(--sub);white-space:nowrap;flex-shrink:0}
 
 
-.form-group{background:#fff;border-radius:12px;border:1px solid rgba(201,151,58,0.15);padding:14px 16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(139,37,0,0.05)}
+.form-group{background:#fff;border-radius:12px;border:1px solid rgba(201,151,58,0.15);padding:14px 16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(139,37,0,0.05);box-sizing:border-box;width:100%;overflow-x:hidden}
 .form-group-title{font-size:13px;font-weight:800;color:var(--red);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;padding-bottom:8px;border-bottom:1px solid rgba(201,151,58,0.15)}
 
 .oline-remove{background:#fff0f0;border:1.5px solid #ffcccc;color:#e05555;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;font-weight:800;flex-shrink:0;transition:all .15s;line-height:1;padding:0;margin-left:6px}
@@ -2222,7 +2222,7 @@ function sendInvoiceEmail(toEmail, order){
     service_type:   serviceType,
     notes:          invNote||"",
     items_html:     itemsHtml,
-    total:          tot.toFixed(2),
+    total:          netTot.toFixed(2),
     tier_discount:  tierDisc>0?('- $'+tierDisc+' ('+tierDiscLabel+')'):' ',
     promo_discount: promoDisc>0?('- $'+promoDisc.toFixed(2)+' ('+(activePromoLocal?activePromoLocal.label:'Promo')+')'):'  ',
     advance:        String(Math.round(adv)),
@@ -2302,6 +2302,20 @@ window.sendWA = function() {
   var a = Object.values(cart).filter(function(x){return x.qty>0;});
   var sub = a.reduce(function(s,x){return s+x.qty*x.price;},0);
   var tot = sub + delCharge;
+  // Tier discount
+  var tierDisc=0, tierDiscLabel='';
+  if(typeof PROMO_CODES!=='undefined'&&PROMO_CODES._tiers){
+    var _trs=PROMO_CODES._tiers;
+    for(var _ti=0;_ti<_trs.length;_ti++){if(sub>=_trs[_ti].minOrder){tierDisc=_trs[_ti].discount;break;}}
+    if(tierDisc>0) tierDiscLabel=tierDisc===30?'$30 off orders $400+':tierDisc===20?'$20 off orders $300+':tierDisc===15?'$15 off orders $200+':tierDisc===10?'$10 off orders $150+':'$5 off orders $100+';
+  }
+  // Promo discount
+  var promoDisc=0, activePromoLocal=null;
+  try{activePromoLocal=JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(_e){}
+  if(activePromoLocal){if(activePromoLocal.type==='percent')promoDisc=sub*(activePromoLocal.value/100);else if(activePromoLocal.type==='fixed')promoDisc=Math.min(activePromoLocal.value,sub);}
+  var netTot = tot - tierDisc - promoDisc;
+  var adv = Math.round(netTot*0.4);
+  var rem = Math.round(netTot - adv);
 
   var od = {
     name:name, phone:phone||"", email:email||"", commMode:comm,
@@ -2389,8 +2403,10 @@ window.sendWA = function() {
     items:          [{name:itemsText,qty:"",price:""}],
     items_text:     itemsText,
     items_html:     itemsHtml,
-    total:          tot.toFixed(2),
-    advance:        String(Math.round(tot*0.4)),
+    total:          netTot.toFixed(2),
+    advance:        String(Math.round(netTot*0.4)),
+    tier_discount:  tierDisc>0?("- $"+tierDisc+" ("+tierDiscLabel+")"):" ",
+    promo_discount: promoDisc>0?("- $"+promoDisc.toFixed(2)+" ("+(activePromoLocal?activePromoLocal.label:"Promo")+")"):"  ",
     approval_link:  acceptLink,
     reject_link:    declineLink
   };
@@ -3204,6 +3220,19 @@ function sendEmail(){
   var a   = Object.values(cart).filter(function(x){return x.qty>0;});
   var sub = a.reduce(function(s,x){return s+x.qty*x.price;},0);
   var tot = sub + delCharge;
+  // Discount calcs
+  var tierDisc=0,tierDiscLabel='';
+  if(typeof PROMO_CODES!=='undefined'&&PROMO_CODES._tiers){
+    var _trs=PROMO_CODES._tiers;
+    for(var _ti=0;_ti<_trs.length;_ti++){if(sub>=_trs[_ti].minOrder){tierDisc=_trs[_ti].discount;break;}}
+    if(tierDisc>0)tierDiscLabel=tierDisc===30?'$30 off orders $400+':tierDisc===20?'$20 off orders $300+':tierDisc===15?'$15 off orders $200+':tierDisc===10?'$10 off orders $150+':'$5 off orders $100+';
+  }
+  var promoDisc=0,activePromoLocal=null;
+  try{activePromoLocal=JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(_e){}
+  if(activePromoLocal){if(activePromoLocal.type==='percent')promoDisc=sub*(activePromoLocal.value/100);else if(activePromoLocal.type==='fixed')promoDisc=Math.min(activePromoLocal.value,sub);}
+  var netTot=tot-tierDisc-promoDisc;
+  var adv=Math.round(netTot*0.4);
+  var rem=Math.round(netTot-adv);
 
   var od = {
     name:name, phone:phone||"", email:email||"", commMode:"email",
@@ -3294,14 +3323,17 @@ function sendEmail(){
     items:          [{name:itemsText, qty:"", price:""}],
     items_text:     itemsText,
     items_html:     itemsHtml,
-    total:          tot.toFixed(2),
-    advance:        String(Math.round(tot*0.4)),
+    total:          netTot.toFixed(2),
+    advance:        String(Math.round(netTot*0.4)),
+    tier_discount:  tierDisc>0?("- $"+tierDisc+" ("+tierDiscLabel+")"):" ",
+    promo_discount: promoDisc>0?("- $"+promoDisc.toFixed(2)+" ("+(activePromoLocal?activePromoLocal.label:"Promo")+")"):"  ",
     approval_link:  acceptLink,
     reject_link:    declineLink
   };
 
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
     .then(function(){
+      setTimeout(showConfirm, 500);
       if(ebtn){
         ebtn.innerHTML="&#10003; Order Sent!";
         ebtn.style.background="#2d8a4e";
