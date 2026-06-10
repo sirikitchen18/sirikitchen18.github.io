@@ -1,0 +1,23 @@
+{
+  "_legend": {
+    "best": "\ud83c\udfc6 Best Seller",
+    "chef": "\ud83d\udc68\u200d\ud83c\udf73 Chef's Special",
+    "popular": "\ud83d\udd25 Popular"
+  },
+  "_note": "Use item names exactly as they appear in the menu. You can also use item IDs (e.g. k3) as fallback.",
+  "tags": {
+    "Chicken Tikka": "best",
+    "Mutton Seekh Kebab (Goat)": "best",
+    "Gulab Jamun": "best",
+    "Chicken Changezi": "chef",
+    "Kosha Mangsho (Slow-Cooked Spicy Goat)": "chef",
+    "Basanti Pulao": "chef",
+    "Dhokar Dalna": "chef",
+    "Mutton Bhuna Gosht (Goat)": "chef",
+    "HaraBhara Kebab (Veg)": "popular",
+    "Paneer Tikka (Veg)": "popular",
+    "Lacchedar Paratha": "popular",
+    "Egg Devil": "best",
+    "Chicken 65 Biryani": "chef"
+  }
+}
