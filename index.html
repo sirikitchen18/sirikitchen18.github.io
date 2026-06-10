@@ -225,7 +225,7 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .del-bar{background:#fdf0e4;padding:8px 1rem;font-size:12px;color:var(--sub);text-align:center;border-top:1px solid var(--border);line-height:1.5;margin-bottom:0}
 
 /* ── CART BAR (fixed) ───────────────────────────────── */
-.cart-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:3px solid var(--red);padding:12px 1.25rem;padding-bottom:calc(12px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px rgba(0,0,0,0.18);z-index:999;display:none}
+.cart-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:3px solid var(--red);padding:8px 1.25rem;padding-bottom:calc(8px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px rgba(0,0,0,0.18);z-index:999;display:none}
 .cart-bar.on{display:block}
 .cart-btn-full{width:100%;background:var(--red);color:#fff;border:none;border-radius:14px;padding:15px 20px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;justify-content:space-between;align-items:center;touch-action:manipulation}
 .cart-btn-full:active{background:var(--red2)}
@@ -650,6 +650,29 @@ html,body{margin:0;padding:0;width:100%}
 #invoice-preview *{box-sizing:border-box;max-width:100%}
 #invoice-preview table{width:100%;table-layout:fixed}
 
+
+/* ── BANNER PHONE OVERLAY ───────────────────────────────── */
+.banner-phone-link{
+  position:absolute;
+  /* adjust these to sit over the phone number on your banner */
+  bottom:12%;right:3%;
+  color:transparent;
+  font-size:1px;
+  text-decoration:none;
+  width:22%;height:8%;
+  display:block;
+  cursor:pointer;
+  border-radius:4px;
+}
+.banner-phone-link:hover,.banner-phone-link:focus{
+  background:rgba(255,255,255,0.15);
+  outline:2px dashed rgba(255,255,255,0.6);
+}
+/* mobile banner phone — position may differ */
+.mob-banner-phone-link{
+  bottom:10%;right:2%;
+  width:50%;height:7%;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
@@ -695,12 +718,16 @@ function handleOccChange(sel){
 </div>
 
 <!-- HERO -->
-<div class="hero-img-wrap">
+<div class="hero-img-wrap" style="position:relative;">
   <img src="images/banner-desktop.jpg" alt="Siri Kitchen Banner" class="hero-img">
+  <a href="tel:0432237104" class="banner-phone-link" aria-label="Call 0432 237 104">0432 237 104</a>
 </div>
 
 <!-- MOBILE HERO (shown ≤600px only) -->
-<div class="mob-hero"><img src="images/banner-mobile.jpg" alt="Siri Kitchen" class="mob-banner-img"></div>
+<div class="mob-hero" style="position:relative;">
+  <img src="images/banner-mobile.jpg" alt="Siri Kitchen" class="mob-banner-img">
+  <a href="tel:0432237104" class="banner-phone-link mob-banner-phone-link" aria-label="Call 0432 237 104">0432 237 104</a>
+</div>
 
 <!-- CATEGORY NAV -->
 <div class="search-wrap" id="search-wrap">
@@ -1175,7 +1202,7 @@ function handleOccChange(sel){
       <div class="mlabel">Your Details</div>
       <div class="frow">
         <div class="fg"><label class="fl">Full Name <span style="color:var(--red)">*</span></label><input class="fi" type="text" id="cname" placeholder="Your name"></div>
-        <div class="fg"><label class="fl">Phone <span style="color:var(--red)" id="phone-required-star">*</span> <span id="phone-optional-label" style="font-size:11px;font-weight:400;color:#aaa;font-style:italic;display:none">(optional)</span></label><input class="fi" type="tel" id="cphone" placeholder="04xx xxx xxx" id="cphone-wrap"></div>
+        <div class="fg"><label class="fl">Phone <span style="color:var(--red)" id="phone-required-star">*</span> <span id="phone-optional-label" style="font-size:11px;font-weight:400;color:#aaa;font-style:italic;display:none">(optional)</span></label><input class="fi" type="tel" id="cphone" placeholder="04xx xxx xxx" maxlength="10" inputmode="numeric" id="cphone-wrap" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"></div>
       </div>
       <div class="fg" id="cemail-wrap" style="display:none;margin-bottom:10px">
         <label class="fl">Email Address <span style="color:var(--red)">*</span></label>
@@ -1841,7 +1868,9 @@ function sendWA(){
   const date=document.getElementById('cdate').value;
   const time=document.getElementById('ctime').value;
   const notes=document.getElementById('cnotes').value.trim();
-  if(!name||!phone){alert('Please enter your name and phone number.');return;}
+  if(!name){alert('Please enter your name.');return;}
+  if(!phone){alert('Please enter your phone number.');return;}
+  if(!/^04\d{8}$/.test(phone)){alert('Please enter a valid Australian mobile number starting with 04 (10 digits, e.g. 0412 345 678).');return;}
   const addr=document.getElementById('daddr').value.trim();
   if(delType==='delivery'&&!addr){alert('Please enter your delivery address.');return;}
   const a=Object.values(cart).filter(c=>c.qty>0);
@@ -2323,8 +2352,8 @@ window.sendWA = function() {
   var promoDisc=0, activePromoLocal=null;
   try{activePromoLocal=JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(_e){}
   if(!activePromoLocal&&typeof activePromo!=='undefined'&&activePromo) activePromoLocal=activePromo;
-  if(!activePromoLocal&&od&&od.promo) activePromoLocal=od.promo;
-  if(activePromoLocal){if(activePromoLocal.type==='percent')promoDisc=sub*(activePromoLocal.value/100);else if(activePromoLocal.type==='fixed')promoDisc=Math.min(activePromoLocal.value,sub);}
+  if(!activePromoLocal&&typeof activePromo!=='undefined'&&activePromo) activePromoLocal=activePromo;
+
   var netTot = tot - tierDisc - promoDisc;
   var adv = Math.round(netTot*0.4);
   var rem = Math.round(netTot - adv);
@@ -2333,7 +2362,7 @@ window.sendWA = function() {
   var od = {
     name:name, phone:phone||"", email:email||"", commMode:comm,
     date:date, time:time, notes:notes,
-    occasion: occasionValOD||localStorage.getItem('sk_occasion')||'',
+    occasion: localStorage.getItem('sk_occasion')||'',
     addr: delType==="delivery" ? addr : "Pickup from Tarneit",
     delType:delType, delCharge:delCharge, distKm:Math.round(km*1.3),
     id:"ORD-"+Date.now(), receivedAt:new Date().toISOString(), status:"pending",
@@ -3332,7 +3361,9 @@ function sendEmail(){
   var notes = document.getElementById("cnotes").value.trim();
   var occasionVal = (function(){ var el=document.getElementById("occ-select"); if(!el) return ""; var v=el.value; if(v==="Other"){ var oi=document.getElementById("occ-other-input"); return oi?oi.value.trim():""; } return v; })();
   if(!name){alert("Please enter your name.");return;}
-  if(!email||email.indexOf("@")<0){alert("Please enter a valid email address.");return;}
+  if(!phone){alert("Please enter your phone number.");return;}
+  if(!/^04\d{8}$/.test(phone)){alert("Please enter a valid Australian mobile number starting with 04 (10 digits, e.g. 0412 345 678).");return;}
+  if(!email||!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)){alert("Please enter a valid email address (e.g. name@example.com).");return;}
   var addrEl = document.getElementById("daddr");
   var addr   = addrEl ? addrEl.value.trim() : "";
   if(delType==="delivery"&&!addr){alert("Please enter your delivery address.");return;}
