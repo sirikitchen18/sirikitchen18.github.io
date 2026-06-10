@@ -236,7 +236,7 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:flex-end;justify-content:center;z-index:9999;padding:0}
 .overlay.on{display:flex}
 .modal{background:var(--cream);width:100%;max-width:540px;max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;margin:0 auto;box-sizing:border-box}
-.mhandle{width:36px;height:4px;background:rgba(255,255,255,0.4);border-radius:2px;margin:0 auto;position:absolute;top:8px;left:50%;transform:translateX(-50%)}
+.mhandle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
 .mhdr{background:var(--red);padding:1.25rem 1.5rem 1rem;position:sticky;top:0;z-index:10;flex-shrink:0}
 .mbody{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:0;width:100%;box-sizing:border-box}
 .wa-sticky-footer{padding:14px 1.25rem;padding-bottom:calc(14px + env(safe-area-inset-bottom));background:var(--cream);border-top:1px solid var(--border);flex-shrink:0}
@@ -647,9 +647,8 @@ html,body{margin:0;padding:0;width:100%}
 .item-tag-popular{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
 
 </style>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
-
-
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
 function handleOccChange(sel){
   var other = document.getElementById('occ-other-input');
   if(sel.value === 'Other'){
@@ -660,7 +659,6 @@ function handleOccChange(sel){
     other.value = '';
   }
 }
-
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
@@ -1106,6 +1104,7 @@ function handleOccChange(sel){
     </div>
     <button onclick="closeConfirm()" style="background:var(--red);color:#fff;border:none;border-radius:50px;padding:13px 0;font-size:15px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;width:100%">Back to Menu</button>
   </div>
+</div>
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="mhandle"></div>
@@ -1828,7 +1827,18 @@ function closeModal(){
   var fr=document.getElementById("free-item-row"); if(fr) fr.style.display="none";var ov=document.getElementById('overlay');ov.classList.remove('on');ov.style.display='none';}
 document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
 
-// Google Sites iframe scroll removed - was hiding modal
+// Ensure overlay works in Google Sites iframe
+(function(){
+  const ov = document.getElementById('overlay');
+  // When modal opens, try to scroll it into view
+  const origOpen = window.openModal;
+  window.openModal = function(){
+    origOpen();
+    setTimeout(()=>{
+      try{ window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); }catch(e){}
+    }, 100);
+  };
+})();
 
 // ── WHATSAPP ─────────────────────────────────────────
 function sendWA(){
@@ -1907,9 +1917,8 @@ function sendWA(){
   var dLink=NETLIFY_URL+'?decline='+od.id+'&name='+encodeURIComponent(name)+'&phone='+encodeURIComponent(phone)+'&date='+encodeURIComponent(date||'');
   msg.push('');msg.push('--- ADMIN ONLY ---');msg.push('Accept & Send Invoice:');msg.push(aLink);msg.push('');msg.push('Not Available:');msg.push(dLink);
   window.open('https://wa.me/61432237104?text='+encodeURIComponent(msg.join('\n')),'_blank');
-  // Show confirmation when user returns from WhatsApp tab
-  pendingConfirm = true;
-  setTimeout(function(){ if(pendingConfirm){ pendingConfirm=false; showConfirm(); } }, 1500);
+  pendingConfirm=true;
+  setTimeout(function(){if(pendingConfirm){pendingConfirm=false;showConfirm();}},1500);
 }
 
 // ── TAB NAV ──────────────────────────────────────────
@@ -2420,7 +2429,12 @@ window.sendWA = function() {
 
   emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, adminParams)
     .then(function(){
-      // Admin email sent - confirmation already shown via pendingConfirm
+      if(btn){
+        btn.innerHTML="&#10003; Order Request Sent!";
+        btn.style.background="#128C7E";
+        btn.disabled=true;
+        btn.style.opacity="0.85";
+      }
     })
     .catch(function(err){
       console.error("EmailJS error:",err);
@@ -3924,10 +3938,10 @@ function removeOline(id){
 
 
 // ── ORDER CONFIRMATION TRIGGER ───────────────────────────────────────────────
-var pendingConfirm = false;
-document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState === 'visible' && pendingConfirm){
-    pendingConfirm = false;
+var pendingConfirm=false;
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'&&pendingConfirm){
+    pendingConfirm=false;
     showConfirm();
   }
 });
@@ -3935,19 +3949,6 @@ document.addEventListener('visibilitychange', function(){
 </script>
 
 <!-- ORDER CONFIRMATION OVERLAY -->
-<div class="order-confirm" id="order-confirm" style="display:none">
-  <div class="order-confirm-box">
-    <div style="font-size:56px;margin-bottom:12px">✅</div>
-    <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--red);margin-bottom:10px">Order Sent!</h2>
-    <p style="font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:16px">Thank you! We'll review your order and get back to you via <strong>WhatsApp or Email within 24 hours</strong> to confirm or suggest an alternative.</p>
-    <div style="background:#fff;border-radius:12px;padding:14px;border:1px solid rgba(201,151,58,0.2);margin-bottom:20px;text-align:left">
-      <div style="display:flex;gap:10px;align-items:center;padding:5px 0;font-size:13px;color:var(--sub)">📋 <span>Order received by Siri Kitchen</span></div>
-      <div style="display:flex;gap:10px;align-items:center;padding:5px 0;font-size:13px;color:var(--sub)">✉️ <span>We'll confirm via WhatsApp</span></div>
-      <div style="display:flex;gap:10px;align-items:center;padding:5px 0;font-size:13px;color:var(--sub)">🧾 <span>Invoice sent on acceptance</span></div>
-      <div style="display:flex;gap:10px;align-items:center;padding:5px 0;font-size:13px;color:var(--sub)">🍽️ <span>We lovingly prepare your order</span></div>
-    </div>
-    <button onclick="closeConfirm()" style="background:var(--red);color:#fff;border:none;border-radius:50px;padding:13px 0;font-size:15px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;width:100%">Back to Menu</button>
-  </div>
-</div>
+
 </body>
 </html>
