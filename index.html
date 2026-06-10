@@ -2410,7 +2410,9 @@ window.sendWA = function() {
     "&dl="+encodeURIComponent(delType)+
     "&dc="+delCharge+
     "&it="+encodeURIComponent(itemsCompact)+
-    (notes?"&nt="+encodeURIComponent(notes):"");
+    (notes?"&nt="+encodeURIComponent(notes):"")+
+    (od.promo?"&pr="+encodeURIComponent(JSON.stringify(od.promo)):"")+
+    (od.occasion?"&oc="+encodeURIComponent(od.occasion):"");
   var declineLink = NETLIFY_URL+
     "?decline="+od.id+
     "&name="+encodeURIComponent(name)+
@@ -3269,6 +3271,8 @@ function sendAcceptWA(){
                 return{qty:parseInt(parts[0])||1,name:decodeURIComponent(parts[1]||""),size:"",price:parseFloat(parts[2])||0};
               });
             }
+            var _prParam=params.get("pr");
+            var _promo=null;try{if(_prParam)_promo=JSON.parse(decodeURIComponent(_prParam));}catch(e){}
             var order={
               id:oid, status:"pending",
               name:decodeURIComponent(params.get("n")||""),
@@ -3281,6 +3285,8 @@ function sendAcceptWA(){
               delType:decodeURIComponent(params.get("dl")||"pickup"),
               delCharge:parseFloat(params.get("dc")||0),
               notes:decodeURIComponent(params.get("nt")||""),
+              occasion:decodeURIComponent(params.get("oc")||""),
+              promo:_promo,
               items:items,
               receivedAt:new Date().toISOString()
             };
@@ -3441,7 +3447,9 @@ function sendEmail(){
     "&dl="+encodeURIComponent(delType)+
     "&dc="+delCharge+
     "&it="+encodeURIComponent(itemsCompact)+
-    (notes?"&nt="+encodeURIComponent(notes):"");
+    (notes?"&nt="+encodeURIComponent(notes):"")+
+    (od.promo?"&pr="+encodeURIComponent(JSON.stringify(od.promo)):"")+
+    (od.occasion?"&oc="+encodeURIComponent(od.occasion):"");
   var declineLink = NETLIFY_URL+
     "?decline="+od.id+
     "&name="+encodeURIComponent(name)+
