@@ -2785,19 +2785,27 @@ function generateInvoice(){
   document.getElementById('inv-del').textContent = '$ '+del.toFixed(2);
   // Tier discount row in generated invoice
   var tierGenRow = document.getElementById('inv-tier-gen-row');
-  if(tierDiscount>0){
-    if(!tierGenRow){
-      var grandRowT = document.getElementById('inv-total').closest('.inv-tot-row');
+  if(!tierGenRow){
+    // Create tier row and insert before Grand Total row
+    var grandEl = document.getElementById('inv-total');
+    var grandRow = grandEl ? grandEl.parentNode : null;
+    if(grandRow && grandRow.parentNode){
       var tr2 = document.createElement('div');
-      tr2.className='inv-tot-row'; tr2.id='inv-tier-gen-row'; tr2.style.color='#2d8a4e';
-      tr2.innerHTML='<span>Order Discount ('+tierLabel+')</span><span>- $ '+tierDiscount.toFixed(2)+'</span>';
-      grandRowT.parentNode.insertBefore(tr2, grandRowT);
-    } else {
-      tierGenRow.style.display='flex';
-      tierGenRow.querySelector('span:last-child').textContent='- $ '+tierDiscount.toFixed(2);
-      tierGenRow.querySelector('span:first-child').textContent='Order Discount ('+tierLabel+')';
+      tr2.className='inv-tot-row'; tr2.id='inv-tier-gen-row'; tr2.style.cssText='display:none;color:#2d8a4e';
+      tr2.innerHTML='<span></span><span></span>';
+      grandRow.parentNode.insertBefore(tr2, grandRow);
+      tierGenRow = tr2;
     }
-  } else if(tierGenRow){ tierGenRow.style.display='none'; }
+  }
+  if(tierGenRow){
+    if(tierDiscount>0){
+      tierGenRow.style.display='flex';
+      tierGenRow.querySelector('span:first-child').textContent='Order Discount ('+tierLabel+')';
+      tierGenRow.querySelector('span:last-child').textContent='- $ '+tierDiscount.toFixed(2);
+    } else {
+      tierGenRow.style.display='none';
+    }
+  }
   // Show discount row in invoice if applicable
   var discRow = document.getElementById('inv-discount-row');
   if(!discRow && discount>0){
