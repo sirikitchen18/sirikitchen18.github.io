@@ -236,7 +236,7 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:flex-end;justify-content:center;z-index:9999;padding:0}
 .overlay.on{display:flex}
 .modal{background:var(--cream);width:100%;max-width:540px;max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;margin:0 auto;box-sizing:border-box}
-.mhandle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.mhandle{width:36px;height:4px;background:rgba(255,255,255,0.35);border-radius:2px;margin:0 auto 10px;position:relative}
 .mhdr{background:var(--red);padding:1.25rem 1.5rem 1rem;position:sticky;top:0;z-index:10;flex-shrink:0}
 .mbody{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:0;width:100%;box-sizing:border-box}
 .wa-sticky-footer{padding:14px 1.25rem;padding-bottom:calc(14px + env(safe-area-inset-bottom));background:var(--cream);border-top:1px solid var(--border);flex-shrink:0}
@@ -1107,8 +1107,8 @@ function handleOccChange(sel){
 </div>
 <div class="overlay" id="overlay">
   <div class="modal">
-    <div class="mhandle"></div>
     <div class="mhdr">
+      <div class="mhandle"></div>
       <h2>Complete Your Order</h2>
       <p id="modal-subtitle">Review and submit via WhatsApp</p>
       <button class="mclose" onclick="closeModal()">✕</button>
@@ -1917,8 +1917,7 @@ function sendWA(){
   var dLink=NETLIFY_URL+'?decline='+od.id+'&name='+encodeURIComponent(name)+'&phone='+encodeURIComponent(phone)+'&date='+encodeURIComponent(date||'');
   msg.push('');msg.push('--- ADMIN ONLY ---');msg.push('Accept & Send Invoice:');msg.push(aLink);msg.push('');msg.push('Not Available:');msg.push(dLink);
   window.open('https://wa.me/61432237104?text='+encodeURIComponent(msg.join('\n')),'_blank');
-  pendingConfirm=true;
-  setTimeout(function(){if(pendingConfirm){pendingConfirm=false;showConfirm();}},1500);
+  showConfirm();
 }
 
 // ── TAB NAV ──────────────────────────────────────────
@@ -2236,8 +2235,8 @@ function sendInvoiceEmail(toEmail, order){
     notes:          invNote||"",
     items_html:     itemsHtml,
     total:          netTot.toFixed(2),
-    tier_discount:  tierDisc>0?('- $'+tierDisc+' ('+tierDiscLabel+')'):' ',
-    promo_discount: promoDisc>0?('- $'+promoDisc.toFixed(2)+' ('+(activePromoLocal?activePromoLocal.label:'Promo')+')'):'  ',
+    tier_discount:  tierDisc>0?('- $'+tierDisc+' ('+tierDiscLabel+')'):'',
+    promo_discount: promoDisc>0?('- $'+promoDisc.toFixed(2)+' ('+(activePromoLocal?activePromoLocal.label:'Promo')+')'):'',
     advance:        String(Math.round(adv)),
     remaining:      String(Math.round(rem))
   };
@@ -2418,8 +2417,8 @@ window.sendWA = function() {
     items_html:     itemsHtml,
     total:          netTot.toFixed(2),
     advance:        String(Math.round(netTot*0.4)),
-    tier_discount:  tierDisc>0?("- $"+tierDisc+" ("+tierDiscLabel+")"):" ",
-    promo_discount: promoDisc>0?("- $"+promoDisc.toFixed(2)+" ("+(activePromoLocal?activePromoLocal.label:"Promo")+")"):"  ",
+    tier_discount:  tierDisc>0?("- $"+tierDisc+" ("+tierDiscLabel+")"):"",
+    promo_discount: promoDisc>0?("- $"+promoDisc.toFixed(2)+" ("+(activePromoLocal?activePromoLocal.label:"Promo")+")"):"",
     approval_link:  acceptLink,
     reject_link:    declineLink
   };
@@ -3338,8 +3337,8 @@ function sendEmail(){
     items_html:     itemsHtml,
     total:          netTot.toFixed(2),
     advance:        String(Math.round(netTot*0.4)),
-    tier_discount:  tierDisc>0?("- $"+tierDisc+" ("+tierDiscLabel+")"):" ",
-    promo_discount: promoDisc>0?("- $"+promoDisc.toFixed(2)+" ("+(activePromoLocal?activePromoLocal.label:"Promo")+")"):"  ",
+    tier_discount:  tierDisc>0?("- $"+tierDisc+" ("+tierDiscLabel+")"):"",
+    promo_discount: promoDisc>0?("- $"+promoDisc.toFixed(2)+" ("+(activePromoLocal?activePromoLocal.label:"Promo")+")"):"",
     approval_link:  acceptLink,
     reject_link:    declineLink
   };
