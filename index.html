@@ -654,24 +654,24 @@ html,body{margin:0;padding:0;width:100%}
 /* ── BANNER PHONE OVERLAY ───────────────────────────────── */
 .banner-phone-link{
   position:absolute;
-  /* adjust these to sit over the phone number on your banner */
-  bottom:12%;right:3%;
+  /* Desktop banner: phone number right of address line */
+  top:43%;left:57%;
   color:transparent;
   font-size:1px;
   text-decoration:none;
-  width:22%;height:8%;
+  width:14%;height:8%;
   display:block;
   cursor:pointer;
   border-radius:4px;
 }
 .banner-phone-link:hover,.banner-phone-link:focus{
-  background:rgba(255,255,255,0.15);
-  outline:2px dashed rgba(255,255,255,0.6);
+  background:rgba(255,255,255,0.18);
+  outline:2px dashed rgba(255,255,255,0.7);
 }
-/* mobile banner phone — position may differ */
+/* Mobile banner: phone number in right cell of address box */
 .mob-banner-phone-link{
-  bottom:10%;right:2%;
-  width:50%;height:7%;
+  top:63%;left:52%;
+  width:42%;height:7%;
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -2325,6 +2325,7 @@ window.sendWA = function() {
   var time  = document.getElementById("ctime").value;
   var notes = document.getElementById("cnotes").value.trim();
   var occasionVal = (function(){ var el=document.getElementById("occ-select"); if(!el) return ""; var v=el.value; if(v==="Other"){ var oi=document.getElementById("occ-other-input"); return oi?oi.value.trim():""; } return v; })();
+  try{if(occasionVal) localStorage.setItem('sk_occasion',occasionVal); else localStorage.removeItem('sk_occasion');}catch(_e){}
   var comm  = typeof commMode !== "undefined" ? commMode : "wa";
 
   if(!name){alert("Please enter your name.");return;}
@@ -3388,9 +3389,11 @@ function sendEmail(){
   var od = {
     name:name, phone:phone||"", email:email||"", commMode:"email",
     date:date, time:time, notes:notes,
+    occasion: occasionVal||"",
     addr: delType==="delivery" ? addr : "Pickup from Tarneit",
     delType:delType, delCharge:delCharge, distKm:Math.round(km*1.3),
     id:"ORD-"+Date.now(), receivedAt:new Date().toISOString(), status:"pending",
+    promo: activePromoLocal,
     items:a.map(function(x){return{qty:x.qty,name:x.name,size:x.size||"",price:x.price};})
   };
 
@@ -4093,12 +4096,5 @@ document.addEventListener('visibilitychange',function(){
 
 
 <!-- DEBUG: remove before final deploy -->
-<button onclick="
-  var od=localStorage.getItem('sk_pending_order');
-  var promo=localStorage.getItem('sk_active_promo');
-  var occ=localStorage.getItem('sk_occasion');
-  var parsed=od?JSON.parse(od):{};
-  alert('od.promo: '+JSON.stringify(parsed.promo)+'\n\nsk_active_promo: '+promo+'\n\nsk_occasion: '+occ);
-" style="position:fixed;bottom:120px;right:16px;background:#333;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:11px;z-index:9999;cursor:pointer">🔍 Debug</button>
 </body>
 </html>
