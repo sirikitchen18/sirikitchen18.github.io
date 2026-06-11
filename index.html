@@ -91,7 +91,7 @@
   --cream:#fdf5ec;--dark:#1a0800;
 }
 html{font-size:16px;scroll-behavior:smooth;-webkit-tap-highlight-color:transparent;background:#080100}
-body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-height:100vh;-webkit-text-size-adjust:100%;overflow-x:hidden;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-height:100vh;-webkit-text-size-adjust:100%;overflow-x:hidden;overflow-x:hidden;margin:0;padding:0}
 
 /* ── HERO ───────────────────────────────────────────── */
 .hero{padding:0;position:relative;text-align:center}
@@ -362,7 +362,7 @@ textarea.fi{height:76px;resize:vertical;font-size:15px}
 body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-height:100vh;padding:1rem}
 
 /* ── BUILDER UI ── */
-.builder{max-width:720px;margin:0 auto}
+.builder{max-width:720px;margin:0 auto;width:100%;box-sizing:border-box}
 .builder-hdr{background:var(--red);color:#fff;padding:1.25rem 1.5rem;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .builder-hdr h1{font-family:'Playfair Display',serif;font-size:22px;letter-spacing:1px}
 .builder-hdr p{font-size:13px;color:rgba(255,220,160,0.85);margin-top:2px}
@@ -412,7 +412,7 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .btn-wa:hover{background:#1fba58}
 
 /* ── INVOICE PREVIEW ── */
-#invoice-preview{display:none;max-width:720px;margin:2rem auto 0;overflow-x:hidden;width:100%;box-sizing:border-box}
+#invoice-preview{display:none;max-width:720px;margin:2rem auto 0;overflow-x:hidden;width:100%;box-sizing:border-box;padding:0}
 
 .inv{background:#fff;font-family:'Inter',sans-serif;color:#1a1a1a;box-shadow:0 4px 24px rgba(0,0,0,0.12);border-radius:12px;overflow:hidden;width:100%;box-sizing:border-box}
 
@@ -496,8 +496,8 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 
 
 /* MODE TOGGLING */
-.inv-mode{display:none}
-.inv-mode.active{display:block}
+.inv-mode{display:none;overflow-x:hidden;width:100%;box-sizing:border-box}
+.inv-mode.active{display:block;overflow-x:hidden;width:100%;box-sizing:border-box}
 .order-mode.hidden{display:none}
 /* Admin button */
 .admin-trigger{text-align:center;padding:14px;background:var(--bg);border-top:1px solid var(--border)}
@@ -2180,7 +2180,7 @@ function showOrderActions(){
       Review the order above then choose your response:
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button onclick="if(typeof generateInvoice==='function')generateInvoice();updateInvSendBtn();" style="flex:1;background:var(--red);color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;min-width:140px">
+      <button onclick="if(typeof loadFromStorage==='function')loadFromStorage();setTimeout(function(){if(typeof generateInvoice==='function')generateInvoice();updateInvSendBtn();},100);" style="flex:1;background:var(--red);color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;min-width:140px">
         ✅ Generate Invoice
       </button>
       <button onclick="sendDeclineWA()" style="flex:1;background:#fff;color:var(--sub);border:2px solid var(--border);border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;min-width:140px">
