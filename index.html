@@ -620,7 +620,7 @@ html,body{margin:0;padding:0;width:100%}
 .order-confirm-box{background:var(--cream);border-radius:20px;padding:2rem 1.5rem;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
 
 
-.cart-items-list{max-height:140px;overflow-y:auto;border-bottom:1px solid rgba(201,151,58,0.2);scrollbar-width:none}
+.cart-items-list{max-height:140px;overflow-y:auto;border-bottom:1px solid rgba(201,151,58,0.2);scrollbar-width:none;display:none}
 .cart-items-list::-webkit-scrollbar{display:none}
 .cart-item-row{display:flex;align-items:center;gap:6px;padding:5px 1.25rem;border-bottom:1px solid rgba(201,151,58,0.08)}
 .cart-item-row:last-child{border-bottom:none}
@@ -1580,7 +1580,7 @@ function updBar(){
     }
     var _first=a[0].name+(a[0].size?' '+a[0].size:'');
     var _more=a.length>1?' +'+(a.length-1)+' more item'+(a.length-1>1?'s':''):'';
-    document.getElementById('ctotal').textContent=_first+_more+' — $'+sub.toFixed(2);
+    document.getElementById('ctotal').textContent=cnt+(cnt===1?' item':' items')+' — $'+sub.toFixed(2);
   }else{
     cb.classList.remove('on');
     document.body.style.paddingBottom='0';
@@ -2295,7 +2295,7 @@ function sendInvoiceEmail(toEmail, order){
     items_html:     itemsHtml,
     total:          netTot.toFixed(2),
     tier_discount_label: tierDisc>0?('Order Discount ('+tierDiscLabel+')'):'',
-    tier_discount_amt:   tierDisc>0?('- $'+tierDisc):'',
+    tier_discount_amt:   tierDisc>0?('- $'+tierDisc.toFixed(2)):'',
     promo_discount_label: promoDisc>0?((activePromoLocal?activePromoLocal.label:'Promo')+' (Code: '+(activePromoLocal&&activePromoLocal.code?activePromoLocal.code:'applied')+')'):'',
     promo_discount_amt:   promoDisc>0?('- $'+promoDisc.toFixed(2)):'',
     advance:        String(Math.round(adv)),
@@ -2492,7 +2492,7 @@ window.sendWA = function() {
     advance:        String(Math.round(netTot*0.4)),
     remaining:      String(Math.round(netTot - Math.round(netTot*0.4))),
     tier_discount_label: tierDisc>0?("Order Discount ("+tierDiscLabel+")"):"",
-    tier_discount_amt:   tierDisc>0?("- $"+tierDisc):"",
+    tier_discount_amt:   tierDisc>0?("- $"+tierDisc.toFixed(2)):"",
     promo_discount_label: promoDisc>0?((activePromoLocal?activePromoLocal.label:"Promo")+" (Code: "+(activePromoLocal&&activePromoLocal.code?activePromoLocal.code:"applied")+")"):"",
     promo_discount_amt:   promoDisc>0?("- $"+promoDisc.toFixed(2)):"",
     approval_link:  acceptLink,
@@ -3532,7 +3532,7 @@ function sendEmail(){
     advance:        String(Math.round(netTot*0.4)),
     remaining:      String(Math.round(netTot - Math.round(netTot*0.4))),
     tier_discount_label: tierDisc>0?("Order Discount ("+tierDiscLabel+")"):"",
-    tier_discount_amt:   tierDisc>0?("- $"+tierDisc):"",
+    tier_discount_amt:   tierDisc>0?("- $"+tierDisc.toFixed(2)):"",
     promo_discount_label: promoDisc>0?((activePromoLocal?activePromoLocal.label:"Promo")+" (Code: "+(activePromoLocal&&activePromoLocal.code?activePromoLocal.code:"applied")+")"):"",
     promo_discount_amt:   promoDisc>0?("- $"+promoDisc.toFixed(2)):"",
     approval_link:  acceptLink,
