@@ -2283,7 +2283,7 @@ function sendInvoiceEmail(toEmail, order){
     name:           "Siri Kitchen",
     email:          toEmail,
     title:          invNum,
-    message_body:   "Your order has been approved! Please find your invoice below. Pay the 40% advance via PayID to confirm.",
+    message_body:   "Your order has been approved! Please find your invoice below. Pay the 40% advance via PayID to confirm. Once paid, please share the advance payment screenshot.",
     customer_name:  invName,
     customer_phone: invPhone||"—",
     address:        invAddr||"Pickup from Tarneit",
@@ -2944,16 +2944,13 @@ function generateInvoice(){
   }
   var pureNote = invNoteVal.replace(/\nOccasion: .+/, '').replace(/^Occasion: .+\n?/, '').trim();
   if(occasionText){
-    document.getElementById('inv-occasion-section').style.display='block';
-    document.getElementById('inv-occasion-text').textContent = occasionText;
-    var metaOcc = document.getElementById('inv-occasion-meta');
-    var metaOccText = document.getElementById('inv-occasion-meta-text');
-    if(metaOcc) metaOcc.style.display='block';
-    if(metaOccText) metaOccText.textContent = ' '+occasionText;
+    var occSec = document.getElementById('inv-occasion-section'); if(occSec) occSec.style.display='block';
+    var occTxt = document.getElementById('inv-occasion-text'); if(occTxt) occTxt.textContent = occasionText;
+    var metaOcc = document.getElementById('inv-occasion-meta'); if(metaOcc) metaOcc.style.display='block';
+    var metaOccText = document.getElementById('inv-occasion-meta-text'); if(metaOccText) metaOccText.textContent = ' '+occasionText;
   } else {
-    document.getElementById('inv-occasion-section').style.display='none';
-    var metaOcc2 = document.getElementById('inv-occasion-meta');
-    if(metaOcc2) metaOcc2.style.display='none';
+    var occSec2 = document.getElementById('inv-occasion-section'); if(occSec2) occSec2.style.display='none';
+    var metaOcc2 = document.getElementById('inv-occasion-meta'); if(metaOcc2) metaOcc2.style.display='none';
   }
   // Note — show in Order Details meta block
   const note = pureNote;
@@ -2962,10 +2959,10 @@ function generateInvoice(){
   if(note){
     if(noteMeta) noteMeta.style.display='block';
     if(noteMetaText) noteMetaText.textContent=' '+note;
-    document.getElementById('inv-note-section').style.display='none';
+    var ns1=document.getElementById('inv-note-section');if(ns1)ns1.style.display='none';
   }else{
     if(noteMeta) noteMeta.style.display='none';
-    document.getElementById('inv-note-section').style.display='none';
+    var ns2=document.getElementById('inv-note-section');if(ns2)ns2.style.display='none';
   }
 
   // Show invoice
@@ -3018,10 +3015,10 @@ function sendInvoiceWA(){
     `*Advance (40%):* $${adv.toFixed(2)}`,
     `*Remaining after ${delType==='pickup'?'Pickup':'Delivery'}:* $${(total-adv).toFixed(2)}`,``,
     note?`*Note:* ${note}`:``,'',
-    `_To confirm:_`,
+    `_To confirm your order:_`,
     `_1. Pay 40% advance via PayID: 0435 772 552 (Ishrat Parween)_`,
-    `_2. Send payment screenshot to this WhatsApp_`,
-    `_3. Final order confirmation will be sent ✅_`,
+    `_2. Once paid, please share the advance payment screenshot_`,
+    `_3. Final order confirmation will be sent after payment ✅_`,
     ``,
     `_Thank you for choosing Siri Kitchen! 🍽️_`
   ].filter(l=>l!==null&&l!==undefined);
@@ -3628,6 +3625,7 @@ function sendInvoiceViaWhatsApp(phone, order){
     "*Advance (40%):* $"+adv.toFixed(2),"",
     "Please pay the advance via PayID:",
     "*0435 772 552 (Ishrat Parween)*","",
+    "_Once paid, please share the advance payment screenshot ✅_",
     "_Invoice image attached._"
   ].filter(Boolean).join("\n");
 
