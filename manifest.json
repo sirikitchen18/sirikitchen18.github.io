@@ -1,0 +1,26 @@
+{
+  "name": "Siri Kitchen",
+  "short_name": "Siri Kitchen",
+  "description": "Authentic Indian & Bengali home-made food, Tarneit",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7efe4",
+  "theme_color": "#8b2500",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "images/banner-mobile.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/banner-mobile.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["food", "shopping"],
+  "lang": "en-AU"
+}
