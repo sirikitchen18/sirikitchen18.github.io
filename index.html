@@ -4043,12 +4043,21 @@ function restoreCart(){
       return;
     }
     var saved=JSON.parse(localStorage.getItem('sk_cart')||'{}');
-    Object.keys(saved).forEach(function(id){
-      var entry=saved[id];
+    Object.keys(saved).forEach(function(cartKey){
+      var entry=saved[cartKey];
       if(!entry||!entry.qty||entry.qty<=0)return;
-      if(!items[id])return;
-      cart[id]={qty:entry.qty,price:getP(items[id]),name:items[id].n,size:getL(items[id])};
-      var el=document.getElementById('q-'+id);
+      // cartKey may be "id" or "id-f" or "id-j" for fj items
+      var baseId=cartKey.replace(/-[fj]$/,'');
+      if(!items[baseId])return;
+      var item=items[baseId];
+      // Restore size selector for fj items before reading price/size
+      if(item.t==='fj'){
+        var sz=cartKey.endsWith('-j')?'j':'f';
+        var sel=document.getElementById('sz-'+baseId);
+        if(sel) sel.value=sz;
+      }
+      cart[cartKey]={qty:entry.qty,price:getP(item),name:item.n,size:getL(item)};
+      var el=document.getElementById('q-'+baseId);
       if(el){
         el.textContent=entry.qty;
         var card=el.closest('.icard');
@@ -4057,7 +4066,7 @@ function restoreCart(){
     });
     updBar();
     updCatBadges();
-  }catch(e){}
+  }catch(e){console.error('restoreCart error',e);}
 }
 restoreCart();
 
