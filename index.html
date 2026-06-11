@@ -451,9 +451,9 @@ body{font-family:'Nunito',sans-serif;background:#f7efe4;color:var(--text);min-he
 .inv-tbl tfoot td{padding:10px 12px;font-size:13px}
 
 /* Totals */
-.inv-totals{padding:0 1.5rem 1.5rem;display:flex;justify-content:flex-end}
-.inv-totals-box{min-width:260px}
-.inv-tot-row{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px dotted #e8d5b8;color:#1a1a1a}
+.inv-totals{padding:0 1.5rem 1.5rem;display:flex;justify-content:flex-start}
+.inv-totals-box{width:100%}
+.inv-tot-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:6px 0;border-bottom:1px dotted #e8d5b8;color:#1a1a1a}
 .inv-tot-row:last-child{border:none}
 .inv-tot-grand{font-size:18px;font-weight:800;color:#8b2500;padding-top:10px!important}
 .inv-note{margin:0 1.5rem 1rem;background:#fff8f2;border-left:3px solid #8b2500;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;color:#5a1a00}
@@ -1048,7 +1048,8 @@ function handleOccChange(sel){
         <div class="inv-meta-row"><strong>Order Date:</strong><span id="inv-ddate"></span></div>
         <div class="inv-meta-row"><strong>Time:</strong><span id="inv-dtime"></span></div>
         <div class="inv-meta-row"><strong>Type:</strong><span id="inv-dtype"></span></div>
-        <div id="inv-occasion-meta" style="display:none"><strong>Occasion:</strong><span id="inv-occasion-meta-text"></span></div>
+        <div class="inv-meta-row" id="inv-occasion-meta" style="display:none"><strong>Occasion:</strong><span id="inv-occasion-meta-text"></span></div>
+        <div class="inv-meta-row" id="inv-note-meta" style="display:none"><strong>Note:</strong><span id="inv-note-meta-text"></span></div>
       </div>
     </div>
 
@@ -1062,12 +1063,6 @@ function handleOccChange(sel){
       </table>
     </div>
 
-    <div id="inv-occasion-section" style="display:none">
-      <div class="inv-note">
-        <label>Occasion</label>
-        <span id="inv-occasion-text"></span>
-      </div>
-    </div>
     <div id="inv-note-section" style="display:none">
       <div class="inv-note">
         <label>Note</label>
@@ -2958,12 +2953,16 @@ function generateInvoice(){
     var metaOcc2 = document.getElementById('inv-occasion-meta');
     if(metaOcc2) metaOcc2.style.display='none';
   }
-  // Note
+  // Note — show in Order Details meta block
   const note = pureNote;
+  var noteMeta = document.getElementById('inv-note-meta');
+  var noteMetaText = document.getElementById('inv-note-meta-text');
   if(note){
-    document.getElementById('inv-note-section').style.display='block';
-    document.getElementById('inv-note-text').textContent = note;
+    if(noteMeta) noteMeta.style.display='block';
+    if(noteMetaText) noteMetaText.textContent=' '+note;
+    document.getElementById('inv-note-section').style.display='none';
   }else{
+    if(noteMeta) noteMeta.style.display='none';
     document.getElementById('inv-note-section').style.display='none';
   }
 
@@ -3530,8 +3529,10 @@ function sendEmail(){
     total:          netTot.toFixed(2),
     advance:        String(Math.round(netTot*0.4)),
     remaining:      String(Math.round(netTot - Math.round(netTot*0.4))),
-    tier_discount:  tierDisc>0?("- $"+tierDisc+" ("+tierDiscLabel+")"):"",
-    promo_discount: promoDisc>0?("- $"+promoDisc.toFixed(2)+" ("+(activePromoLocal?activePromoLocal.label:"Promo")+")"):"",
+    tier_discount_label: tierDisc>0?("Order Discount ("+tierDiscLabel+")"):"",
+    tier_discount_amt:   tierDisc>0?("- $"+tierDisc):"",
+    promo_discount_label: promoDisc>0?((activePromoLocal?activePromoLocal.label:"Promo")+" (Code: "+(activePromoLocal&&activePromoLocal.code?activePromoLocal.code:"applied")+")"):"",
+    promo_discount_amt:   promoDisc>0?("- $"+promoDisc.toFixed(2)):"",
     approval_link:  acceptLink,
     reject_link:    declineLink
   };
