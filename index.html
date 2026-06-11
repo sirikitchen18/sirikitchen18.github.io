@@ -92,8 +92,6 @@
   border-radius:0;
 }
 /* Cards keep normal padding */
-.icard{background:linear-gradient(145deg,#fffdf8,#fdf6ec);border-radius:12px;border:1px solid rgba(201,151,58,0.2);margin-bottom:10px;padding:10px 12px;box-shadow:0 2px 8px rgba(139,37,0,0.07);overflow:hidden}
-
 /* Responsive */
 @media(max-width:480px){
   .section{padding:0.5rem 0.75rem}
@@ -187,7 +185,7 @@ body{font-family:"Inter",sans-serif;font-size:16px;background:#f7efe4;color:var(
 
 /* ── SECTIONS ───────────────────────────────────────── */
 
-.section.active{display:block;min-height:400px;padding-bottom:80px}
+.section.active{display:block;min-height:400px;padding-bottom:80px;max-width:1400px;margin-left:auto;margin-right:auto}
 
 /* ── SECTION TITLE ──────────────────────────────────── */
 .stitle{background:linear-gradient(135deg,#3d0800 0%,#7a1a00 50%,#5a1000 100%);color:#fff;font-family:"Playfair Display",serif;font-style:normal;font-size:20px;font-weight:700;padding:13px 20px;border-radius:10px;margin-bottom:14px;display:flex;align-items:center;gap:0;box-shadow:0 4px 16px rgba(80,10,0,0.35);letter-spacing:0.5px;border-left:4px solid var(--gold)}
@@ -196,23 +194,11 @@ body{font-family:"Inter",sans-serif;font-size:16px;background:#f7efe4;color:var(
 .ssub span{font-weight:400;font-size:13px;opacity:0.85}
 
 /* ── ITEM CARD ──────────────────────────────────────── */
-.icard{background:linear-gradient(145deg,#fffdf8,#fdf6ec);border-radius:14px;border:1px solid rgba(201,151,58,0.2);margin-bottom:10px;padding:13px 15px;box-shadow:0 3px 12px rgba(139,37,0,0.08),0 1px 3px rgba(201,151,58,0.1)}
-.icard:active{background:#fdf8f4}
 .iname{font-family:"Playfair Display",serif;font-size:15px;font-weight:700;color:#1e0e02;line-height:1.3;margin-bottom:3px}
-/* ── ITEM CARD WITH PHOTO ──────────────────────────────── */
-.icard.has-img{padding:0;overflow:hidden}
-.icard.has-img .icard-row{padding:10px 12px 10px 0;flex:1;min-width:0}
-.icard-layout{display:flex;align-items:stretch;gap:0}
-.icard-img{width:110px;min-width:110px;height:110px;object-fit:cover;border-radius:0;display:block;flex-shrink:0}
-.icard.has-img .icard-info{padding-left:12px}
-@media(max-width:480px){
-  .icard-img{width:90px;min-width:90px;height:90px}
-}
 .idesc{font-size:14px;color:#7a4a20;line-height:1.5;margin-bottom:8px;font-style:normal;display:none}
 .idesc.open{display:block}
 .iname{cursor:pointer;user-select:none}
 .iname::after{content:' ›';font-size:11px;color:#c9973a;font-weight:700;transition:transform .2s;display:inline-block}
-.icard.desc-open .iname::after{content:' ‹';font-size:11px}
 .ifoot{display:flex;flex-direction:column;gap:7px;margin-top:8px}
 
 .ifoot-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -368,7 +354,6 @@ textarea.fi{height:76px;resize:vertical;font-size:15px}
   .hero-pill:nth-child(5){grid-column:1}
   .hero-menu-btn{grid-column:3}
   .hero-pill{font-size:12px}
-  .icard{padding:10px 10px}
   .iname{font-size:14px}
   .idesc{font-size:12px}
   .ssel{font-size:13px;padding:6px 6px}
@@ -392,8 +377,7 @@ textarea.fi{height:76px;resize:vertical;font-size:15px}
 @media(min-width:900px){
   
   
-  .icard{padding:14px 18px}
-}
+  }
 
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -583,9 +567,6 @@ body{font-family:"Inter",sans-serif;background:#f7efe4;color:var(--text);min-hei
 .qbtn{width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(201,151,58,0.4);background:linear-gradient(135deg,#fff,#fdf6ec);cursor:pointer;font-size:17px;font-weight:700;color:var(--red);display:flex;align-items:center;justify-content:center;transition:all .15s;touch-action:manipulation;flex-shrink:0;box-shadow:0 1px 4px rgba(139,37,0,0.1)}
 
 /* ── ITEM CARD: single horizontal row ── */
-.icard-row{display:flex;align-items:flex-start;gap:8px;width:100%;min-width:0}
-.icard-info{flex:1;min-width:0}
-.icard-ctrl{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .ifoot-sel{flex-shrink:0}
 .ssel{padding:5px 8px;border:1.5px solid rgba(201,151,58,0.3);border-radius:8px;font-size:13px;font-weight:600;color:var(--text);background:linear-gradient(135deg,#fffdf8,#fdf6ec);font-family:"Inter",sans-serif;cursor:pointer;touch-action:manipulation;max-width:150px}
 .qrow{display:flex;align-items:center;gap:4px;flex-shrink:0}
@@ -600,9 +581,9 @@ body{font-family:"Inter",sans-serif;background:#f7efe4;color:var(--text);min-hei
 
 .occ-select{padding:8px 12px;border:1.5px solid rgba(201,151,58,0.3);border-radius:10px;font-size:14px;font-weight:600;color:var(--text);background:linear-gradient(135deg,#fffdf8,#fdf6ec);font-family:"Inter",sans-serif;cursor:pointer;width:100%;appearance:auto}
 
-[id^="r-"]{display:grid;grid-template-columns:1fr;gap:10px}
-@media(min-width:500px){[id^="r-"]{grid-template-columns:1fr 1fr;gap:12px}}
-@media(min-width:1024px){[id^="r-"]{grid-template-columns:1fr 1fr 1fr;gap:16px}}
+[id^="r-"]{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+@media(min-width:600px){[id^="r-"]{gap:12px}}
+@media(min-width:1024px){[id^="r-"]{gap:16px}}
 
 :focus-visible{outline:2px solid #c9973a;outline-offset:2px;border-radius:4px}
 .skip-link{position:absolute;top:-40px;left:0;background:var(--red);color:#fff;padding:8px 12px;z-index:999;border-radius:0 0 8px 0;font-size:14px;font-weight:700}
@@ -646,13 +627,6 @@ html,body{margin:0;padding:0;width:100%}
 
 
 
-
-
-.icard.selected{
-  background:linear-gradient(145deg,#f5e6c8,#f0d9a8);
-  border:2px solid var(--red);
-  box-shadow:0 4px 16px rgba(139,37,0,0.18);
-}
 
 
 .order-confirm{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:99999;display:none;align-items:center;justify-content:center;padding:1rem}
@@ -706,7 +680,6 @@ html,body{margin:0;padding:0;width:100%}
 #btt.show{display:flex}
 /* ── CART ADD PULSE ────────────────────────────────── */
 @keyframes cardPulse{0%{transform:scale(1)}40%{transform:scale(1.03)}100%{transform:scale(1)}}
-.icard.pulse{animation:cardPulse .3s ease}
 /* ── BANNER PHONE OVERLAY ───────────────────────────────── */
 .banner-phone-link{
   position:absolute;
@@ -731,6 +704,80 @@ html,body{margin:0;padding:0;width:100%}
 .mob-banner-phone-link{
   top:61%;left:56%;
   width:36%;height:5%;
+}
+
+/* ── ITEM CARDS ─────────────────────────────────────── */
+.icard{
+  background:linear-gradient(145deg,#fffdf8,#fdf6ec);
+  border-radius:12px;
+  border:1px solid rgba(201,151,58,0.2);
+  margin-bottom:8px;
+  overflow:hidden;
+  display:flex;
+  align-items:stretch;
+  padding:0;
+  transition:box-shadow .15s;
+}
+.icard:active{background:#fdf8f4}
+.icard.selected{
+  background:linear-gradient(145deg,#f5e6c8,#f0d9a8);
+  border:2px solid var(--red);
+  box-shadow:0 4px 16px rgba(139,37,0,0.18);
+}
+.icard.pulse{animation:cardPulse .3s ease}
+.icard.desc-open .iname::after{content:' ‹';font-size:11px}
+
+/* col 1 — photo */
+.icard-img{
+  width:90px;min-width:90px;height:90px;
+  object-fit:cover;flex-shrink:0;display:block;
+  border-right:1px solid rgba(201,151,58,0.15);
+}
+/* col 2 — name + desc */
+.icard-info{
+  flex:1;min-width:0;
+  padding:8px 8px 8px 10px;
+  border-left:4px solid var(--item-color,#c9973a);
+  display:flex;flex-direction:column;justify-content:center;
+}
+/* col 3 — selector + qty */
+.icard-ctrl{
+  width:80px;min-width:80px;flex-shrink:0;
+  padding:6px 8px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:space-between;
+  border-left:1px solid rgba(201,151,58,0.12);
+  background:rgba(255,255,255,0.5);
+}
+.ifoot-sel{width:100%}
+.ifoot-sel select{
+  width:100%;font-size:11px;padding:3px 2px;
+  border:1px solid rgba(201,151,58,0.4);
+  border-radius:6px;background:#fff;
+  color:#5a1a00;font-family:"Inter",sans-serif;
+  text-align:center;
+}
+.qrow{display:flex;align-items:center;gap:4px}
+.qbtn{
+  width:28px;height:28px;border-radius:50%;
+  border:1.5px solid rgba(201,151,58,0.4);
+  background:linear-gradient(135deg,#fff,#fdf6ec);
+  cursor:pointer;font-size:16px;font-weight:700;
+  color:var(--red);display:flex;align-items:center;
+  justify-content:center;transition:all .15s;
+  touch-action:manipulation;flex-shrink:0;
+}
+.qbtn:active{background:var(--red);color:#fff}
+.qval{
+  width:18px;text-align:center;font-size:13px;
+  font-weight:700;color:var(--text);
+}
+
+/* desktop — wider photo, bigger touch targets */
+@media(min-width:600px){
+  .icard-img{width:110px;min-width:110px;height:110px}
+  .icard-ctrl{width:88px;min-width:88px}
+  .qbtn{width:32px;height:32px}
 }
 </style>
 <script>
@@ -1624,23 +1671,22 @@ function renderSection(data,elId){
     else if(item.t==='pc'){priceStr=`$${item.v.toFixed(2)} ea`+(item.min?` · min ${item.min}`:'');}
     var cc=getCatColor(item.id);
     var _diet=item.veg===true?'veg':item.veg===false?'nonveg':'mixed';
-    return `<div class="icard ${item.img?'has-img':''}" data-diet="${_diet}" style="border-left:${item.img?'none':'4px solid '+cc}">
-      ${item.img?`<div class="icard-layout"><img class="icard-img" src="${item.img}" alt="${item.n}" loading="lazy" onerror="this.closest('.icard').classList.remove('has-img');this.style.display='none'"><div style="flex:1;min-width:0;border-left:4px solid ${cc}">`:'' }
-      <div class="icard-row">
-        <div class="icard-info">
-          <div class="iname" ${item.d?`onclick="var c=this.closest('.icard');var d=c.querySelector('.idesc');if(d){d.classList.toggle('open');c.classList.toggle('desc-open');}"`:''} >${item.n}</div>
-          ${item.d?`<div class="idesc">${item.d}</div>`:'' }
-        </div>
-        <div class="icard-ctrl">
-          ${ctrl?`<div class="ifoot-sel">${ctrl}</div>`:''}
-          <div class="qrow">
-            <button class="qbtn" onclick="adj('${item.id}',-1)">−</button>
-            <span class="qval" id="q-${item.id}">0</span>
-            <button class="qbtn" onclick="adj('${item.id}',1)">+</button>
-          </div>
+    return `<div class="icard" data-diet="${_diet}" style="--item-color:${cc}">
+      ${item.img?`<img class="icard-img" src="${item.img}" alt="${item.n}" loading="lazy" onerror="this.style.display='none'">`:'' }
+      <div class="icard-info">
+        <div class="iname" ${item.d?`onclick="var c=this.closest('.icard');var d=c.querySelector('.idesc');if(d){d.classList.toggle('open');c.classList.toggle('desc-open');}"`:''} >${item.n}</div>
+        ${item.d?`<div class="idesc">${item.d}</div>`:'' }
+
+      </div>
+      <div class="icard-ctrl">
+        ${ctrl?`<div class="ifoot-sel">${ctrl}</div>`:'<div></div>'}
+        <div class="qrow">
+          <button class="qbtn" onclick="adj('${item.id}',-1)">−</button>
+          <span class="qval" id="q-${item.id}">0</span>
+          <button class="qbtn" onclick="adj('${item.id}',1)">+</button>
         </div>
       </div>
-    </div>${item.img?'</div></div>':''}`;
+    </div>`;
   }).join('');
 }
 
