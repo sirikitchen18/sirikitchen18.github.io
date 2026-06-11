@@ -199,7 +199,11 @@ body{font-family:"Inter",sans-serif;font-size:16px;background:#f7efe4;color:var(
 .icard{background:linear-gradient(145deg,#fffdf8,#fdf6ec);border-radius:14px;border:1px solid rgba(201,151,58,0.2);margin-bottom:10px;padding:13px 15px;box-shadow:0 3px 12px rgba(139,37,0,0.08),0 1px 3px rgba(201,151,58,0.1)}
 .icard:active{background:#fdf8f4}
 .iname{font-family:"Playfair Display",serif;font-size:15px;font-weight:700;color:#1e0e02;line-height:1.3;margin-bottom:3px}
-.idesc{font-size:14px;color:#7a4a20;line-height:1.5;margin-bottom:8px;font-style:normal}
+.idesc{font-size:14px;color:#7a4a20;line-height:1.5;margin-bottom:8px;font-style:normal;display:none}
+.idesc.open{display:block}
+.iname{cursor:pointer;user-select:none}
+.iname::after{content:' ›';font-size:11px;color:#c9973a;font-weight:700;transition:transform .2s;display:inline-block}
+.icard.desc-open .iname::after{content:' ‹';font-size:11px}
 .ifoot{display:flex;flex-direction:column;gap:7px;margin-top:8px}
 
 .ifoot-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -677,6 +681,17 @@ html,body{margin:0;padding:0;width:100%}
 #invoice-preview table{width:100%;table-layout:fixed}
 
 
+/* ── REORDER BAR ─────────────────────────────────────── */
+#reorder-bar{background:#fff8f0;border:1.5px solid rgba(201,151,58,0.35);border-radius:12px;padding:12px 14px;margin:8px 1rem 0;display:none}
+#reorder-bar .rb-title{font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px}
+.rb-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(201,151,58,0.15);font-size:13px}
+.rb-item:last-child{border:none}
+.rb-meta{color:var(--sub)}
+.rb-btn{background:var(--red);color:#fff;border:none;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer}
+/* ── DIETARY FILTER ─────────────────────────────────── */
+#diet-filter{display:flex;gap:6px;padding:8px 1rem 4px;background:var(--bg)}
+.diet-btn{padding:6px 16px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .18s;font-family:"Inter",sans-serif}
+.diet-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
 /* ── BACK TO TOP ────────────────────────────────────── */
 #btt{position:fixed;bottom:80px;right:16px;width:40px;height:40px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:18px;cursor:pointer;z-index:998;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(139,37,0,0.3);transition:opacity .2s}
 #btt.show{display:flex}
@@ -791,6 +806,12 @@ function handleOccChange(sel){
   </div>
 </nav>
 
+<!-- DIETARY FILTER -->
+<div id="diet-filter">
+  <button class="diet-btn active" onclick="setDiet('all',this)">🍽️ All</button>
+  <button class="diet-btn" onclick="setDiet('veg',this)">🥦 Veg Only</button>
+  <button class="diet-btn" onclick="setDiet('nonveg',this)">🍗 Non-Veg Only</button>
+</div>
 <!-- SECTIONS -->
 <div id="tmenu" class="section" style="padding:0">
   <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 1rem;background:var(--bg)">
@@ -1477,6 +1498,58 @@ function renderAll(){
   renderMostLoved();
   addTabCounts();
 }
+function setDiet(mode, btn){
+  document.querySelectorAll('.diet-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.querySelectorAll('.icard').forEach(function(card){
+    var diet=card.getAttribute('data-diet')||'mixed';
+    if(mode==='all'){card.style.display='';}
+    else if(mode==='veg'){card.style.display=(diet==='veg'||diet==='mixed')?'':'none';}
+    else if(mode==='nonveg'){card.style.display=(diet==='nonveg'||diet==='mixed')?'':'none';}
+  });
+}
+function renderReorderBar(){
+  try{
+    var hist=JSON.parse(localStorage.getItem('sk_order_history')||'[]');
+    var bar=document.getElementById('reorder-bar');
+    var list=document.getElementById('reorder-list');
+    if(!bar||!list||!hist.length){if(bar)bar.style.display='none';return;}
+    list.innerHTML=hist.map(function(o,idx){
+      var names=(o.items||[]).slice(0,2).map(function(x){return x.name;}).join(', ');
+      if((o.items||[]).length>2) names+=' +'+((o.items.length-2)+' more');
+      return '<div class="rb-item">'
+        +'<div><div style="font-weight:600;color:var(--text)">'+names+'</div>'
+        +'<div class="rb-meta">'+o.date+'</div></div>'
+        +'<button class="rb-btn" onclick="reorder('+idx+')">Reorder</button>'
+        +'</div>';
+    }).join('');
+    bar.style.display='block';
+  }catch(e){}
+}
+function reorder(idx){
+  try{
+    var hist=JSON.parse(localStorage.getItem('sk_order_history')||'[]');
+    var o=hist[idx]; if(!o||!o.items) return;
+    cart={};
+    o.items.forEach(function(x){
+      if(items[x.id]||items[x.id.replace(/-[fj]$/,'')]){
+        cart[x.id]={qty:x.qty,price:x.price,name:x.name,size:x.size||''};
+      }
+    });
+    try{localStorage.setItem('sk_cart',JSON.stringify(cart));localStorage.setItem('sk_cart_ts',String(Date.now()));}catch(e){}
+    // Update qty displays
+    Object.keys(cart).forEach(function(k){
+      var baseId=k.replace(/-[fj]$/,'');
+      var el=document.getElementById('q-'+baseId);
+      if(el){el.textContent=cart[k].qty;var card=el.closest('.icard');if(card)card.classList.add('selected');}
+    });
+    updBar();
+    updCatBadges();
+    // Scroll to top and open modal
+    window.scrollTo({top:0,behavior:'smooth'});
+    setTimeout(function(){openModal();},400);
+  }catch(e){}
+}
 function addTabCounts(){
   if(document.querySelector('.cat-btn [style*="opacity"]')) return; // already done
   var tabCounts={
@@ -1526,11 +1599,14 @@ function renderSection(data,elId){
     }else if(item.t==='flat'){priceStr=`$${item.v}`;}
     else if(item.t==='pc'){priceStr=`$${item.v.toFixed(2)} ea`+(item.min?` · min ${item.min}`:'');}
     var cc=getCatColor(item.id);
-    return `<div class="icard" style="border-left:4px solid ${cc}">
+    var _vegCats=['v','bv'];var _nvCats=['nv','k','b','bf','bm','bs'];
+    var _itemPrefix=item.id.replace(/[0-9]+$/,'');
+    var _diet=_vegCats.indexOf(_itemPrefix)>-1?'veg':_nvCats.indexOf(_itemPrefix)>-1?'nonveg':'mixed';
+    return `<div class="icard" data-diet="${_diet}" style="border-left:4px solid ${cc}">
       <div class="icard-row">
         <div class="icard-info">
-          <div class="iname">${item.n}</div>
-          ${item.d?`<div class="idesc">${item.d}</div>`:''}
+          <div class="iname" ${item.d?`onclick="var c=this.closest('.icard');var d=c.querySelector('.idesc');if(d){d.classList.toggle('open');c.classList.toggle('desc-open');}"`:''} >${item.n}</div>
+          ${item.d?`<div class="idesc">${item.d}</div>`:'' }
         </div>
         <div class="icard-ctrl">
           ${ctrl?`<div class="ifoot-sel">${ctrl}</div>`:''}
@@ -4226,12 +4302,23 @@ function showConfirm(){
 function closeConfirm(){
   document.getElementById('order-confirm').style.display='none';
   document.body.style.overflow='';
+  // Save to order history (keep last 3)
+  try{
+    var od=JSON.parse(localStorage.getItem('sk_pending_order')||'null');
+    if(od&&od.items&&od.items.length){
+      var hist=JSON.parse(localStorage.getItem('sk_order_history')||'[]');
+      hist.unshift({id:od.id,date:od.date,items:od.items,total:od.total,savedAt:Date.now()});
+      hist=hist.slice(0,3);
+      localStorage.setItem('sk_order_history',JSON.stringify(hist));
+    }
+  }catch(e){}
   cart={};
   try{localStorage.removeItem('sk_cart');}catch(e){}
   updBar();
   if(typeof updCatBadges==='function') updCatBadges();
   document.querySelectorAll('.qval').forEach(function(el){el.textContent='0';});
   document.querySelectorAll('.icard.selected').forEach(function(el){el.classList.remove('selected');});
+  renderReorderBar();
 }
 
 
