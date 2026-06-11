@@ -1498,14 +1498,22 @@ function renderAll(){
   renderMostLoved();
   addTabCounts();
 }
+var _activeDiet='all';
 function setDiet(mode, btn){
+  _activeDiet=mode;
   document.querySelectorAll('.diet-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
-  document.querySelectorAll('.icard').forEach(function(card){
+  applyDietFilter();
+}
+function applyDietFilter(){
+  // Only filter cards inside the currently visible section
+  var activeSection=document.querySelector('.section.active')||document.querySelector('.section:not([style*="none"])');
+  var scope=activeSection||document;
+  scope.querySelectorAll('.icard').forEach(function(card){
     var diet=card.getAttribute('data-diet')||'mixed';
-    if(mode==='all'){card.style.display='';}
-    else if(mode==='veg'){card.style.display=(diet==='veg'||diet==='mixed')?'':'none';}
-    else if(mode==='nonveg'){card.style.display=(diet==='nonveg'||diet==='mixed')?'':'none';}
+    if(_activeDiet==='all'){card.style.display='';}
+    else if(_activeDiet==='veg'){card.style.display=(diet==='veg'||diet==='mixed')?'':'none';}
+    else if(_activeDiet==='nonveg'){card.style.display=(diet==='nonveg'||diet==='mixed')?'':'none';}
   });
 }
 function renderReorderBar(){
@@ -2152,6 +2160,7 @@ function goTab(id,el){
   var mBtn=document.getElementById('menu-tab');
   if(mBtn){mBtn.classList.remove('active');mBtn.style.background='';mBtn.style.color='';}
   var activeSection=document.getElementById(id); if(activeSection){activeSection.classList.add('active');activeSection.style.display='';}
+  if(typeof applyDietFilter==='function') applyDietFilter();
   if(el) el.classList.add('active');
   // If clicking Full Menu hero button, highlight it
   if(id==='tmenu' && mBtn){mBtn.style.background='var(--red)';mBtn.style.color='#fff';}
