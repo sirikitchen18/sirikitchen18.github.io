@@ -1834,6 +1834,16 @@ function checkWAReady(){
   } else {
     var email=(document.getElementById("cemail")||{}).value||"";
     var emVal = email.trim();
+    var phone2=(document.getElementById("cphone")||{}).value||"";
+    var ph2Val = phone2.trim();
+    // Phone optional in email mode but must be AU format if filled
+    var phoneOk = true;
+    if(ph2Val && !/^04\d{8}$/.test(ph2Val)){
+      if(phoneErr){phoneErr.textContent="Must start with 04 and be 10 digits (e.g. 0412 345 678)";phoneErr.style.display="block";}
+      phoneOk = false;
+    } else {
+      if(phoneErr){phoneErr.textContent="";phoneErr.style.display="none";}
+    }
     if(!emVal){
       if(emailErr){emailErr.textContent="";emailErr.style.display="none";}
       contactOk = false;
@@ -1842,7 +1852,7 @@ function checkWAReady(){
       contactOk = false;
     } else {
       if(emailErr){emailErr.textContent="";emailErr.style.display="none";}
-      contactOk = true;
+      contactOk = phoneOk;
     }
   }
   var ready = !!(name.trim() && contactOk && date && time && addr);
@@ -2381,7 +2391,10 @@ window.sendWA = function() {
   var promoDisc=0, activePromoLocal=null;
   try{activePromoLocal=JSON.parse(localStorage.getItem('sk_active_promo')||'null');}catch(_e){}
   if(!activePromoLocal&&typeof activePromo!=='undefined'&&activePromo) activePromoLocal=activePromo;
-  if(!activePromoLocal&&typeof activePromo!=='undefined'&&activePromo) activePromoLocal=activePromo;
+  if(activePromoLocal){
+    if(activePromoLocal.type==='percent') promoDisc=sub*(activePromoLocal.value/100);
+    else if(activePromoLocal.type==='fixed') promoDisc=Math.min(activePromoLocal.value,sub);
+  }
 
   var netTot = tot - tierDisc - promoDisc;
   var adv = Math.round(netTot*0.4);
@@ -3396,8 +3409,7 @@ function sendEmail(){
   var notes = document.getElementById("cnotes").value.trim();
   var occasionVal = (function(){ var el=document.getElementById("occ-select"); if(!el) return ""; var v=el.value; if(v==="Other"){ var oi=document.getElementById("occ-other-input"); return oi?oi.value.trim():""; } return v; })();
   if(!name){alert("Please enter your name.");return;}
-  if(!phone){alert("Please enter your phone number.");return;}
-  if(!/^04\d{8}$/.test(phone)){alert("Please enter a valid Australian mobile number starting with 04 (10 digits, e.g. 0412 345 678).");return;}
+  if(phone&&!/^04\d{8}$/.test(phone)){alert("Please enter a valid Australian mobile number starting with 04 (10 digits, e.g. 0412 345 678).");return;}
   if(!email||!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)){alert("Please enter a valid email address (e.g. name@example.com).");return;}
   var addrEl = document.getElementById("daddr");
   var addr   = addrEl ? addrEl.value.trim() : "";
