@@ -199,8 +199,15 @@ body{font-family:"Inter",sans-serif;font-size:16px;background:#f7efe4;color:var(
 .icard{background:linear-gradient(145deg,#fffdf8,#fdf6ec);border-radius:14px;border:1px solid rgba(201,151,58,0.2);margin-bottom:10px;padding:13px 15px;box-shadow:0 3px 12px rgba(139,37,0,0.08),0 1px 3px rgba(201,151,58,0.1)}
 .icard:active{background:#fdf8f4}
 .iname{font-family:"Playfair Display",serif;font-size:15px;font-weight:700;color:#1e0e02;line-height:1.3;margin-bottom:3px}
-.icard-img{width:100%;height:140px;object-fit:cover;border-radius:8px 8px 0 0;display:block;margin:-10px -12px 10px;width:calc(100% + 24px)}
-@media(max-width:480px){.icard-img{height:120px}}
+/* ── ITEM CARD WITH PHOTO ──────────────────────────────── */
+.icard.has-img{padding:0;overflow:hidden}
+.icard.has-img .icard-row{padding:10px 12px 10px 0;flex:1;min-width:0}
+.icard-layout{display:flex;align-items:stretch;gap:0}
+.icard-img{width:110px;min-width:110px;height:110px;object-fit:cover;border-radius:0;display:block;flex-shrink:0}
+.icard.has-img .icard-info{padding-left:12px}
+@media(max-width:480px){
+  .icard-img{width:90px;min-width:90px;height:90px}
+}
 .idesc{font-size:14px;color:#7a4a20;line-height:1.5;margin-bottom:8px;font-style:normal;display:none}
 .idesc.open{display:block}
 .iname{cursor:pointer;user-select:none}
@@ -1617,8 +1624,8 @@ function renderSection(data,elId){
     else if(item.t==='pc'){priceStr=`$${item.v.toFixed(2)} ea`+(item.min?` · min ${item.min}`:'');}
     var cc=getCatColor(item.id);
     var _diet=item.veg===true?'veg':item.veg===false?'nonveg':'mixed';
-    return `<div class="icard" data-diet="${_diet}" style="border-left:4px solid ${cc}">
-      ${item.img?`<img class="icard-img" src="${item.img}" alt="${item.n}" loading="lazy" onerror="this.style.display='none'">`:'' }
+    return `<div class="icard ${item.img?'has-img':''}" data-diet="${_diet}" style="border-left:${item.img?'none':'4px solid '+cc}">
+      ${item.img?`<div class="icard-layout"><img class="icard-img" src="${item.img}" alt="${item.n}" loading="lazy" onerror="this.closest('.icard').classList.remove('has-img');this.style.display='none'"><div style="flex:1;min-width:0;border-left:4px solid ${cc}">`:'' }
       <div class="icard-row">
         <div class="icard-info">
           <div class="iname" ${item.d?`onclick="var c=this.closest('.icard');var d=c.querySelector('.idesc');if(d){d.classList.toggle('open');c.classList.toggle('desc-open');}"`:''} >${item.n}</div>
@@ -1633,7 +1640,7 @@ function renderSection(data,elId){
           </div>
         </div>
       </div>
-    </div>`;
+    </div>${item.img?'</div></div>':''}`;
   }).join('');
 }
 
