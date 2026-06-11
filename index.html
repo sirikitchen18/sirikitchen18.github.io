@@ -2491,8 +2491,10 @@ window.sendWA = function() {
     total:          netTot.toFixed(2),
     advance:        String(Math.round(netTot*0.4)),
     remaining:      String(Math.round(netTot - Math.round(netTot*0.4))),
-    tier_discount:  tierDisc>0?("Order Discount ("+tierDiscLabel+"): - $"+tierDisc):"",
-    promo_discount: promoDisc>0?((activePromoLocal?activePromoLocal.label:"Promo")+" (Code: "+(activePromoLocal&&activePromoLocal.code?activePromoLocal.code:"applied")+"): - $"+promoDisc.toFixed(2)):"",
+    tier_discount_label: tierDisc>0?("Order Discount ("+tierDiscLabel+")"):"",
+    tier_discount_amt:   tierDisc>0?("- $"+tierDisc):"",
+    promo_discount_label: promoDisc>0?((activePromoLocal?activePromoLocal.label:"Promo")+" (Code: "+(activePromoLocal&&activePromoLocal.code?activePromoLocal.code:"applied")+")"):"",
+    promo_discount_amt:   promoDisc>0?("- $"+promoDisc.toFixed(2)):"",
     approval_link:  acceptLink,
     reject_link:    declineLink
   };
