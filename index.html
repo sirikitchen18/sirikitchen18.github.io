@@ -738,6 +738,13 @@ html,body{margin:0;padding:0;width:100%}
   display:flex;flex-direction:column;justify-content:flex-start;
   overflow:visible;
 }
+/* when image present, strip lives on the card left edge, not info column */
+.icard.has-img .icard-info{
+  border-left:none;
+}
+.icard.has-img{
+  border-left:4px solid var(--item-color,#c9973a);
+}
 /* col 3 — selector + qty */
 .icard-ctrl{
   flex-shrink:0;
@@ -1670,7 +1677,7 @@ function renderSection(data,elId){
     else if(item.t==='pc'){priceStr=`$${item.v.toFixed(2)} ea`+(item.min?` · min ${item.min}`:'');}
     var cc=getCatColor(item.id);
     var _diet=item.veg===true?'veg':item.veg===false?'nonveg':'mixed';
-    return `<div class="icard" data-diet="${_diet}" style="--item-color:${cc}">
+    return `<div class="${item.img?'icard has-img':'icard'}" data-diet="${_diet}" style="--item-color:${cc}">
       ${item.img?`<img class="icard-img" src="${item.img}" alt="${item.n}" loading="lazy" onerror="this.style.display='none'">`:'' }
       <div class="icard-info">
         <div class="iname">${item.n}</div>
