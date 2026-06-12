@@ -788,6 +788,37 @@ html,body{margin:0;padding:0;width:100%}
   .icard-ctrl{min-width:100px}
   .qbtn{width:32px;height:32px}
 }
+
+/* ── iOS INSTALL BANNER ─────────────────────────────── */
+#ios-install-banner{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#1a1a1a;color:#fff;
+  padding:12px 16px 16px;
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
+  display:none;
+  align-items:flex-start;gap:12px;
+  z-index:99998;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.4);
+  animation:slideUpBanner .3s ease;
+}
+@keyframes slideUpBanner{from{transform:translateY(100%)}to{transform:translateY(0)}}
+#ios-install-banner .iib-icon{font-size:36px;flex-shrink:0}
+#ios-install-banner .iib-body{flex:1}
+#ios-install-banner .iib-title{font-size:14px;font-weight:700;margin-bottom:4px}
+#ios-install-banner .iib-steps{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6}
+#ios-install-banner .iib-steps strong{color:#fff}
+#ios-install-banner .iib-dismiss{
+  background:none;border:1px solid rgba(255,255,255,0.3);
+  color:rgba(255,255,255,0.7);border-radius:6px;
+  padding:4px 10px;font-size:12px;cursor:pointer;
+  flex-shrink:0;margin-top:2px;font-family:"Inter",sans-serif;
+}
+#ios-install-banner .iib-arrow{
+  display:inline-block;
+  font-size:22px;
+  animation:bounce .8s infinite alternate;
+}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-4px)}}
 </style>
 <script>
 function handleOccChange(sel){
@@ -4435,7 +4466,62 @@ document.addEventListener('visibilitychange',function(){
 
 
 <!-- DEBUG: remove before final deploy -->
+
+<!-- iOS PWA Install Banner -->
+<div id="ios-install-banner">
+  <div class="iib-icon">🍛</div>
+  <div class="iib-body">
+    <div class="iib-title">Install Siri Kitchen on your iPhone</div>
+    <div class="iib-steps">
+      Tap <strong>Share</strong> <span class="iib-arrow">⬆️</span> at the bottom of your browser,
+      then tap <strong>"Add to Home Screen"</strong>
+    </div>
+  </div>
+  <button class="iib-dismiss" onclick="dismissIOSBanner()">✕ Got it</button>
+</div>
+
 <script>
+
+// iOS PWA install banner
+(function(){
+  var ua = navigator.userAgent;
+  var isIOS = /iphone|ipad|ipod/i.test(ua);
+  var isStandalone = window.navigator.standalone === true;
+  var dismissed = localStorage.getItem('sk_ios_banner_dismissed');
+  if(!isIOS || isStandalone || dismissed) return;
+
+  // Detect browser on iOS
+  var isChrome  = /CriOS/i.test(ua);
+  var isFirefox = /FxiOS/i.test(ua);
+  var isEdge    = /EdgiOS/i.test(ua);
+  // Everything else is Safari
+
+  var steps;
+  if(isChrome){
+    steps = 'Tap the <strong>⋮ menu</strong> (top right), then tap <strong>"Add to Home Screen"</strong>';
+  } else if(isFirefox){
+    steps = 'Tap the <strong>☰ menu</strong> (bottom right), then tap <strong>"Add to Home Screen"</strong>';
+  } else if(isEdge){
+    steps = 'Tap the <strong>⋯ menu</strong> (bottom), then tap <strong>"Add to Phone"</strong>';
+  } else {
+    // Safari
+    steps = 'Tap <strong>Share</strong> <span class="iib-arrow">⬆️</span> at the bottom, then tap <strong>"Add to Home Screen"</strong>';
+  }
+
+  // Update banner text and show after 3s
+  setTimeout(function(){
+    var stepsEl = document.querySelector('#ios-install-banner .iib-steps');
+    if(stepsEl) stepsEl.innerHTML = steps;
+    var banner = document.getElementById('ios-install-banner');
+    if(banner) banner.style.display = 'flex';
+  }, 3000);
+})();
+function dismissIOSBanner(){
+  var banner = document.getElementById('ios-install-banner');
+  if(banner) banner.style.display = 'none';
+  try{ localStorage.setItem('sk_ios_banner_dismissed','1'); }catch(e){}
+}
+
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js')
