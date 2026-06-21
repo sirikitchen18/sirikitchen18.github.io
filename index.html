@@ -646,12 +646,18 @@ html,body{margin:0;padding:0;width:100%}
 .oline-remove{background:#fff0f0;border:1.5px solid #ffcccc;color:#e05555;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;font-weight:800;flex-shrink:0;transition:all .15s;line-height:1;padding:0;margin-left:6px}
 .oline-remove:hover{background:var(--red);border-color:var(--red);color:#fff;transform:scale(1.1)}
 
-/* ── ITEM TAGS ── */
+/* ── ITEM TAGS (ribbon badge overlaid on photo, top-left corner) ── */
 .item-tag{
-  display:inline-flex;align-items:center;gap:3px;
-  font-size:11px;font-weight:800;border-radius:20px;
-  padding:2px 8px;margin-bottom:4px;letter-spacing:0.3px;
+  position:absolute;
+  top:5px;left:-1px;
+  display:inline-flex;align-items:center;gap:2px;
+  font-size:8.5px;font-weight:800;border-radius:0 3px 3px 0;
+  padding:2px 6px 2px 5px;letter-spacing:0.2px;
   width:fit-content;
+  box-shadow:0 1px 4px rgba(0,0,0,0.25);
+  z-index:2;
+  line-height:1.3;
+  white-space:nowrap;
 }
 .item-tag-best{background:#fff3e0;color:#e65100;border:1px solid #ffcc80}
 .item-tag-chef{background:#fce4ec;color:#880e4f;border:1px solid #f48fb1}
@@ -726,12 +732,18 @@ html,body{margin:0;padding:0;width:100%}
 }
 .icard.pulse{animation:cardPulse .3s ease}
 /* col 1 — photo: fixed visual box, independent of card's natural height */
-.icard-img{
+.icard-photo-wrap{
+  position:relative;
   width:90px;min-width:90px;max-width:90px;
   height:90px;min-height:90px;max-height:90px;
   align-self:flex-start;
-  object-fit:cover;flex-shrink:0;display:block;
+  flex-shrink:0;
   border-right:1px solid rgba(201,151,58,0.15);
+  overflow:hidden;
+}
+.icard-img{
+  width:100%;height:100%;
+  object-fit:cover;display:block;
 }
 /* col 2 — name + desc */
 .icard-info{
@@ -785,7 +797,7 @@ html,body{margin:0;padding:0;width:100%}
 /* desktop — wider photo, bigger touch targets */
 /* desktop — wider photo, bigger touch targets */
 @media(min-width:600px){
-  .icard-img{width:110px;min-width:110px;max-width:110px;height:110px;min-height:110px;max-height:110px;}
+  .icard-photo-wrap{width:110px;min-width:110px;max-width:110px;height:110px;min-height:110px;max-height:110px;}
   .icard-ctrl{min-width:100px}
   .qbtn{width:32px;height:32px}
 }
@@ -1713,7 +1725,7 @@ function renderSection(data,elId){
     var cc=getCatColor(item.id);
     var _diet=item.veg===true?'veg':item.veg===false?'nonveg':'mixed';
     return `<div class="${item.img?'icard has-img':'icard'}" data-diet="${_diet}" style="--item-color:${cc}">
-      ${item.img?`<img class="icard-img" src="${item.img}" alt="${item.n}" loading="lazy" onerror="this.style.display='none'">`:'' }
+      ${item.img?`<div class="icard-photo-wrap"><img class="icard-img" src="${item.img}" alt="${item.n}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`:'' }
       <div class="icard-info">
         <div class="iname">${item.n}</div>
         ${item.d?`<div class="idesc">${item.d}</div>`:'' }
@@ -4255,9 +4267,22 @@ fetch('itemTags.json')
       var tagEl = document.createElement('div');
       tagEl.className = 'item-tag item-tag-'+tagKey;
       tagEl.textContent = legend[tagKey] || tagKey;
-      var info = icard.querySelector('.icard-info');
-      var iname = info ? info.querySelector('.iname') : null;
-      if(info && iname) info.insertBefore(tagEl, iname);
+      var photoWrap = icard.querySelector('.icard-photo-wrap');
+      if(photoWrap){
+        // Photo present — overlay ribbon badge on top-left corner of the photo
+        photoWrap.appendChild(tagEl);
+      } else {
+        // No photo — fall back to inline pill above the dish name
+        tagEl.style.position = 'static';
+        tagEl.style.marginBottom = '4px';
+        tagEl.style.borderRadius = '20px';
+        tagEl.style.boxShadow = 'none';
+        tagEl.style.fontSize = '11px';
+        tagEl.style.padding = '2px 8px';
+        var info = icard.querySelector('.icard-info');
+        var iname = info ? info.querySelector('.iname') : null;
+        if(info && iname) info.insertBefore(tagEl, iname);
+      }
     });
   })
   .catch(function(){ console.warn('Item tags file not found'); });
