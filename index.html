@@ -1483,8 +1483,8 @@ const MENU={
     {n:"Crispy Cutlet (Chicken)",d:"Crumb-coated chicken cutlets, shallow fried",t:'pc',v:3,id:"sn2c",img:"images/food/sn2c.jpg",min:20,veg:false},
     {n:"Egg Devil",d:"Spiced devilled eggs — a party favourite",t:'pc',v:3,id:"sn3",img:"images/food/sn3.jpg",veg:false,min:20},
     {n:"Bread Pakora",d:"Spiced potato-stuffed bread fritters",t:'pc',v:3,id:"sn4",img:"images/food/sn4.jpg",veg:true,min:20},
-    {n:"Puff Patties (Veg)",d:"Flaky pastry puffs with spiced veg filling",t:'pc',v:4,id:"sn5",min:20,veg:true},
-    {n:"Puff Patties (Chicken)",d:"Flaky pastry puffs with seasoned chicken filling",t:'pc',v:4,id:"sn5c",min:20,veg:false},
+    {n:"Puff Patties (Veg)",d:"Flaky pastry puffs with spiced veg filling",t:'pc',v:4,id:"sn5",img:"images/food/sn5.jpg",min:20,veg:true},
+    {n:"Puff Patties (Chicken)",d:"Flaky pastry puffs with seasoned chicken filling",t:'pc',v:4,id:"sn5c",img:"images/food/sn5c.jpg",min:20,veg:false},
     {n:"Punjabi Samosa",d:"Classic triangular pastry with spiced potato & peas",t:'pc',v:4,id:"sn6",img:"images/food/sn6.jpg",veg:true,min:20},
     {n:"Sandwich (Veg)",d:"Freshly prepared veg sandwiches with chutney",t:'pc',v:4,id:"sn7",img:"images/food/sn7.jpg",min:20,veg:true},
     {n:"Sandwich (Chicken)",d:"Freshly prepared chicken sandwiches with chutney",t:'pc',v:4,id:"sn7c",img:"images/food/sn7c.jpg",min:20,veg:false}
@@ -1556,11 +1556,11 @@ const MENU={
     {n:"Veg Biryani",d:"Fragrant basmati with mixed vegetables",t:'fj',f:54,j:78,id:"b1",img:"images/food/b1.jpg",veg:true},
     {n:"Chicken Dum Biryani",d:"Slow-cooked sealed pot chicken biryani",t:'fj',f:59,j:79,id:"b2",img:"images/food/b2.jpg",veg:false},
     {n:"Chicken 65 Biryani",d:"Spicy Chicken 65 in fragrant biryani rice",t:'fj',f:62,j:83,id:"b3",img:"images/food/b3.jpg",veg:false},
-    {n:"Goat Yakhni Pulao",d:"Goat cooked in aromatic stock with rice",t:'fj',f:69,j:90,id:"b4",veg:false},
+    {n:"Goat Yakhni Pulao",d:"Goat cooked in aromatic stock with rice",t:'fj',f:69,j:90,id:"b4",img:"images/food/b4.jpg",veg:false},
     {n:"Goat Dum Biryani",d:"The classic — tender goat dum-cooked biryani",t:'fj',f:70,j:91,id:"b5",img:"images/food/b5.jpg",veg:false},
     {n:"Jeera Rice",d:"Fragrant basmati rice tempered with cumin",t:'fj',f:38,j:52,id:"b6",img:"images/food/b6.jpg",veg:true},
     {n:"Peas Pulao",d:"Basmati rice cooked with green peas and spices",t:'fj',f:44,j:60,id:"b7",img:"images/food/b7.jpg",veg:true},
-    {n:"Veg Pulao",d:"Basmati rice with mixed vegetables and whole spices",t:'fj',f:48,j:65,id:"b8",veg:true}
+    {n:"Veg Pulao",d:"Basmati rice with mixed vegetables and whole spices",t:'fj',f:48,j:65,id:"b8",img:"images/food/b8.jpg",veg:true}
   ],
   roti:[
     {n:"Chapati / Roti",d:"Soft whole wheat flatbread",t:'pc',v:1.5,id:"r1",veg:true,min:20},
@@ -1725,8 +1725,11 @@ function renderSection(data,elId){
     else if(item.t==='pc'){priceStr=`$${item.v.toFixed(2)} ea`+(item.min?` · min ${item.min}`:'');}
     var cc=getCatColor(item.id);
     var _diet=item.veg===true?'veg':item.veg===false?'nonveg':'mixed';
-    return `<div class="${item.img?'icard has-img':'icard'}" data-diet="${_diet}" style="--item-color:${cc}">
-      ${item.img?`<div class="icard-photo-wrap"><img class="icard-img" src="${item.img}" alt="${item.n}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`:'' }
+    // Use explicit img if set, otherwise auto-guess from id (images/food/<id>.jpg).
+    // If the guessed file doesn't exist, onerror below removes the whole photo block cleanly.
+    var imgSrc = item.img || ('images/food/'+item.id+'.jpg');
+    return `<div class="${item.img?'icard has-img':'icard'}" id="card-${item.id}" data-diet="${_diet}" style="--item-color:${cc}">
+      <div class="icard-photo-wrap" id="photo-${item.id}"><img class="icard-img" src="${imgSrc}" alt="${item.n}" loading="lazy" onerror="this.parentElement.remove();var c=document.getElementById('card-${item.id}');if(c)c.classList.remove('has-img');"></div>
       <div class="icard-info">
         <div class="iname">${item.n}</div>
         ${item.d?`<div class="idesc">${item.d}</div>`:'' }
