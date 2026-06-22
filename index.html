@@ -731,7 +731,7 @@ html,body{margin:0;padding:0;width:100%}
   box-shadow:0 4px 16px rgba(139,37,0,0.2);
 }
 .icard.pulse{animation:cardPulse .3s ease}
-/* col 1 — photo: floor of 90px, but stretches taller to match card if title/desc wraps to extra lines */
+/* col 1 — photo: floor of 90px, stretches taller only for the few remaining long-title items */
 .icard-photo-wrap{
   position:relative;
   width:90px;min-width:90px;max-width:90px;
@@ -797,6 +797,7 @@ html,body{margin:0;padding:0;width:100%}
 /* desktop — wider photo, bigger touch targets */
 /* desktop — wider photo, bigger touch targets */
 @media(min-width:600px){
+  .icard{min-height:110px;}
   .icard{min-height:110px;}
   .icard-photo-wrap{width:110px;min-width:110px;max-width:110px;min-height:110px;}
   .icard-ctrl{min-width:100px}
@@ -1513,11 +1514,11 @@ const MENU={
     {n:"Chicken 65",d:"Fiery South Indian deep-fried chicken",t:'fj',f:49,j:71,id:"ic1",img:"images/food/ic1.jpg",veg:false},
     {n:"Chicken Majestic",d:"Hyderabadi-style fried chicken with curry leaves",t:'fj',f:49,j:71,id:"ic2",img:"images/food/ic2.jpg",veg:false},
     {n:"Chicken Lollipop",d:"Glazed chicken lollipops in Indo-Chinese sauce",t:'fj',f:52,j:73,id:"ic3",img:"images/food/ic3.jpg",veg:false},
-    {n:"Chicken Manchurian (Dry/Gravy)",d:"Crispy chicken in sweet & spicy Manchurian sauce",t:'fj',f:52,j:73,id:"ic4",img:"images/food/ic4.jpg",veg:false},
+    {n:"Chicken Manchurian",d:"Crispy chicken in sweet & spicy Manchurian sauce",t:'fj',f:52,j:73,id:"ic4",img:"images/food/ic4.jpg",veg:false},
     {n:"Chilli Chicken",d:"Wok-tossed with capsicum, onion & chilli",t:'fj',f:50,j:72,id:"ic5",img:"images/food/ic5.jpg",veg:false},
     {n:"Chilli Paneer",d:"Wok-tossed cottage cheese with peppers",t:'fj',f:50,j:72,id:"ic6",img:"images/food/ic6.jpg",veg:true},
-    {n:"Veg Manchurian (Dry/Gravy)",d:"Crispy veg balls in tangy Manchurian sauce",t:'fj',f:48,j:69,id:"ic7",img:"images/food/ic7.jpg",veg:true},
-    {n:"Gobhi Manchurian (Dry/Gravy)",d:"Crispy cauliflower in Manchurian sauce",t:'fj',f:46,j:66,id:"ic8",img:"images/food/ic8.jpg",veg:true},
+    {n:"Veg Manchurian",d:"Crispy veg balls in tangy Manchurian sauce",t:'fj',f:48,j:69,id:"ic7",img:"images/food/ic7.jpg",veg:true},
+    {n:"Gobhi Manchurian",d:"Crispy cauliflower in Manchurian sauce",t:'fj',f:46,j:66,id:"ic8",img:"images/food/ic8.jpg",veg:true},
     {n:"Hakka Noodles (Veg)",d:"Stir-fried noodles with fresh vegetables",t:'fj',f:49,j:71,id:"ic9",img:"images/food/ic9.jpg",veg:true},
     {n:"Hakka Noodles (Egg)",d:"Stir-fried noodles with egg",t:'fj',f:49,j:71,id:"ic9e",veg:false},
     {n:"Veg Fried Rice",d:"Wok-fried fragrant rice with fresh vegetables",t:'fj',f:49,j:71,id:"ic10",veg:true},
@@ -1541,7 +1542,7 @@ const MENU={
     {n:"Chicken Changezi",d:"Delhi-style chicken in rich tangy tomato gravy",t:'fj',f:62,j:83,id:"nv3",veg:false},
     {n:"Chicken Chaap",d:"Mughlai braised chicken in delicate spice gravy",t:'fj',f:62,j:83,id:"nv4",veg:false},
     {n:"Chicken Rezala",d:"Delicate white Mughal-style chicken curry",t:'fj',f:62,j:83,id:"nv5",veg:false},
-    {n:"Dum ka Chicken (Red Chicken)",d:"Slow-cooked spicy red chicken, dum sealed",t:'fj',f:62,j:83,id:"nv6",veg:false},
+    {n:"Dum ka Chicken",d:"Slow-cooked spicy red chicken, dum sealed",t:'fj',f:62,j:83,id:"nv6",veg:false},
     {n:"Achari Chicken",d:"Chicken cooked with pickling spices",t:'fj',f:62,j:83,id:"nv7",veg:false},
     {n:"Kadhai Chicken",d:"Chicken wok-cooked with capsicum & spices",t:'fj',f:62,j:83,id:"nv8",veg:false},
     {n:"Chicken Kofta",d:"Spiced minced chicken dumplings in rich gravy",t:'fj',f:64,j:87,id:"nv9",veg:false},
@@ -1574,27 +1575,27 @@ const MENU={
     {n:"Gajar ka Halwa (1000ml)",d:"Slow-cooked carrot pudding with cardamom",t:'flat',v:34,id:"d5",img:"images/food/d5.jpg",veg:true}
   ],
   bf:[
-    {n:"Macher Jhol (Rohu Fish Curry)",d:"Light Bengali fish curry with turmeric",t:'fj',f:58,j:80,id:"bf1",veg:false},
-    {n:"Shorshe Ilish (Hilsa in Mustard Gravy)",d:"Hilsa fish in sharp mustard gravy — iconic",t:'fj',f:68,j:95,id:"bf2",veg:false},
-    {n:"Chingri Malai Curry (Prawn in Coconut Milk)",d:"Prawns in velvety coconut milk gravy",t:'fj',f:65,j:90,id:"bf3",img:"images/food/bf3.jpg",veg:false},
+    {n:"Macher Jhol",d:"Light Bengali Rohu fish curry with turmeric",t:'fj',f:58,j:80,id:"bf1",veg:false},
+    {n:"Shorshe Ilish",d:"Hilsa fish in sharp mustard gravy — iconic",t:'fj',f:68,j:95,id:"bf2",veg:false},
+    {n:"Chingri Malai Curry",d:"Prawns in velvety coconut milk gravy",t:'fj',f:65,j:90,id:"bf3",img:"images/food/bf3.jpg",veg:false},
     {n:"Doi Mach",d:"Fish in yoghurt gravy — delicate & tangy",t:'fj',f:58,j:80,id:"bf4",img:"images/food/bf4.jpg",veg:false},
     {n:"Macher Kalia",d:"Rich spicy Bengali fish curry",t:'fj',f:58,j:80,id:"bf5",veg:false},
     {n:"Chingri Bhapa",d:"Steamed prawns in mustard & coconut paste",t:'fj',f:58,j:80,id:"bf6",veg:false}
   ],
   bm:[
-    {n:"Kosha Mangsho (Slow-Cooked Spicy Goat)",d:"Bengali signature — goat slow-cooked until deeply caramelised & rich",t:'fj',f:74,j:99,id:"bm1",img:"images/food/bm1.jpg",veg:false},
-    {n:"Mutton Rezala (Mughal-style White Curry)",d:"Delicate white Mughal-style aromatic gravy with whole spices",t:'fj',f:74,j:99,id:"bm2",veg:false},
-    {n:"Bengali Chicken Curry (Aloo Diye)",d:"Home-style chicken curry with potato",t:'fj',f:62,j:83,id:"bm3",veg:false},
-    {n:"Dhakai Chicken Roast (Festive Style)",d:"Dhaka-style celebration chicken, rich & golden",t:'fj',f:64,j:87,id:"bm4",veg:false}
+    {n:"Kosha Mangsho",d:"Bengali signature — goat slow-cooked until deeply caramelised & rich",t:'fj',f:74,j:99,id:"bm1",img:"images/food/bm1.jpg",veg:false},
+    {n:"Mutton Rezala",d:"Delicate white Mughal-style aromatic gravy with whole spices",t:'fj',f:74,j:99,id:"bm2",veg:false},
+    {n:"Bengali Chicken Curry",d:"Home-style chicken curry with potato",t:'fj',f:62,j:83,id:"bm3",veg:false},
+    {n:"Dhakai Chicken Roast",d:"Dhaka-style celebration chicken, rich & golden",t:'fj',f:64,j:87,id:"bm4",veg:false}
   ],
   bv:[
     {n:"Dhokar Dalna",d:"Lentil cakes in spiced gravy",t:'fj',f:45,j:63,id:"bv1",img:"images/food/bv1.jpg",veg:true},
     {n:"Aloo Posto",d:"Potatoes in fragrant poppy seed paste",t:'fj',f:45,j:63,id:"bv2",veg:true},
     {n:"Cholar Dal",d:"Bengal gram dal with coconut & spices",t:'fj',f:45,j:63,id:"bv3",veg:true},
-    {n:"Shukto (Mixed Veg Bittersweet Medley)",d:"Traditional Bengali bitter-sweet vegetables",t:'fj',f:48,j:68,id:"bv4",veg:true},
+    {n:"Shukto",d:"Traditional Bengali bitter-sweet vegetables",t:'fj',f:48,j:68,id:"bv4",veg:true},
     {n:"Basanti Pulao",d:"Sweet fragrant Bengali saffron rice",t:'fj',f:54,j:76,id:"bv5",img:"images/food/bv5.jpg",veg:true},
     {n:"Mishti Pulao",d:"Aromatic sweet rice with spices & raisins",t:'fj',f:54,j:76,id:"bv6",img:"images/food/bv6.jpg",veg:true},
-    {n:"Luchi — Deep-fried Puffed Bread",d:"Soft pillowy Bengali puri",t:'pc',v:2,id:"bv7",veg:true,min:20}
+    {n:"Luchi",d:"Soft pillowy Bengali puri",t:'pc',v:2,id:"bv7",veg:true,min:20}
   ],
   bs:[
     {n:"Pantua",d:"Bengali gulab jamun — soft & syrup-soaked",t:'pc',v:2,id:"bs1",img:"images/food/bs1.jpg",veg:true,min:20},
