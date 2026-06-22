@@ -731,12 +731,12 @@ html,body{margin:0;padding:0;width:100%}
   box-shadow:0 4px 16px rgba(139,37,0,0.2);
 }
 .icard.pulse{animation:cardPulse .3s ease}
-/* col 1 — photo: floor of 90px, stretches taller only for the few remaining long-title items */
+/* col 1 — photo: always uniform, fixed size regardless of card height */
 .icard-photo-wrap{
   position:relative;
   width:90px;min-width:90px;max-width:90px;
-  min-height:90px;
-  align-self:stretch;
+  height:90px;min-height:90px;max-height:90px;
+  align-self:center;
   flex-shrink:0;
   border-right:1px solid rgba(201,151,58,0.15);
   overflow:hidden;
@@ -799,7 +799,7 @@ html,body{margin:0;padding:0;width:100%}
 @media(min-width:600px){
   .icard{min-height:110px;}
   .icard{min-height:110px;}
-  .icard-photo-wrap{width:110px;min-width:110px;max-width:110px;min-height:110px;}
+  .icard-photo-wrap{width:110px;min-width:110px;max-width:110px;height:110px;min-height:110px;max-height:110px;}
   .icard-ctrl{min-width:100px}
   .qbtn{width:32px;height:32px}
 }
@@ -1583,7 +1583,7 @@ const MENU={
     {n:"Chingri Bhapa",d:"Steamed prawns in mustard & coconut paste",t:'fj',f:58,j:80,id:"bf6",veg:false}
   ],
   bm:[
-    {n:"Kosha Mangsho",d:"Bengali signature — goat slow-cooked until deeply caramelised & rich",t:'fj',f:74,j:99,id:"bm1",img:"images/food/bm1.jpg",veg:false},
+    {n:"Kosha Mangsho",d:"Bengali signature — slow-cooked goat, deeply caramelised",t:'fj',f:74,j:99,id:"bm1",img:"images/food/bm1.jpg",veg:false},
     {n:"Mutton Rezala",d:"Delicate white Mughal-style aromatic gravy with whole spices",t:'fj',f:74,j:99,id:"bm2",veg:false},
     {n:"Bengali Chicken Curry",d:"Home-style chicken curry with potato",t:'fj',f:62,j:83,id:"bm3",veg:false},
     {n:"Dhakai Chicken Roast",d:"Dhaka-style celebration chicken, rich & golden",t:'fj',f:64,j:87,id:"bm4",veg:false}
