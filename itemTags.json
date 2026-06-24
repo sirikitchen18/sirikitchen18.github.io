@@ -1,8 +1,8 @@
 {
   "_legend": {
-    "best": "\ud83c\udfc6 Best Seller",
-    "chef": "\ud83d\udc68\u200d\ud83c\udf73 Chef's Special",
-    "popular": "\ud83d\udd25 Popular"
+    "best": "🏆 Best Seller",
+    "chef": "👨‍🍳 Chef's Special",
+    "popular": "🔥 Popular"
   },
   "_note": "Use item names exactly as they appear in the menu. You can also use item IDs (e.g. k3) as fallback.",
   "tags": {
@@ -14,26 +14,26 @@
     "Chicken Changezi": "chef",
     "Mutton Bhuna Gosht (Goat)": "chef",
     "Dum ka Chicken": "chef",
-    "Shahi Tukda": "chef",
+    "Shahi Tukda (10 pcs)": "chef",
     "Spring Rolls (Chicken)": "popular",
-    "Chapli Kebab": "popular",
-    "HaraBhara Kebab (Veg)": "popular"
+    "Chapli Kebab (Goat)": "popular",
+    "HaraBhara Kebab (Veg)": "popular",
     "Chicken 65": "popular",
     "Hakka Noodles (Veg)": "popular",
-    "Veg Manchurian (Dry/Gravy)": "popular",
+    "Veg Manchurian": "popular",
     "Kadhai Paneer": "popular",
     "Chicken Afghani": "popular",
     "Kadhai Chicken": "popular",
     "Chicken Dum Biryani": "popular",
-    "Shahi Firni": "popular",
+    "Shahi Firni (1000ml)": "popular",
     "Egg Devil": "best",
     "Paneer Tikka (Veg)": "best",
     "Chicken Reshmi Kebab": "best",
     "Chilli Chicken": "best",
-    "Veg Diwani Handi": "best"
+    "Veg Diwani Handi": "best",
     "Chicken Tikka Masala": "best",
     "Tawa Gosht (Goat)": "best",
     "Veg Biryani": "best",
-    "Sheer Khurma": "best"
+    "Sheer Khurma (1000ml)": "best"
   }
 }
