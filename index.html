@@ -749,15 +749,11 @@ html,body{margin:0;padding:0;width:100%}
 .icard-info{
   flex:1;min-width:0;
   padding:8px 8px 8px 10px;
-  border-left:4px solid var(--item-color,#c9973a);
   display:flex;flex-direction:column;justify-content:center;
   overflow:visible;
 }
-/* when image present, strip lives on the card left edge, not info column */
-.icard.has-img .icard-info{
-  border-left:none;
-}
-.icard.has-img{
+/* colored strip always sits on the card's own outer-left edge, consistent whether photo is present or not */
+.icard{
   border-left:4px solid var(--item-color,#c9973a);
 }
 /* col 3 — selector + qty */
@@ -1704,9 +1700,9 @@ function addTabCounts(){
     btn.appendChild(countEl);
   });
 }
-function renderMostLoved(){
-  // Pick best-seller IDs from across all menu categories
-  var featuredIds=['sn3','k2','k5','nv2','nv4','b2','b3','v3','v5','r2'];
+function renderMostLoved(idsOverride){
+  // Default fallback list, used only until itemTags.json loads (or if it fails to load)
+  var featuredIds = idsOverride || ['sn3','k2','k5','nv2','nv4','b2','b3','v3','v5','r2'];
   var featured=[];
   Object.keys(MENU).forEach(function(cat){
     (MENU[cat]||[]).forEach(function(item){
@@ -1782,14 +1778,18 @@ function adj(id,d){
   }
   if(!cart[cartKey])cart[cartKey]={qty:0,price:getP(item),name:item.n,size:getL(item),id:cartKey};
   cart[cartKey].qty=nq;cart[cartKey].price=getP(item);cart[cartKey].size=getL(item);
-  // Show current size qty in counter
-  document.getElementById('q-'+id).textContent=nq;
+  // Show current size qty in counter — update EVERY instance of this item on the page
+  // (an item can appear in both its own category and Most Loved, with duplicate ids)
+  var allQtyEls=document.querySelectorAll('[id="q-'+id+'"]');
+  allQtyEls.forEach(function(el){ el.textContent=nq; });
   // Highlight based on ANY size having qty > 0
   var hasAny=Object.keys(cart).some(function(k){
     return (k===id||k.startsWith(id+'-'))&&cart[k]&&cart[k].qty>0;
   });
-  var card=document.getElementById('q-'+id).closest('.icard');
-  if(card) card.classList.toggle('selected', hasAny);
+  allQtyEls.forEach(function(el){
+    var card=el.closest('.icard');
+    if(card) card.classList.toggle('selected', hasAny);
+  });
   updBar();
   updCatBadges();
   try{localStorage.setItem('sk_cart',JSON.stringify(cart));localStorage.setItem('sk_cart_ts',Date.now());}catch(e){}
@@ -4266,36 +4266,55 @@ fetch('itemTags.json')
     ITEM_TAGS = data;
     var legend = (data._legend) || {};
     var tagsByName = data.tags || {};
-    // Re-render tags by matching item name
+
+    // Build Most Loved from every tagged item (matched by name, falling back to id).
+    // This keeps Most Loved automatically in sync with itemTags.json — no code change
+    // needed when tags are added/removed/updated.
+    var nameToId = {};
+    Object.keys(items).forEach(function(id){ nameToId[items[id].n] = id; });
+    var taggedIds = [];
+    Object.keys(tagsByName).forEach(function(name){
+      var id = nameToId[name] || (items[name] ? name : null);
+      if(id && taggedIds.indexOf(id)===-1) taggedIds.push(id);
+    });
+    if(taggedIds.length){
+      renderMostLoved(taggedIds);
+    }
+
+    // Re-render tags by matching item name. Some items (e.g. Most Loved picks) render
+    // in more than one place on the page, so we must tag EVERY instance, not just the first.
     Object.keys(items).forEach(function(id){
       var itemName = items[id].n;
       // Match by name or by id
       var tagKey = tagsByName[itemName] || data[id];
       if(!tagKey) return;
-      var el = document.getElementById('q-'+id);
-      if(!el) return;
-      var icard = el.closest('.icard');
-      if(!icard || icard.querySelector('.item-tag')) return;
-      var tagEl = document.createElement('div');
-      tagEl.className = 'item-tag item-tag-'+tagKey;
-      tagEl.textContent = legend[tagKey] || tagKey;
-      var photoWrap = icard.querySelector('.icard-photo-wrap');
-      if(photoWrap){
-        // Photo present — overlay ribbon badge on top-left corner of the photo
-        photoWrap.appendChild(tagEl);
-      } else {
-        // No photo — fall back to inline pill above the dish name
-        tagEl.style.position = 'static';
-        tagEl.style.marginBottom = '4px';
-        tagEl.style.borderRadius = '20px';
-        tagEl.style.boxShadow = 'none';
-        tagEl.style.fontSize = '11px';
-        tagEl.style.padding = '2px 8px';
-        var info = icard.querySelector('.icard-info');
-        var iname = info ? info.querySelector('.iname') : null;
-        if(info && iname) info.insertBefore(tagEl, iname);
-      }
+      var allCards = document.querySelectorAll('[id="card-'+id+'"]');
+      allCards.forEach(function(icard){
+        if(icard.querySelector('.item-tag')) return;
+        var tagEl = document.createElement('div');
+        tagEl.className = 'item-tag item-tag-'+tagKey;
+        tagEl.textContent = legend[tagKey] || tagKey;
+        var photoWrap = icard.querySelector('.icard-photo-wrap');
+        if(photoWrap){
+          // Photo present — overlay ribbon badge on top-left corner of the photo
+          photoWrap.appendChild(tagEl);
+        } else {
+          // No photo — fall back to inline pill above the dish name
+          tagEl.style.position = 'static';
+          tagEl.style.marginBottom = '4px';
+          tagEl.style.borderRadius = '20px';
+          tagEl.style.boxShadow = 'none';
+          tagEl.style.fontSize = '11px';
+          tagEl.style.padding = '2px 8px';
+          var info = icard.querySelector('.icard-info');
+          var iname = info ? info.querySelector('.iname') : null;
+          if(info && iname) info.insertBefore(tagEl, iname);
+        }
+      });
     });
+    // Most Loved may have just been rebuilt with different items — re-apply any
+    // saved cart quantities so restored counts show correctly there too.
+    restoreCart();
   })
   .catch(function(){ console.warn('Item tags file not found'); });
 
@@ -4375,12 +4394,12 @@ function restoreCart(){
         if(sel) sel.value=sz;
       }
       cart[cartKey]={qty:entry.qty,price:getP(item),name:item.n,size:getL(item)};
-      var el=document.getElementById('q-'+baseId);
-      if(el){
+      var allEls=document.querySelectorAll('[id="q-'+baseId+'"]');
+      allEls.forEach(function(el){
         el.textContent=entry.qty;
         var card=el.closest('.icard');
         if(card){card.classList.add('selected');card.classList.remove('pulse');void card.offsetWidth;card.classList.add('pulse');}
-      }
+      });
     });
     updBar();
     updCatBadges();
