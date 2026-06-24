@@ -909,7 +909,8 @@ function handleOccChange(sel){
     <div class="cat-btn" id="cat-tveg" onclick="goTab('tveg',this)">🥦 Veg Mains</div>
     <div class="cat-btn" id="cat-tnonveg" onclick="goTab('tnonveg',this)">🍗 Non-Veg</div>
     <div class="cat-btn active" id="cat-tbiryani" onclick="goTab('tbiryani',this)">🍛 Biryani</div>
-    <div class="cat-btn" id="cat-troti" onclick="goTab('troti',this)">🫓 Roti &amp; Dessert</div>
+    <div class="cat-btn" id="cat-troti" onclick="goTab('troti',this)">🫓 Roti &amp; Rice</div>
+    <div class="cat-btn" id="cat-tdessert" onclick="goTab('tdessert',this)">🍮 Desserts</div>
     <div class="cat-btn" id="cat-tcatering" onclick="goTab('tcatering',this)">🎂 Catering</div>
     <div class="cat-btn" id="cat-tbengali" onclick="goTab('tbengali',this)">🐟 Bengali À La Carte</div>
     <div class="cat-btn" id="cat-tbengpkg" onclick="goTab('tbengpkg',this)">🎁 Bengali Packages</div>
@@ -989,7 +990,11 @@ function handleOccChange(sel){
 <div id="troti" class="section">
   <div class="stitle">Roti / Paratha <small>(min 15 pcs · per piece)</small></div>
   <div id="r-roti"></div>
-  <div class="stitle" style="margin-top:1.25rem">Dessert Deals</div>
+  <div class="stitle" style="margin-top:1.25rem">Rice & Pulao</div>
+  <div id="r-rice"></div>
+</div>
+<div id="tdessert" class="section">
+  <div class="stitle">Dessert Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
   <div id="r-dessert"></div>
 </div>
 
@@ -1558,14 +1563,16 @@ const MENU={
     {n:"Chicken Dum Biryani",d:"Slow-cooked sealed pot chicken biryani",t:'fj',f:59,j:79,id:"b2",img:"images/food/b2.jpg",veg:false},
     {n:"Chicken 65 Biryani",d:"Spicy Chicken 65 in fragrant biryani rice",t:'fj',f:62,j:83,id:"b3",img:"images/food/b3.jpg",veg:false},
     {n:"Goat Yakhni Pulao",d:"Goat cooked in aromatic stock with rice",t:'fj',f:69,j:90,id:"b4",img:"images/food/b4.jpg",veg:false},
-    {n:"Goat Dum Biryani",d:"The classic — tender goat dum-cooked biryani",t:'fj',f:70,j:91,id:"b5",img:"images/food/b5.jpg",veg:false},
-    {n:"Jeera Rice",d:"Fragrant basmati rice tempered with cumin",t:'fj',f:38,j:52,id:"b6",img:"images/food/b6.jpg",veg:true},
-    {n:"Peas Pulao",d:"Basmati rice cooked with green peas and spices",t:'fj',f:44,j:60,id:"b7",img:"images/food/b7.jpg",veg:true},
-    {n:"Veg Pulao",d:"Basmati rice with mixed vegetables and whole spices",t:'fj',f:48,j:65,id:"b8",img:"images/food/b8.jpg",veg:true}
+    {n:"Goat Dum Biryani",d:"The classic — tender goat dum-cooked biryani",t:'fj',f:70,j:91,id:"b5",img:"images/food/b5.jpg",veg:false}
   ],
   roti:[
     {n:"Chapati / Roti",d:"Soft whole wheat flatbread",t:'pc',v:1.5,id:"r1",veg:true,min:20},
     {n:"Lacchedar Paratha",d:"Flaky multi-layered flatbread",t:'pc',v:2.5,id:"r2",img:"images/food/r2.jpg",veg:true,min:20}
+  ],
+  rice:[
+    {n:"Jeera Rice",d:"Fragrant basmati rice tempered with cumin",t:'fj',f:38,j:52,id:"b6",img:"images/food/b6.jpg",veg:true},
+    {n:"Peas Pulao",d:"Basmati rice cooked with green peas and spices",t:'fj',f:44,j:60,id:"b7",img:"images/food/b7.jpg",veg:true},
+    {n:"Veg Pulao",d:"Basmati rice with mixed vegetables and whole spices",t:'fj',f:48,j:65,id:"b8",img:"images/food/b8.jpg",veg:true}
   ],
   dessert:[
     {n:"Gulab Jamun",d:"Milk dumplings in rose sugar syrup",t:'pc',v:2,id:"d1",img:"images/food/d1.jpg",veg:true,min:20},
@@ -1601,7 +1608,6 @@ const MENU={
     {n:"Pantua",d:"Bengali gulab jamun — soft & syrup-soaked",t:'pc',v:2,id:"bs1",img:"images/food/bs1.jpg",veg:true,min:20},
     {n:"Mishti Doi (1000ml)",d:"Bengali sweetened yoghurt — the iconic dessert",t:'flat',v:32,id:"bs2",veg:true},
     {n:"Payesh / Rice Kheer (1000ml)",d:"Bengali creamy rice pudding",t:'flat',v:32,id:"bs3",veg:true},
-    {n:"Egg Devil",d:"Spiced devilled eggs — Bengali party staple",t:'pc',v:3,id:"bs4",veg:false,min:20},
     {n:"Khejoor Chutney (1000ml)",d:"Date chutney — the essential Bengali condiment",t:'flat',v:28,id:"bs5",img:"images/food/bs5.jpg",veg:true}
   ]
 };
@@ -1611,7 +1617,7 @@ let delType='pickup',delCharge=0,km=0,slat=null,slon=null,atimer=null,suggs=[];
 
 // ── RENDER ITEMS ─────────────────────────────────────
 function renderAll(){
-  const keys={snacks:'snacks',family:'family',kebab:'kebab',ic:'ic',veg:'veg',nv:'nv',bir:'bir',roti:'roti',dessert:'dessert',bf:'bf',bm:'bm',bv:'bv',bs:'bs'};
+  const keys={snacks:'snacks',family:'family',kebab:'kebab',ic:'ic',veg:'veg',nv:'nv',bir:'bir',roti:'roti',rice:'rice',dessert:'dessert',bf:'bf',bm:'bm',bv:'bv',bs:'bs'};
   Object.keys(keys).forEach(k=>renderSection(MENU[k]||[],'r-'+k));
   renderMostLoved();
   addTabCounts();
@@ -1685,7 +1691,8 @@ function addTabCounts(){
     'cat-tveg':      (MENU.veg||[]).length,
     'cat-tnonveg':   (MENU.nv||[]).length,
     'cat-tbiryani':  (MENU.bir||[]).length,
-    'cat-troti':     ((MENU.roti||[]).length+(MENU.dessert||[]).length),
+    'cat-troti':     ((MENU.roti||[]).length+(MENU.rice||[]).length),
+    'cat-tdessert':  (MENU.dessert||[]).length,
     'cat-tbengali':  ((MENU.bf||[]).length+(MENU.bm||[]).length+(MENU.bv||[]).length+(MENU.bs||[]).length)
   };
   Object.keys(tabCounts).forEach(function(id){
@@ -2308,7 +2315,7 @@ function renderFullMenu(){
   var sectionNames = {
     snacks:"Snacks & Starters", family:"Family Specials", kebab:"Kebabs",
     ic:"Indo-Chinese", veg:"Veg Mains", nv:"Non-Veg Mains",
-    bir:"Biryani & Rice", roti:"Roti & Breads", dessert:"Desserts",
+    bir:"Biryani", roti:"Roti & Breads", rice:"Rice & Pulao", dessert:"Desserts",
     bf:"Bengali Fish", bm:"Bengali Mutton/Chicken", bv:"Bengali Veg", bs:"Bengali Sweets"
   };
 
@@ -4389,8 +4396,9 @@ function updCatBadges(){
     'tic':      ['ic'],
     'tveg':     ['v'],
     'tnonveg':  ['nv'],
-    'tbiryani': ['b'],
-    'troti':    ['r','d'],
+    'tbiryani': ['b1','b2','b3','b4','b5'],
+    'troti':    ['r1','r2','b6','b7','b8'],
+    'tdessert': ['d'],
     'tcatering':['cp'],
     'tbengali': ['bf','bm','bv','bs'],
     'tbengpkg': ['bp']
@@ -4401,7 +4409,7 @@ function updCatBadges(){
     var prefixes = catMap[tab];
     var qty = Object.keys(cart).filter(function(id){
       return cart[id] && cart[id].qty > 0 &&
-        prefixes.some(function(p){ return id.startsWith(p); });
+        prefixes.some(function(p){ return id===p || id.startsWith(p); });
     }).reduce(function(s,id){ return s + (cart[id].qty||0); }, 0);
     var badge = btn.querySelector('.cat-badge');
     if(qty > 0){
