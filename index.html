@@ -710,31 +710,6 @@ html,body{margin:0;padding:0;width:100%}
 #btt.show{display:flex}
 /* ── CART ADD PULSE ────────────────────────────────── */
 @keyframes cardPulse{0%{transform:scale(1)}40%{transform:scale(1.03)}100%{transform:scale(1)}}
-/* ── BANNER PHONE OVERLAY ───────────────────────────────── */
-.banner-phone-link{
-  position:absolute;
-  /* Desktop: nudged down, trimmed right */
-  top:48%;left:57%;
-  color:transparent;
-  font-size:1px;
-  text-decoration:none;
-  width:10%;height:6%;
-  display:block;
-  cursor:pointer;
-  border-radius:3px;
-}
-.banner-phone-link:hover,.banner-phone-link:focus{
-  background:rgba(0,0,0,0.55);
-}
-.banner-phone-link:visited,.banner-phone-link:active{
-  color:transparent;
-  background:transparent;
-}
-/* Mobile: recalibrated to the current banner image — phone number sits in the info box */
-.mob-banner-phone-link{
-  top:48.5%;left:60.9%;
-  width:37.2%;height:5%;
-}
 
 /* ── ITEM CARDS ─────────────────────────────────────── */
 .icard{
@@ -926,13 +901,11 @@ function handleOccChange(sel){
 <!-- HERO -->
 <div class="hero-img-wrap" style="position:relative;">
   <img src="images/banner-desktop.jpg" alt="Siri Kitchen Banner" class="hero-img">
-  <a href="tel:0432237104" class="banner-phone-link" aria-label="Call 0432 237 104">0432 237 104</a>
 </div>
 
 <!-- MOBILE HERO (shown ≤600px only) -->
 <div class="mob-hero" style="position:relative;">
   <img src="images/banner-mobile.jpg" alt="Siri Kitchen" class="mob-banner-img">
-  <a href="tel:0432237104" class="banner-phone-link mob-banner-phone-link" aria-label="Call 0432 237 104">0432 237 104</a>
 </div>
 
 <!-- CATEGORY NAV -->
