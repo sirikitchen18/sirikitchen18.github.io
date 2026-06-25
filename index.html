@@ -4258,12 +4258,21 @@ function searchMenu(q){
   var results = [];
   Object.keys(MENU).forEach(function(k){
     (MENU[k]||[]).forEach(function(item){
-      var hay = (item.n+" "+(item.d||"")).toLowerCase();
-      if(qWords.some(function(w){return hay.indexOf(w)>-1;})){
-        results.push({item:item,section:k});
+      var nameLower = item.n.toLowerCase();
+      var descLower = (item.d||"").toLowerCase();
+      var score = 0;
+      qWords.forEach(function(w){
+        if(nameLower.indexOf(w)>-1) score += 3;
+        else if(descLower.indexOf(w)>-1) score += 1;
+      });
+      if(score>0){
+        results.push({item:item,section:k,score:score});
       }
     });
   });
+  // Best matches first — items matching every word in the name rank highest,
+  // partial/description-only matches still show but lower down (no dead-end empty results)
+  results.sort(function(a,b){ return b.score-a.score; });
 
   document.getElementById("catnav").style.display = "none";
   document.querySelectorAll(".menu-section").forEach(function(s){s.style.display="none";});
@@ -4327,12 +4336,29 @@ function searchMenu(q){
 
 function buildSearchCard(card, item){
   var iid = item.id;
+  card.style.display = "flex";
+  card.style.padding = "0";
+  card.style.overflow = "hidden";
+  card.style.borderLeft = "4px solid " + (typeof getCatColor==='function'?getCatColor(iid):"#c9973a");
+  // Photo — same auto-fallback path as the main menu cards (explicit img, else images/food/<id>.jpg)
+  var imgSrc = item.img || ("images/food/"+iid+".jpg");
+  var photoWrap = document.createElement("div");
+  photoWrap.className = "icard-photo-wrap";
+  photoWrap.id = "photo-search-"+iid;
+  var imgEl = document.createElement("img");
+  imgEl.className = "icard-img"; imgEl.loading = "lazy"; imgEl.alt = item.n; imgEl.src = imgSrc;
+  imgEl.addEventListener("error", function(){ photoWrap.remove(); });
+  photoWrap.appendChild(imgEl);
+  card.appendChild(photoWrap);
+  var body = document.createElement("div");
+  body.style.cssText = "flex:1;min-width:0;padding:12px 14px;";
+  card.appendChild(body);
   // Name
-  var nameEl=document.createElement("div"); nameEl.style.cssText="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px"; nameEl.textContent=item.n; card.appendChild(nameEl);
+  var nameEl=document.createElement("div"); nameEl.style.cssText="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px"; nameEl.textContent=item.n; body.appendChild(nameEl);
   // Desc
-  if(item.d){var dEl=document.createElement("div");dEl.style.cssText="font-size:12px;color:var(--sub);margin-bottom:6px";dEl.textContent=item.d;card.appendChild(dEl);}
+  if(item.d){var dEl=document.createElement("div");dEl.style.cssText="font-size:12px;color:var(--sub);margin-bottom:6px";dEl.textContent=item.d;body.appendChild(dEl);}
   // Price row
-  var foot=document.createElement("div"); foot.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px"; card.appendChild(foot);
+  var foot=document.createElement("div"); foot.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px"; body.appendChild(foot);
   var priceArea=document.createElement("div"); foot.appendChild(priceArea);
   if(item.t==="fj"){
     var togWrap=document.createElement("div"); togWrap.className="size-toggle"; togWrap.id="sztog-"+iid; togWrap.style.width="96px";
