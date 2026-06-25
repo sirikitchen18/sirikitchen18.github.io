@@ -800,6 +800,30 @@ html,body{margin:0;padding:0;width:100%}
   border-radius:6px;background:#fff;
   color:#5a1a00;font-family:"Inter",sans-serif;
 }
+.size-toggle{
+  display:flex;flex-direction:column;
+  width:100%;
+  border:1px solid rgba(201,151,58,0.4);
+  border-radius:6px;overflow:hidden;
+}
+.size-btn{
+  width:100%;
+  font-size:11px;font-weight:600;
+  padding:4px 6px;
+  border:none;
+  background:#fff;
+  color:#5a1a00;
+  font-family:"Inter",sans-serif;
+  cursor:pointer;
+  transition:background .15s,color .15s;
+  text-align:center;
+}
+.size-btn + .size-btn{border-top:1px solid rgba(201,151,58,0.3)}
+.size-btn.active{
+  background:var(--red);
+  color:#fff;
+}
+.size-btn:not(.active):hover{background:#fae8d0}
 .qrow{display:flex;align-items:center;gap:4px}
 .qbtn{
   width:28px;height:28px;border-radius:50%;
@@ -1749,8 +1773,11 @@ function renderSection(data,elId){
   el.innerHTML=data.map(item=>{
     let ctrl='',priceStr='';
     if(item.t==='fj'){
-      ctrl=`<select class="ssel" id="sz-${item.id}" onchange="upP('${item.id}')"><option value="f">Family $${item.f}</option><option value="j">Jumbo $${item.j}</option></select>`;
-      priceStr=``;  // price shown in dropdown
+      ctrl=`<div class="size-toggle" id="sztog-${item.id}">
+        <button type="button" class="size-btn active" data-size="f" onclick="setSize('${item.id}','f',this)">Family $${item.f}</button>
+        <button type="button" class="size-btn" data-size="j" onclick="setSize('${item.id}','j',this)">Jumbo $${item.j}</button>
+      </div><select class="ssel" id="sz-${item.id}" onchange="upP('${item.id}')" style="display:none"><option value="f">Family $${item.f}</option><option value="j">Jumbo $${item.j}</option></select>`;
+      priceStr=``;  // price shown in toggle
     }else if(item.t==='flat'){priceStr=`$${item.v}`;}
     else if(item.t==='pc'){priceStr=`$${item.v.toFixed(2)} ea`+(item.min?` · min ${item.min}`:'');}
     var cc=getCatColor(item.id);
@@ -1822,6 +1849,37 @@ function adj(id,d){
 }
 
 // Update qval display when dropdown size changes
+function setSize(id, size, btnEl){
+  // Scope to the specific toggle the user clicked, not a global lookup —
+  // an item can exist in both search results and its own category tab
+  // simultaneously (the inactive one hidden via display:none, not removed),
+  // and getElementById would only ever find the first match in the DOM.
+  var tog = btnEl ? btnEl.closest('.size-toggle') : document.getElementById('sztog-'+id);
+  if(!tog) return;
+  var sel = tog.parentElement ? tog.parentElement.querySelector('[id="sz-'+id+'"]') : document.getElementById('sz-'+id);
+  if(!sel) return;
+  sel.value = size;
+  tog.querySelectorAll('.size-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-size')===size);
+  });
+  // Fire the existing onchange-equivalent logic (price update, cart qty display) unchanged
+  upPScoped(id, sel);
+}
+function upPScoped(id, sel){
+  const item=items[id];if(!item)return;
+  const sz = sel && sel.value==='j' ? 'j' : 'f';
+  const p = sz==='j' ? item.j : item.f;
+  var cartKey=id+'-'+sz;
+  if(cart[cartKey]&&cart[cartKey].qty>0){
+    cart[cartKey].price=p;
+    cart[cartKey].size=(sz==='j'?' (Jumbo)':' (Family)');
+    updBar();
+  }
+  // Show qty for selected size, scoped to the same card the toggle lives in
+  var card = sel.closest('.icard') || sel.closest('.search-result-item') || document;
+  var qEl = card.querySelector ? card.querySelector('[id="q-'+id+'"]') : null;
+  if(qEl) qEl.textContent = (cart[cartKey]&&cart[cartKey].qty)||0;
+}
 function upP(id){
   const item=items[id];if(!item)return;
   const p=getP(item);
@@ -4277,7 +4335,14 @@ function buildSearchCard(card, item){
   var foot=document.createElement("div"); foot.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px"; card.appendChild(foot);
   var priceArea=document.createElement("div"); foot.appendChild(priceArea);
   if(item.t==="fj"){
-    var sel=document.createElement("select"); sel.className="ssel"; sel.id="sz-"+iid;
+    var togWrap=document.createElement("div"); togWrap.className="size-toggle"; togWrap.id="sztog-"+iid; togWrap.style.width="96px";
+    var fBtn=document.createElement("button"); fBtn.type="button"; fBtn.className="size-btn active"; fBtn.setAttribute("data-size","f"); fBtn.textContent="Family $"+item.f;
+    fBtn.addEventListener("click",function(){setSize(iid,'f',fBtn);});
+    var jBtn=document.createElement("button"); jBtn.type="button"; jBtn.className="size-btn"; jBtn.setAttribute("data-size","j"); jBtn.textContent="Jumbo $"+item.j;
+    jBtn.addEventListener("click",function(){setSize(iid,'j',jBtn);});
+    togWrap.appendChild(fBtn); togWrap.appendChild(jBtn);
+    priceArea.appendChild(togWrap);
+    var sel=document.createElement("select"); sel.className="ssel"; sel.id="sz-"+iid; sel.style.display="none";
     sel.innerHTML="<option value='f'>Family $"+item.f+"</option><option value='j'>Jumbo $"+item.j+"</option>";
     sel.addEventListener("change",function(){upP(iid);});
     priceArea.appendChild(sel);
@@ -4448,6 +4513,12 @@ function restoreCart(){
         var sz=cartKey.endsWith('-j')?'j':'f';
         var sel=document.getElementById('sz-'+baseId);
         if(sel) sel.value=sz;
+        var tog=document.getElementById('sztog-'+baseId);
+        if(tog){
+          tog.querySelectorAll('.size-btn').forEach(function(btn){
+            btn.classList.toggle('active', btn.getAttribute('data-size')===sz);
+          });
+        }
       }
       cart[cartKey]={qty:entry.qty,price:getP(item),name:item.n,size:getL(item)};
       var allEls=document.querySelectorAll('[id="q-'+baseId+'"]');
