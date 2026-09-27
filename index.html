@@ -272,6 +272,7 @@ body{font-family:"Inter",sans-serif;font-size:16px;background:#f7efe4;color:var(
 
 /* ── DELIVERY BAR ───────────────────────────────────── */
 .del-bar{background:#fdf0e4;padding:8px 1rem;font-size:13px;color:var(--sub);text-align:center;border-top:1px solid var(--border);line-height:1.5;margin-bottom:0}
+.site-footer{background:#fdf0e4;padding:6px 1rem 10px;font-size:11px;color:var(--sub);opacity:0.7;text-align:center;border-top:1px solid var(--border)}
 
 /* ── CART BAR (fixed) ───────────────────────────────── */
 .cart-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:3px solid var(--red);padding:8px 1.25rem;padding-bottom:calc(8px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px rgba(0,0,0,0.18);z-index:999;display:block;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
@@ -923,8 +924,9 @@ function handleOccChange(sel){
   <button class="cat-nav-arrow cat-nav-arrow-left" id="catnav-arrow-left" onclick="scrollCatNav(-1)" aria-label="Scroll categories left" type="button">‹</button>
   <div class="cat-inner" id="catnav-inner">
     <div class="cat-btn active" id="cat-tmostloved" onclick="goTab('tmostloved',this)">⭐ Most Loved</div>
+    <div class="cat-btn" id="cat-tbfast" onclick="goTab('tbfast',this)">🌅 Breakfast</div>
     <div class="cat-btn" id="cat-tsnacks" onclick="goTab('tsnacks',this)">🍢 Snacks</div>
-    <div class="cat-btn" id="cat-tkebab" onclick="goTab('tkebab',this)">🍖 Kebab</div>
+    <div class="cat-btn" id="cat-tkebab" onclick="goTab('tkebab',this)">🍖 Starters &amp; Kebabs</div>
     <div class="cat-btn" id="cat-tic" onclick="goTab('tic',this)">🍜 Indo-Chinese</div>
     <div class="cat-btn" id="cat-tveg" onclick="goTab('tveg',this)">🥦 Veg Mains</div>
     <div class="cat-btn" id="cat-tnonveg" onclick="goTab('tnonveg',this)">🍗 Non-Veg</div>
@@ -987,15 +989,23 @@ function handleOccChange(sel){
   <div id="r-mostloved"></div>
 </div>
 
+<div id="tbfast" class="section">
+  <div class="stitle">Breakfast <small>(per piece unless noted)</small></div>
+  <div id="r-bfast"></div>
+</div>
+
 <div id="tsnacks" class="section">
   <div class="stitle">Snacks <small>(min 15 pcs · per piece)</small></div>
   <div id="r-snacks"></div>
-  <div class="stitle" style="margin-top:1.25rem">Family Deals <small>(serves 4–5 people)</small></div>
-  <div id="r-family"></div>
 </div>
 <div id="tkebab" class="section">
   <div style="background:transparent;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;padding:5px 12px;font-size:clamp(10px,2.8vw,13px);color:var(--sub);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>Family</strong> serves 4–5 people &nbsp;·&nbsp; <strong>Jumbo</strong> serves 8–9 people</div>
-  <div class="stitle">Kebab Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-kebab"></div></div>
+  <div class="stitle">Starters &amp; Kebabs<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
+  <div class="stitle" style="margin-top:1.25rem;font-size:1rem">Starters (Family Deals)</div>
+  <div id="r-family"></div>
+  <div class="stitle" style="margin-top:1.25rem;font-size:1rem">Kebabs &amp; Tikkas</div>
+  <div id="r-kebab"></div>
+</div>
 <div id="tic" class="section">
   <div style="background:transparent;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;padding:5px 12px;font-size:clamp(10px,2.8vw,13px);color:var(--sub);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>Family</strong> serves 4–5 people &nbsp;·&nbsp; <strong>Jumbo</strong> serves 8–9 people</div>
   <div class="stitle">Indo-Chinese Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div><div id="r-ic"></div></div>
@@ -1015,7 +1025,7 @@ function handleOccChange(sel){
   <div id="r-rice"></div>
 </div>
 <div id="tdessert" class="section">
-  <div class="stitle">Dessert Deals<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
+  <div class="stitle">Desserts<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
   <div id="r-dessert"></div>
 </div>
 
@@ -1117,6 +1127,7 @@ function handleOccChange(sel){
 </div>
 
 <div class="del-bar">🚚 Free delivery over $100 (≤5 km) · $8 flat (5–10 km) · $1/km beyond · Free pickup Tarneit</div>
+<div class="site-footer">Siri Kitchen · ABN: 93 854 688 909</div>
 
 <!-- FIXED CART BAR -->
 <div class="cart-bar" id="cart-bar">
@@ -1227,7 +1238,7 @@ function handleOccChange(sel){
     <div class="inv-hdr">
       <div class="inv-brand">SIRI KITCHEN</div>
       <div class="inv-tagline">Relish the taste of quality Indian home-made food</div>
-      <div class="inv-info">Near Riverdale Village Shopping Centre, Tarneit · Phone: 0432237104</div>
+      <div class="inv-info">Near Riverdale Village Shopping Centre, Tarneit · Phone: 0432237104 · ABN: 93 854 688 909</div>
       <div class="inv-delivery">🚚 Free on orders above $100 (within 5km) · $8 (5–10km) · $1/km beyond</div>
       <div class="inv-num" id="inv-num-display"></div>
     </div>
@@ -1294,6 +1305,7 @@ function handleOccChange(sel){
       <div>
         <div class="inv-footer-brand">Siri Kitchen</div>
         <div style="font-size:12px;color:rgba(255,220,160,0.75);margin-top:3px">18 Gunawan Drive, Tarneit, VIC 3029</div>
+        <div style="font-size:12px;color:rgba(255,220,160,0.75);margin-top:2px">ABN: 93 854 688 909</div>
       </div>
       <div class="inv-footer-info">
         Cont: 0432237104<br>
@@ -1503,6 +1515,15 @@ var NETLIFY_URL="https://sirikitchen18.github.io";
 
 const ORIGIN="18 Gunawan Drive, Tarneit VIC 3029, Australia";
 const MENU={
+  bfast:[
+    {n:"Poha (500ml)",d:"Flattened rice with onion, mustard & spices",t:'flat',v:18,id:"bf_1",veg:true},
+    {n:"Chhola Bhature (2 pcs)",d:"Crispy fried bread with spiced chickpea curry",t:'pc',v:5,id:"bf_2",veg:true,min:10},
+    {n:"Halwa Puri (2 pcs)",d:"Deep-fried puri with semolina halwa",t:'pc',v:4,id:"bf_3",veg:true,min:10},
+    {n:"Kheer Puri (2 pcs)",d:"Deep-fried puri with creamy rice kheer",t:'pc',v:4,id:"bf_4",veg:true,min:10},
+    {n:"Aloo Puri (2 pcs)",d:"Deep-fried puri with spiced potato curry",t:'pc',v:4,id:"bf_5",veg:true,min:10},
+    {n:"Sandwich (Veg)",d:"Fresh veg sandwiches with chutney",t:'pc',v:4,id:"sn7",img:"images/food/sn7.jpg",min:20,veg:true},
+    {n:"Sandwich (Chicken)",d:"Fresh chicken sandwiches with chutney",t:'pc',v:4,id:"sn7c",img:"images/food/sn7c.jpg",min:20,veg:false}
+  ],
   snacks:[
     {n:"Spring Rolls (Veg)",d:"Crispy golden rolls with spiced veg filling",t:'pc',v:3,id:"sn1",img:"images/food/sn1.jpg",min:20,veg:true},
     {n:"Spring Rolls (Chicken)",d:"Crispy rolls with spiced chicken filling",t:'pc',v:3,id:"sn1c",img:"images/food/sn1c.jpg",min:20,veg:false},
@@ -1513,16 +1534,14 @@ const MENU={
     {n:"Puff Patties (Veg)",d:"Flaky pastry puffs with spiced veg filling",t:'pc',v:4,id:"sn5",img:"images/food/sn5.jpg",min:20,veg:true},
     {n:"Puff Patties (Chicken)",d:"Flaky pastry puffs with spiced chicken",t:'pc',v:4,id:"sn5c",img:"images/food/sn5c.jpg",min:20,veg:false},
     {n:"Punjabi Samosa",d:"Classic pastry with spiced potato & peas",t:'pc',v:4,id:"sn6",img:"images/food/sn6.jpg",veg:true,min:20},
-    {n:"Sandwich (Veg)",d:"Freshly prepared veg sandwiches with chutney",t:'pc',v:4,id:"sn7",img:"images/food/sn7.jpg",min:20,veg:true},
-    {n:"Sandwich (Chicken)",d:"Fresh chicken sandwiches with chutney",t:'pc',v:4,id:"sn7c",img:"images/food/sn7c.jpg",min:20,veg:false}
+    {n:"Medu Vada (Veg)",d:"Crispy lentil donuts with coconut chutney",t:'flat',v:35,id:"f3",veg:true}
   ],
   family:[
-    {n:"Onion Bhajji (Veg)",d:"Crispy golden onion fritters",t:'flat',v:32,id:"f1",veg:true},
-    {n:"Gobhi Pakoda (Veg)",d:"Cauliflower florets in seasoned batter",t:'flat',v:34,id:"f2",img:"images/food/f2.jpg",veg:true},
-    {n:"Medu Vada (Veg)",d:"South Indian crispy lentil doughnuts",t:'flat',v:35,id:"f3",veg:true},
-    {n:"Paneer Pakoda (Veg)",d:"Cottage cheese fritters in spiced batter",t:'flat',v:44,id:"f4",img:"images/food/f4.jpg",veg:true},
-    {n:"Corn Cheese Ball (Veg)",d:"Crispy corn and melted cheese balls",t:'flat',v:44,id:"f5",img:"images/food/f5.jpg",veg:true},
-    {n:"Chicken Pakoda",d:"Tender chicken in spiced gram flour",t:'flat',v:46,id:"f6",veg:false}
+    {n:"Onion Bhajji (Veg)",d:"Crispy golden onion fritters",t:'fj',f:32,j:44,id:"f1",veg:true},
+    {n:"Gobhi Pakoda (Veg)",d:"Crispy cauliflower fritters in spiced batter",t:'fj',f:34,j:47,id:"f2",veg:true},
+    {n:"Paneer Pakoda (Veg)",d:"Golden cottage cheese fritters",t:'fj',f:44,j:60,id:"f4",veg:true},
+    {n:"Corn Cheese Ball (Veg)",d:"Golden corn & cheese balls, crispy outside",t:'fj',f:44,j:60,id:"f5",img:"images/food/f5.jpg",veg:true},
+    {n:"Chicken Pakoda",d:"Tender chicken in spiced gram flour",t:'fj',f:46,j:63,id:"f6",veg:false}
   ],
   kebab:[
     {n:"HaraBhara Kebab (Veg)",d:"Spinach, pea & potato green kebabs",t:'fj',f:42,j:58,id:"k1",img:"images/food/k1.jpg",veg:true},
@@ -1534,50 +1553,65 @@ const MENU={
     {n:"Mutton Tikka Boti (Goat)",d:"Cubed goat marinated in bold spices",t:'fj',f:60,j:82,id:"k7",img:"images/food/k7.jpg",veg:false},
     {n:"Mutton Seekh Kebab (Goat)",d:"Minced goat kebab on skewer",t:'fj',f:60,j:82,id:"k8",img:"images/food/k8.jpg",veg:false},
     {n:"Chapli Kebab (Goat)",d:"Flat Peshawari minced goat kebab",t:'fj',f:60,j:82,id:"k9",img:"images/food/k9.jpg",veg:false},
-    {n:"Gola Kebab (Goat)",d:"Round minced goat kebab, juicy & aromatic",t:'fj',f:60,j:82,id:"k10",img:"images/food/k10.jpg",veg:false}
+    {n:"Gola Kebab (Goat)",d:"Round minced goat kebab, juicy & aromatic",t:'fj',f:60,j:82,id:"k10",img:"images/food/k10.jpg",veg:false},
+    {n:"Chicken Keema Samosa",d:"Crispy pastry filled with spiced chicken mince",t:'fj',f:48,j:66,id:"k11",veg:false},
+    {n:"Tandoori Drummettes",d:"Chicken drummettes marinated in tandoori spices",t:'fj',f:48,j:66,id:"k12",veg:false},
+    {n:"Keema Cheese Cutlet",d:"Spiced mince & melted cheese cutlets",t:'fj',f:48,j:66,id:"k13",veg:false},
+    {n:"Chicken Nene Drummettes (Korean)",d:"Korean-style crispy glazed chicken drummettes",t:'fj',f:52,j:72,id:"k14",veg:false},
+    {n:"Chicken Seekh Kebab",d:"Spiced minced chicken kebab on skewer",t:'fj',f:48,j:66,id:"k15",veg:false}
   ],
   ic:[
-    {n:"Chicken 65",d:"Fiery South Indian deep-fried chicken",t:'fj',f:49,j:71,id:"ic1",img:"images/food/ic1.jpg",veg:false},
+    {n:"Chicken 65",d:"Fiery South Indian fried chicken",t:'fj',f:49,j:71,id:"ic1",img:"images/food/ic1.jpg",veg:false},
     {n:"Chicken Majestic",d:"Hyderabadi fried chicken with curry leaves",t:'fj',f:49,j:71,id:"ic2",img:"images/food/ic2.jpg",veg:false},
     {n:"Chicken Lollipop",d:"Glazed chicken in Indo-Chinese sauce",t:'fj',f:52,j:73,id:"ic3",img:"images/food/ic3.jpg",veg:false},
     {n:"Chicken Manchurian",d:"Crispy chicken in spicy Manchurian sauce",t:'fj',f:52,j:73,id:"ic4",img:"images/food/ic4.jpg",veg:false},
-    {n:"Chilli Chicken",d:"Wok-tossed with capsicum, onion & chilli",t:'fj',f:50,j:72,id:"ic5",img:"images/food/ic5.jpg",veg:false},
-    {n:"Chilli Paneer",d:"Wok-tossed cottage cheese with peppers",t:'fj',f:50,j:72,id:"ic6",img:"images/food/ic6.jpg",veg:true},
+    {n:"Chilli Chicken",d:"Crispy chicken in bold chilli sauce",t:'fj',f:50,j:72,id:"ic5",img:"images/food/ic5.jpg",veg:false},
+    {n:"Chilli Paneer",d:"Cottage cheese in tangy chilli sauce",t:'fj',f:50,j:72,id:"ic6",img:"images/food/ic6.jpg",veg:true},
     {n:"Veg Manchurian",d:"Crispy veg balls in tangy Manchurian sauce",t:'fj',f:48,j:69,id:"ic7",img:"images/food/ic7.jpg",veg:true},
     {n:"Gobhi Manchurian",d:"Crispy cauliflower in Manchurian sauce",t:'fj',f:46,j:66,id:"ic8",img:"images/food/ic8.jpg",veg:true},
-    {n:"Hakka Noodles (Veg)",d:"Stir-fried noodles with fresh vegetables",t:'fj',f:49,j:71,id:"ic9",img:"images/food/ic9.jpg",veg:true},
+    {n:"Hakka Noodles (Veg)",d:"Stir-fried noodles with vegetables",t:'fj',f:49,j:71,id:"ic9",img:"images/food/ic9.jpg",veg:true},
     {n:"Hakka Noodles (Egg)",d:"Stir-fried noodles with egg",t:'fj',f:49,j:71,id:"ic9e",veg:false},
-    {n:"Veg Fried Rice",d:"Wok-fried fragrant rice with fresh vegetables",t:'fj',f:49,j:71,id:"ic10",veg:true},
-    {n:"Egg Fried Rice",d:"Wok-fried fragrant rice with egg",t:'fj',f:49,j:71,id:"ic10e",img:"images/food/ic10e.jpg",veg:false},
-    {n:"Chicken Fried Rice",d:"Wok-fried fragrant rice with chicken",t:'fj',f:49,j:71,id:"ic10c",img:"images/food/ic10c.jpg",veg:false},
-    {n:"Hakka Noodles (Chicken)",d:"Wok-fried Hakka noodles with chicken",t:'fj',f:52,j:73,id:"ic11",veg:false}
+    {n:"Veg Fried Rice",d:"Wok-tossed rice with vegetables",t:'fj',f:49,j:71,id:"ic10",veg:true},
+    {n:"Egg Fried Rice",d:"Wok-tossed rice with egg",t:'fj',f:49,j:71,id:"ic10e",veg:false},
+    {n:"Chicken Fried Rice",d:"Wok-tossed rice with chicken",t:'fj',f:49,j:71,id:"ic10c",img:"images/food/ic10c.jpg",veg:false},
+    {n:"Hakka Noodles (Chicken)",d:"Stir-fried noodles with chicken",t:'fj',f:52,j:73,id:"ic11",veg:false},
+    {n:"Fish Chilli",d:"Crispy fish in bold chilli sauce",t:'fj',f:52,j:73,id:"ic12",veg:false}
   ],
   veg:[
     {n:"Daal Makhni",d:"Slow-cooked black lentils, buttery & rich",t:'fj',f:45,j:66,id:"v1",veg:true},
     {n:"Matar Paneer",d:"Cottage cheese & peas in tomato gravy",t:'fj',f:53,j:75,id:"v2",veg:true},
     {n:"Kadhai Paneer",d:"Cottage cheese wok-cooked with spices",t:'fj',f:53,j:75,id:"v3",img:"images/food/v3.jpg",veg:true},
     {n:"Paneer Butter Masala",d:"Rich creamy butter tomato gravy with paneer",t:'fj',f:53,j:75,id:"v4",img:"images/food/v4.jpg",veg:true},
-    {n:"Paneer Tikka Masala",d:"Grilled paneer in vibrant tikka masala sauce",t:'fj',f:54,j:76,id:"v5",veg:true},
+    {n:"Paneer Tikka Masala",d:"Grilled paneer in vibrant tikka masala sauce",t:'fj',f:54,j:76,id:"v5",img:"images/food/v5.jpg",veg:true},
     {n:"Malai Kofta",d:"Creamy potato-paneer dumplings, rich gravy",t:'fj',f:54,j:76,id:"v6",veg:true},
-    {n:"Veg Diwani Handi",d:"Mixed vegetables slow-cooked in clay pot",t:'fj',f:49,j:71,id:"v7",veg:true},
-    {n:"Veg Kolhapuri",d:"Fiery Maharashtrian mixed vegetable curry",t:'fj',f:49,j:71,id:"v8",veg:true}
+    {n:"Veg Diwani Handi",d:"Mixed vegetable curry in handi-style gravy",t:'fj',f:49,j:71,id:"v7",veg:true},
+    {n:"Veg Kolhapuri",d:"Fiery Maharashtrian mixed vegetable curry",t:'fj',f:49,j:71,id:"v8",veg:true},
+    {n:"Daal Tadka",d:"Yellow lentils tempered with cumin & garlic",t:'fj',f:45,j:66,id:"v9",veg:true},
+    {n:"Shahi Paneer",d:"Paneer in rich Mughlai cream gravy",t:'fj',f:53,j:75,id:"v10",veg:true},
+    {n:"Paneer Lababdar",d:"Paneer in tangy onion-tomato cream gravy",t:'fj',f:54,j:76,id:"v11",veg:true}
   ],
   nv:[
-    {n:"Chicken Afghani",d:"Creamy white yoghurt marinated chicken",t:'fj',f:62,j:83,id:"nv1",veg:false},
-    {n:"Chicken Korma",d:"Rich fragrant chicken in almond & cream gravy",t:'fj',f:62,j:83,id:"nv2",img:"images/food/nv2.jpg",veg:false},
+    {n:"Chicken Afghani",d:"Creamy white chicken in Afghani marinade",t:'fj',f:62,j:83,id:"nv1",veg:false},
+    {n:"Chicken Korma",d:"Rich fragrant chicken in almond & cream gravy",t:'fj',f:62,j:83,id:"nv2",veg:false},
     {n:"Chicken Changezi",d:"Delhi-style chicken in tangy tomato gravy",t:'fj',f:62,j:83,id:"nv3",veg:false},
     {n:"Chicken Chaap",d:"Mughlai braised chicken, delicate spices",t:'fj',f:62,j:83,id:"nv4",veg:false},
-    {n:"Chicken Rezala",d:"Delicate white Mughal-style chicken curry",t:'fj',f:62,j:83,id:"nv5",veg:false},
+    {n:"Chicken Rezala",d:"White Mughlai chicken in delicate spice gravy",t:'fj',f:62,j:83,id:"nv5",veg:false},
     {n:"Dum ka Chicken",d:"Slow-cooked spicy red chicken, dum sealed",t:'fj',f:62,j:83,id:"nv6",veg:false},
-    {n:"Achari Chicken",d:"Chicken cooked with pickling spices",t:'fj',f:62,j:83,id:"nv7",veg:false},
-    {n:"Kadhai Chicken",d:"Chicken wok-cooked with capsicum & spices",t:'fj',f:62,j:83,id:"nv8",veg:false},
-    {n:"Chicken Kofta",d:"Spiced minced chicken dumplings in rich gravy",t:'fj',f:64,j:87,id:"nv9",veg:false},
-    {n:"Chicken Tikka Masala",d:"Grilled chicken tikka in creamy masala",t:'fj',f:64,j:87,id:"nv10",veg:false},
-    {n:"Chicken Mughlai Handi",d:"Royal Mughlai chicken in a handi pot",t:'fj',f:64,j:87,id:"nv11",veg:false},
-    {n:"Mutton Bhuna Gosht (Goat)",d:"Slow-cooked dry goat with caramelised spices",t:'fj',f:72,j:98,id:"nv12",veg:false},
-    {n:"Mutton Chaap (Goat)",d:"Tender goat chops marinated & braised",t:'fj',f:72,j:98,id:"nv13",img:"images/food/nv13.jpg",veg:false},
-    {n:"Tawa Gosht (Goat)",d:"Goat cooked on iron griddle with bold spices",t:'fj',f:74,j:99,id:"nv14",veg:false},
-    {n:"Mutton Kofta (Goat)",d:"Spiced minced goat balls in aromatic gravy",t:'fj',f:74,j:99,id:"nv15",veg:false}
+    {n:"Achari Chicken",d:"Tangy pickled-spice chicken curry",t:'fj',f:62,j:83,id:"nv7",veg:false},
+    {n:"Kadhai Chicken",d:"Chicken wok-cooked with whole spices",t:'fj',f:62,j:83,id:"nv8",veg:false},
+    {n:"Chicken Kofta",d:"Minced chicken dumplings in rich gravy",t:'fj',f:64,j:87,id:"nv9",veg:false},
+    {n:"Chicken Tikka Masala",d:"Rich tomato-cream chicken curry",t:'fj',f:64,j:87,id:"nv10",veg:false},
+    {n:"Chicken Mughlai Handi",d:"Slow-cooked Mughlai chicken in handi",t:'fj',f:64,j:87,id:"nv11",veg:false},
+    {n:"Mutton Bhuna Gosht (Goat)",d:"Slow-cooked dry-roasted goat curry",t:'fj',f:72,j:98,id:"nv12",veg:false},
+    {n:"Mutton Chaap (Goat)",d:"Tender braised goat chops in rich gravy",t:'fj',f:72,j:98,id:"nv13",veg:false},
+    {n:"Tawa Gosht (Goat)",d:"Spicy goat cooked on a flat iron tawa",t:'fj',f:74,j:99,id:"nv14",veg:false},
+    {n:"Mutton Kofta (Goat)",d:"Goat mince dumplings in rich curry",t:'fj',f:74,j:99,id:"nv15",veg:false},
+    {n:"Mutton Korma",d:"Slow-cooked goat in aromatic cream gravy",t:'fj',f:72,j:98,id:"nv16",veg:false},
+    {n:"Pahadi Gosht",d:"Mountain-style goat in green herb marinade",t:'fj',f:74,j:99,id:"nv17",veg:false},
+    {n:"Chicken Angara",d:"Smoky charcoal-infused chicken curry",t:'fj',f:64,j:87,id:"nv18",veg:false},
+    {n:"Mutton Rogan Josh",d:"Kashmiri slow-cooked goat in bold spices",t:'fj',f:72,j:98,id:"nv19",veg:false},
+    {n:"Mutton Rezala",d:"Delicate Mughlai-style gravy with spices",t:'fj',f:72,j:98,id:"nv20",veg:false},
+    {n:"Chicken Barra",d:"Marinated bone-in chicken, grilled & smoky",t:'fj',f:64,j:87,id:"nv21",veg:false}
   ],
   bir:[
     {n:"Veg Biryani",d:"Fragrant basmati with mixed vegetables",t:'fj',f:54,j:78,id:"b1",img:"images/food/b1.jpg",veg:true},
@@ -1600,19 +1634,26 @@ const MENU={
     {n:"Shahi Tukda (10 pcs)",d:"Royal bread pudding soaked in saffron rabri",t:'flat',v:31,id:"d2",img:"images/food/d2.jpg",veg:true},
     {n:"Sheer Khurma (1000ml)",d:"Vermicelli & nut dessert in sweetened milk",t:'flat',v:31,id:"d3",img:"images/food/d3.jpg",veg:true},
     {n:"Shahi Firni (1000ml)",d:"Creamy ground rice pudding with cardamom",t:'flat',v:31,id:"d4",img:"images/food/d4.jpg",veg:true},
-    {n:"Gajar ka Halwa (1000ml)",d:"Slow-cooked carrot pudding with cardamom",t:'flat',v:34,id:"d5",img:"images/food/d5.jpg",veg:true}
+    {n:"Gajar ka Halwa (1000ml)",d:"Slow-cooked carrot pudding with cardamom",t:'flat',v:34,id:"d5",img:"images/food/d5.jpg",veg:true},
+    {n:"Pantua",d:"Bengali gulab jamun — soft & syrup-soaked",t:'pc',v:2,id:"bs1",img:"images/food/bs1.jpg",veg:true,min:20},
+    {n:"Maal Pua (10 pcs)",d:"Sweet Bengali pancakes in cardamom syrup",t:'flat',v:31,id:"bs2",veg:true},
+    {n:"Payesh (1000ml)",d:"Bengali creamy rice pudding",t:'flat',v:32,id:"bs3",veg:true},
+    {n:"Lab e Shireen",d:"Layered chilled dessert with cream & fruits",t:'flat',v:32,id:"d6",veg:true},
+    {n:"Mango Delight",d:"Chilled mango dessert with cream & saffron",t:'flat',v:30,id:"d7",veg:true},
+    {n:"Biscoff Delight",d:"Creamy Biscoff-layered chilled dessert",t:'flat',v:32,id:"d8",veg:true},
+    {n:"Ras Malai",d:"Soft paneer discs in chilled saffron milk",t:'pc',v:3,id:"d9",veg:true,min:20}
   ],
   bf:[
     {n:"Macher Jhol",d:"Light Bengali Rohu fish curry with turmeric",t:'fj',f:58,j:80,id:"bf1",veg:false},
     {n:"Shorshe Ilish",d:"Hilsa fish in sharp mustard gravy — iconic",t:'fj',f:68,j:95,id:"bf2",veg:false},
     {n:"Chingri Malai Curry",d:"Prawns in velvety coconut milk gravy",t:'fj',f:65,j:90,id:"bf3",img:"images/food/bf3.jpg",veg:false},
-    {n:"Doi Mach",d:"Fish in yoghurt gravy — delicate & tangy",t:'fj',f:58,j:80,id:"bf4",img:"images/food/bf4.jpg",veg:false},
-    {n:"Macher Kalia",d:"Rich spicy Bengali fish curry",t:'fj',f:58,j:80,id:"bf5",veg:false},
+    {n:"Doi Mach",d:"Fish in Bengali mustard-yoghurt curry",t:'fj',f:58,j:80,id:"bf4",img:"images/food/bf4.jpg",veg:false},
+    {n:"Macher Kalia",d:"Rich spiced Bengali fish curry",t:'fj',f:58,j:80,id:"bf5",veg:false},
     {n:"Chingri Bhapa",d:"Steamed prawns in mustard & coconut paste",t:'fj',f:58,j:80,id:"bf6",veg:false}
   ],
   bm:[
     {n:"Kosha Mangsho",d:"Bengali signature, slow-cooked & caramelised",t:'fj',f:74,j:99,id:"bm1",img:"images/food/bm1.jpg",veg:false},
-    {n:"Mutton Rezala",d:"Delicate Mughal-style gravy with spices",t:'fj',f:74,j:99,id:"bm2",veg:false},
+    {n:"Mutton Rezala",d:"Delicate Mughlai-style gravy with spices",t:'fj',f:74,j:99,id:"bm2",veg:false},
     {n:"Bengali Chicken Curry",d:"Home-style chicken curry with potato",t:'fj',f:62,j:83,id:"bm3",veg:false},
     {n:"Dhakai Chicken Roast",d:"Dhaka-style festive chicken, rich & golden",t:'fj',f:64,j:87,id:"bm4",veg:false}
   ],
@@ -1624,9 +1665,6 @@ const MENU={
     {n:"Luchi",d:"Soft pillowy Bengali puri",t:'pc',v:2,id:"bv7",veg:true,min:20}
   ],
   bs:[
-    {n:"Pantua",d:"Bengali gulab jamun — soft & syrup-soaked",t:'pc',v:2,id:"bs1",img:"images/food/bs1.jpg",veg:true,min:20},
-    {n:"Maal Pua (10 pcs)",d:"Sweet Bengali pancakes in cardamom syrup",t:'flat',v:31,id:"bs2",veg:true},
-    {n:"Payesh (1000ml)",d:"Bengali creamy rice pudding",t:'flat',v:32,id:"bs3",veg:true},
     {n:"Khejoor Chutney (1000ml)",d:"Date chutney — essential Bengali condiment",t:'flat',v:28,id:"bs5",img:"images/food/bs5.jpg",veg:true}
   ]
 };
@@ -1636,7 +1674,7 @@ let delType='pickup',delCharge=0,km=0,slat=null,slon=null,atimer=null,suggs=[];
 
 // ── RENDER ITEMS ─────────────────────────────────────
 function renderAll(){
-  const keys={snacks:'snacks',family:'family',kebab:'kebab',ic:'ic',veg:'veg',nv:'nv',bir:'bir',roti:'roti',rice:'rice',dessert:'dessert',bf:'bf',bm:'bm',bv:'bv',bs:'bs'};
+  const keys={bfast:'bfast',snacks:'snacks',family:'family',kebab:'kebab',ic:'ic',veg:'veg',nv:'nv',bir:'bir',roti:'roti',rice:'rice',dessert:'dessert',bf:'bf',bm:'bm',bv:'bv',bs:'bs'};
   Object.keys(keys).forEach(k=>renderSection(MENU[k]||[],'r-'+k));
   renderMostLoved();
   addTabCounts();
@@ -1704,14 +1742,15 @@ function reorder(idx){
 function addTabCounts(){
   if(document.querySelector('.cat-btn [style*="opacity"]')) return; // already done
   var tabCounts={
-    'cat-tsnacks':   ((MENU.snacks||[]).length+(MENU.family||[]).length),
-    'cat-tkebab':    (MENU.kebab||[]).length,
+    'cat-tbfast':    (MENU.bfast||[]).length,
+    'cat-tsnacks':   (MENU.snacks||[]).length,
+    'cat-tkebab':    ((MENU.family||[]).length+(MENU.kebab||[]).length),
     'cat-tic':       (MENU.ic||[]).length,
     'cat-tveg':      (MENU.veg||[]).length,
     'cat-tnonveg':   (MENU.nv||[]).length,
     'cat-tbiryani':  (MENU.bir||[]).length,
     'cat-troti':     ((MENU.roti||[]).length+(MENU.rice||[]).length),
-    'cat-tdessert':  (MENU.dessert||[]).length,
+    'cat-tdessert':  ((MENU.dessert||[]).length+(MENU.bs||[]).length),
     'cat-tbengali':  ((MENU.bf||[]).length+(MENU.bm||[]).length+(MENU.bv||[]).length+(MENU.bs||[]).length)
   };
   Object.keys(tabCounts).forEach(function(id){
@@ -2399,10 +2438,10 @@ function renderFullMenu(){
   container.dataset.rendered = "1";
 
   var sectionNames = {
-    snacks:"Snacks & Starters", family:"Family Specials", kebab:"Kebabs",
+    bfast:"Breakfast", snacks:"Snacks", family:"Starters (Family Deals)", kebab:"Kebabs & Tikkas",
     ic:"Indo-Chinese", veg:"Veg Mains", nv:"Non-Veg Mains",
     bir:"Biryani", roti:"Roti & Breads", rice:"Rice & Pulao", dessert:"Desserts",
-    bf:"Bengali Fish", bm:"Bengali Mutton/Chicken", bv:"Bengali Veg", bs:"Bengali Sweets"
+    bf:"Bengali Fish", bm:"Bengali Mutton/Chicken", bv:"Bengali Veg", bs:"Bengali Condiments"
   };
 
   Object.keys(sectionNames).forEach(function(k){
@@ -4536,14 +4575,15 @@ restoreCart();
 // ── CATEGORY BADGE COUNTS ────────────────────────────────────────────────────
 function updCatBadges(){
   var catMap = {
-    'tsnacks':  ['sn','f'],
-    'tkebab':   ['k'],
+    'tbfast':   ['bf_','sn7'],
+    'tsnacks':  ['sn1','sn2','sn3','sn4','sn5','sn6','f3'],
+    'tkebab':   ['f1','f2','f4','f5','f6','k'],
     'tic':      ['ic'],
     'tveg':     ['v'],
     'tnonveg':  ['nv'],
     'tbiryani': ['b1','b2','b3','b4','b5'],
     'troti':    ['r1','r2','b6','b7','b8'],
-    'tdessert': ['d'],
+    'tdessert': ['d','bs1','bs2','bs3'],
     'tcatering':['cp'],
     'tbengali': ['bf','bm','bv','bs'],
     'tbengpkg': ['bp']
