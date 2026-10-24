@@ -736,6 +736,75 @@ html,body{margin:0;padding:0;width:100%}
 /* ── CART ADD PULSE ────────────────────────────────── */
 @keyframes cardPulse{0%{transform:scale(1)}40%{transform:scale(1.03)}100%{transform:scale(1)}}
 
+/* ── UNIFIED CATERING BUILDER ─────────────────────────── */
+.ctier-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:10px}
+.ctier-wrap::-webkit-scrollbar{display:none}
+.ctier-row{display:flex;gap:8px;padding:4px 2px;min-width:max-content}
+.ctier-btn{display:flex;flex-direction:column;align-items:center;padding:8px 14px;border-radius:12px;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:inherit;transition:all .18s;min-width:72px}
+.ctier-btn:hover{border-color:var(--gold);background:#fdf8f2}
+.ctier-btn.active{border-color:var(--red);background:var(--red);color:#fff}
+.ctier-price{font-size:1.15rem;font-weight:900;line-height:1}
+.ctier-name{font-size:10px;font-weight:600;margin-top:3px;opacity:.85;letter-spacing:.2px}
+.ctier-desc{background:#fdf0e4;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:8px 12px;font-size:12px;color:var(--sub);line-height:1.6;margin-bottom:12px;min-height:36px}
+.ctier-desc strong{color:var(--red)}
+.cu-slot-sec{border:1px solid var(--border);border-radius:10px;padding:9px 11px;margin-bottom:8px;background:#fff}
+.cu-slot-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cu-slot-title{font-size:13px;font-weight:700;color:var(--red)}
+.cu-slot-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.cu-type-toggle{display:flex;gap:6px;margin-bottom:8px}
+.cu-type-btn{flex:1;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:#fdf8f4;color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.cu-type-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+/* ── CATERING BUILDER ─────────────────────────────────── */
+.cater-notice{font-size:12px;color:var(--sub);text-align:center;padding:6px 14px;background:#fdf0e4;border-radius:8px;margin:6px 0 10px}
+.cater-diet-bar{display:flex;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);margin-bottom:12px}
+.cater-diet-btn{flex:1;padding:10px;font-size:13px;font-weight:700;border:none;background:#fdf8f4;cursor:pointer;color:var(--sub);transition:all .15s;font-family:inherit}
+.cater-diet-btn.active{background:var(--red);color:#fff}
+.cater-price-bar{background:linear-gradient(135deg,var(--red),#5a1500);color:#fff;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cater-pp{font-size:2rem;font-weight:900;line-height:1}
+.cater-pp span{font-size:0.9rem;font-weight:400;opacity:.75}
+.cater-dep{font-size:11px;background:rgba(255,255,255,0.15);border-radius:20px;padding:2px 9px;margin-top:5px;display:inline-block}
+.cater-price-right{text-align:right}
+.cater-total{font-size:1.2rem;font-weight:700}
+.cater-guests-lbl{font-size:11px;opacity:.7;margin-top:2px}
+.cater-breakdown{font-size:11px;color:rgba(255,220,160,0.9);background:#2d0a00;padding:7px 14px;border-radius:8px;margin-bottom:12px;line-height:1.6;min-height:30px}
+.cater-slot-sec{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#fff}
+.cater-slot-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cater-slot-title{font-size:13px;font-weight:700;color:var(--red)}
+.cater-slot-title small{font-weight:400;color:var(--sub);font-size:11px}
+.cater-add-btn{font-size:11px;font-weight:600;color:var(--gold);border:1.5px dashed var(--gold);background:transparent;border-radius:8px;padding:4px 10px;cursor:pointer;font-family:inherit;transition:all .15s}
+.cater-add-btn:hover{background:#fdf0e4}
+.cater-slot-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.cater-sel{flex:1;padding:7px 28px 7px 9px;border:1.5px solid var(--border);border-radius:9px;font-size:12px;font-family:inherit;color:var(--text);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238B2500' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 9px center;appearance:none}
+.cater-sel:focus{outline:none;border-color:var(--gold)}
+.cater-badge{font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;white-space:nowrap;flex-shrink:0}
+.tier0-b{background:#e8f5e9;color:#2e7d32}
+.tier1-b{background:#fff3e0;color:#e65100}
+.tier2-b{background:#fce4ec;color:#c62828}
+.cater-rm-btn{font-size:11px;color:#c00;border:none;background:none;cursor:pointer;padding:0 4px;flex-shrink:0}
+.cater-legend{display:flex;gap:10px;flex-wrap:wrap;padding:4px 2px;margin-bottom:8px}
+.cater-legend-item{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:4px}
+.cater-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.cater-guest-row{display:flex;align-items:center;gap:8px;padding:6px 2px;margin-bottom:4px}
+.cater-guest-lbl{font-size:12px;font-weight:600;color:var(--sub);flex-shrink:0}
+/* ── PACKAGE BUILDER ──────────────────────────────────── */
+.pkg-tiers{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:12px}
+.pkg-card{background:#fff;border-radius:14px;border:1px solid rgba(201,151,58,0.3);padding:0 0 12px;box-shadow:0 2px 10px rgba(139,37,0,0.07);overflow:hidden}
+.pkg-fixed{border-color:rgba(139,37,0,0.25)}
+.pkg-structure{font-size:12px;color:var(--sub);padding:4px 14px 8px;font-style:italic;border-bottom:1px solid rgba(201,151,58,0.15);margin-bottom:6px}
+.pkg-toggle-wrap{display:flex;gap:6px;padding:6px 14px 4px}
+.pkg-toggle{flex:1;padding:6px 10px;border-radius:8px;border:1.5px solid rgba(201,151,58,0.4);background:#fff8f0;color:#7a3b0a;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.pkg-toggle.active{background:var(--red);color:#fff;border-color:var(--red)}
+.pkg-deposit{font-size:12px;color:var(--sub);margin:2px 0 6px;text-align:center}
+.pkg-fixed-menu{padding:6px 14px 4px}
+.pkg-fixed-variant{margin-bottom:8px}
+.pkg-fixed-variant-label{font-size:11px;font-weight:700;letter-spacing:0.4px;margin-bottom:4px;padding:2px 8px;border-radius:20px;width:fit-content}
+.nv-label{background:#fff3e0;color:#c25000}
+.veg-label{background:#e8f5e9;color:#2e7d32}
+.pkg-fixed-variant ul{margin:0;padding-left:16px;list-style:disc}
+.pkg-fixed-variant li{font-size:12px;color:var(--text);line-height:1.6}
+.pkg-fixed-variant li span{color:var(--sub);font-size:11px}
+.pkg-fixed-divider{height:1px;background:rgba(201,151,58,0.2);margin:6px 0}
+
 /* ── ITEM CARDS ─────────────────────────────────────── */
 .icard{
   background:#ffffff;
@@ -948,16 +1017,16 @@ function handleOccChange(sel){
   <button class="cat-nav-arrow cat-nav-arrow-left" id="catnav-arrow-left" onclick="scrollCatNav(-1)" aria-label="Scroll categories left" type="button">‹</button>
   <div class="cat-inner" id="catnav-inner">
     <div class="cat-btn active" id="cat-tmostloved" onclick="goTab('tmostloved',this)">⭐ Most Loved</div>
+    <div class="cat-btn" id="cat-tcatering" onclick="goTab('tcatering',this)">🎂 Catering</div>
     <div class="cat-btn" id="cat-tbfast" onclick="goTab('tbfast',this)">🌅 Breakfast</div>
-    <div class="cat-btn" id="cat-tsnacks" onclick="goTab('tsnacks',this)">🍢 Snacks</div>
-    <div class="cat-btn" id="cat-tkebab" onclick="goTab('tkebab',this)">🍖 Starters &amp; Kebabs</div>
+    <div class="cat-btn" id="cat-tsnacks" onclick="goTab('tsnacks',this)">🍢 Starters &amp; Snacks</div>
+    <div class="cat-btn" id="cat-tkebab" onclick="goTab('tkebab',this)">🍖 Kebabs &amp; Tikkas</div>
     <div class="cat-btn" id="cat-tic" onclick="goTab('tic',this)">🍜 Indo-Chinese</div>
     <div class="cat-btn" id="cat-tveg" onclick="goTab('tveg',this)">🥦 Veg Mains</div>
     <div class="cat-btn" id="cat-tnonveg" onclick="goTab('tnonveg',this)">🍗 Non-Veg</div>
     <div class="cat-btn" id="cat-tbiryani" onclick="goTab('tbiryani',this)">🍛 Biryani</div>
     <div class="cat-btn" id="cat-troti" onclick="goTab('troti',this)">🫓 Roti &amp; Rice</div>
     <div class="cat-btn" id="cat-tdessert" onclick="goTab('tdessert',this)">🍮 Desserts</div>
-    <div class="cat-btn" id="cat-tcatering" onclick="goTab('tcatering',this)">🎂 Catering Packages</div>
     <div class="cat-btn" id="cat-tbengali" onclick="goTab('tbengali',this)">🐟 Bengali À La Carte</div>
     <div class="cat-btn hero-menu-btn" onclick="goTab('tmenu', document.getElementById('menu-tab'))" id="menu-tab">📋 Full Menu</div>
   </div>
@@ -1018,15 +1087,15 @@ function handleOccChange(sel){
 </div>
 
 <div id="tsnacks" class="section">
-  <div class="stitle">Snacks <small>(min 15 pcs · per piece)</small></div>
+  <div class="stitle">Starters &amp; Snacks<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
+  <div class="stitle" style="margin-top:0;font-size:0.95rem;color:var(--sub);font-weight:400">Snacks <small>(min 15 pcs · per piece)</small></div>
   <div id="r-snacks"></div>
+  <div class="stitle" style="margin-top:1.25rem;font-size:0.95rem">Starters <small>(Family / Jumbo — serves 4–5 or 8–9)</small></div>
+  <div id="r-family"></div>
 </div>
 <div id="tkebab" class="section">
   <div style="background:transparent;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;padding:5px 12px;font-size:clamp(10px,2.8vw,13px);color:var(--sub);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>Family</strong> serves 4–5 people &nbsp;·&nbsp; <strong>Jumbo</strong> serves 8–9 people</div>
-  <div class="stitle">Starters &amp; Kebabs<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
-  <div class="stitle" style="margin-top:1.25rem;font-size:1rem">Starters (Family Deals)</div>
-  <div id="r-family"></div>
-  <div class="stitle" style="margin-top:1.25rem;font-size:1rem">Kebabs &amp; Tikkas</div>
+  <div class="stitle">Kebabs &amp; Tikkas<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
   <div id="r-kebab"></div>
 </div>
 <div id="tic" class="section">
@@ -1054,7 +1123,7 @@ function handleOccChange(sel){
 
 <!-- CATERING PACKAGES (dynamic builder) -->
 <div id="tcatering" class="section">
-  <div class="notice"><strong>Per-person pricing</strong> · Min 20 · Max 50 guests · Food-grade containers · Disposable serve ware if requested</div>
+  <div class="notice"><strong>Per-person pricing</strong> · Min 20 guests · 40% advance deposit required · Call <strong>0432 237 104</strong> for custom menus</div>
   <div class="stitle">Catering Packages<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
   <div class="pk-deals" id="pk-deals" role="tablist" aria-label="Choose a package"></div>
   <div class="pk-diet" role="group" aria-label="Veg or non-veg">
@@ -1067,11 +1136,11 @@ function handleOccChange(sel){
     <div id="pk-slots"></div>
     <div class="pk-break" id="pk-break"></div>
     <div class="padd-row">
-      <label class="guest-label">Number of guests (20–50)</label>
+      <label class="guest-label">Number of guests (min 20)</label>
       <div class="guest-row">
-        <button class="guest-qbtn" type="button" onclick="pkGuests(-1)">−</button>
-        <input class="guest-inp" id="pk-guests" type="number" min="20" max="50" value="20" onchange="pkGuestsInput()">
-        <button class="guest-qbtn" type="button" onclick="pkGuests(1)">+</button>
+        <button class="guest-qbtn" type="button" onclick="pkGuests(-5)">−</button>
+        <input class="guest-inp" id="pk-guests" type="number" min="20" max="300" value="20" onchange="pkGuestsInput()">
+        <button class="guest-qbtn" type="button" onclick="pkGuests(5)">+</button>
         <span class="guest-price" id="pk-tot">$0</span>
       </div>
       <div class="pk-dep" id="pk-dep"></div>
@@ -1485,11 +1554,11 @@ const MENU={
     {n:"Chhola Bhature (2 pcs)",d:"Crispy fried bread with spiced chickpea curry",t:'pc',v:5,id:"bf_2",veg:true,min:10},
     {n:"Halwa Puri (2 pcs)",d:"Deep-fried puri with semolina halwa",t:'pc',v:4,id:"bf_3",veg:true,min:10},
     {n:"Kheer Puri (2 pcs)",d:"Deep-fried puri with creamy rice kheer",t:'pc',v:4,id:"bf_4",veg:true,min:10},
-    {n:"Aloo Puri (2 pcs)",d:"Deep-fried puri with spiced potato curry",t:'pc',v:4,id:"bf_5",veg:true,min:10},
-    {n:"Sandwich (Veg)",d:"Fresh veg sandwiches with chutney",t:'pc',v:4,id:"sn7",img:"images/food/sn7.jpg",min:20,veg:true},
-    {n:"Sandwich (Chicken)",d:"Fresh chicken sandwiches with chutney",t:'pc',v:4,id:"sn7c",img:"images/food/sn7c.jpg",min:20,veg:false}
+    {n:"Aloo Puri (2 pcs)",d:"Deep-fried puri with spiced potato curry",t:'pc',v:4,id:"bf_5",veg:true,min:10}
   ],
   snacks:[
+    {n:"Sandwich (Veg)",d:"Fresh veg sandwiches with chutney",t:'pc',v:4,id:"sn7",img:"images/food/sn7.jpg",min:20,veg:true},
+    {n:"Sandwich (Chicken)",d:"Fresh chicken sandwiches with chutney",t:'pc',v:4,id:"sn7c",img:"images/food/sn7c.jpg",min:20,veg:false},
     {n:"Spring Rolls (Veg)",d:"Crispy golden rolls with spiced veg filling",t:'pc',v:3,id:"sn1",img:"images/food/sn1.jpg",min:20,veg:true},
     {n:"Spring Rolls (Chicken)",d:"Crispy rolls with spiced chicken filling",t:'pc',v:3,id:"sn1c",img:"images/food/sn1c.jpg",min:20,veg:false},
     {n:"Crispy Cutlet (Veg)",d:"Crumb-coated veg cutlets, shallow fried",t:'pc',v:3,id:"sn2",img:"images/food/sn2.jpg",min:20,veg:true},
@@ -1708,8 +1777,8 @@ function addTabCounts(){
   if(document.querySelector('.cat-btn [style*="opacity"]')) return; // already done
   var tabCounts={
     'cat-tbfast':    (MENU.bfast||[]).length,
-    'cat-tsnacks':   (MENU.snacks||[]).length,
-    'cat-tkebab':    ((MENU.family||[]).length+(MENU.kebab||[]).length),
+    'cat-tsnacks':   ((MENU.snacks||[]).length+(MENU.family||[]).length),
+    'cat-tkebab':    (MENU.kebab||[]).length,
     'cat-tic':       (MENU.ic||[]).length,
     'cat-tveg':      (MENU.veg||[]).length,
     'cat-tnonveg':   (MENU.nv||[]).length,
@@ -2039,10 +2108,10 @@ function pkPrice(){
 function pkSetDeal(id){PK.deal=id;pkRender();}
 function pkSetDiet(dt){PK.diet=dt;PK.sel={};pkRender();}
 function pkPick(k,v){PK.sel[k]=v;pkRender();}
-function pkGuests(dlt){PK.guests=Math.max(20,Math.min(50,PK.guests+dlt));document.getElementById('pk-guests').value=PK.guests;pkPrice();}
+function pkGuests(dlt){PK.guests=Math.max(20,Math.min(300,PK.guests+dlt));document.getElementById('pk-guests').value=PK.guests;pkPrice();}
 function pkGuestsInput(){
   var inp=document.getElementById('pk-guests');var v=parseInt(inp.value,10);
-  if(isNaN(v))v=20;v=Math.max(20,Math.min(50,v));PK.guests=v;inp.value=v;pkPrice();
+  if(isNaN(v))v=20;v=Math.max(20,Math.min(300,v));PK.guests=v;inp.value=v;pkPrice();
 }
 function pkAdd(){
   var d=pkDeal(),c=pkCalc(),parts=[];
@@ -2554,7 +2623,7 @@ function renderFullMenu(){
   container.dataset.rendered = "1";
 
   var sectionNames = {
-    bfast:"Breakfast", snacks:"Snacks", family:"Starters (Family Deals)", kebab:"Kebabs & Tikkas",
+    bfast:"Breakfast", snacks:"Starters & Snacks", family:"Starters (Family / Jumbo)", kebab:"Kebabs & Tikkas",
     ic:"Indo-Chinese", veg:"Veg Mains", nv:"Non-Veg Mains",
     bir:"Biryani", roti:"Roti & Breads", rice:"Rice & Pulao", dessert:"Desserts",
     bf:"Bengali Fish", bm:"Bengali Mutton/Chicken", bv:"Bengali Veg", bs:"Bengali Condiments"
@@ -2620,8 +2689,6 @@ function renderFullMenu(){
 }
 
 renderAll();
-
-// ── MENU PAGE NAVIGATION ─────────────────────────────
 let menuCurPage = 0;
 const MENU_PAGES = 3;
 function menuPage(d){
@@ -4692,9 +4759,9 @@ restoreCart();
 // ── CATEGORY BADGE COUNTS ────────────────────────────────────────────────────
 function updCatBadges(){
   var catMap = {
-    'tbfast':   ['bf_','sn7'],
-    'tsnacks':  ['sn1','sn2','sn3','sn4','sn5','sn6','f3'],
-    'tkebab':   ['f1','f2','f4','f5','f6','k'],
+    'tbfast':   ['bf_'],
+    'tsnacks':  ['sn','f'],
+    'tkebab':   ['k'],
     'tic':      ['ic'],
     'tveg':     ['v'],
     'tnonveg':  ['nv'],
