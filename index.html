@@ -265,6 +265,30 @@ body{font-family:"Inter",sans-serif;font-size:16px;background:#f7efe4;color:var(
 .padd-btn.done{background:#2d8a4e}
 .pfooter{background:var(--bg);padding:9px 16px;font-size:13px;color:var(--sub);font-style:italic;text-align:center;border-top:1px solid var(--border)}
 
+
+/* ── PACKAGE BUILDER ────────────────────────────────── */
+.pk-deals{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.pk-deals::-webkit-scrollbar{display:none}
+.pk-deal{flex:0 0 auto;min-width:118px;text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;cursor:pointer;font-family:"Inter",sans-serif;touch-action:manipulation;transition:border-color .15s,background .15s}
+.pk-deal b{display:block;font-size:13.5px;color:var(--text);font-weight:700;line-height:1.25}
+.pk-deal small{display:block;font-size:12.5px;color:var(--sub);margin-top:2px}
+.pk-deal.on{background:var(--red);border-color:var(--red)}
+.pk-deal.on b,.pk-deal.on small{color:#fff}
+.pk-diet{display:flex;gap:6px;margin-bottom:12px}
+.pk-diet-btn{flex:1;padding:9px 10px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:14px;font-weight:700;color:var(--sub);cursor:pointer;font-family:"Inter",sans-serif;touch-action:manipulation}
+.pk-diet-btn.on{background:#2d8a4e;border-color:#2d8a4e;color:#fff}
+#pk-diet-nv.on{background:var(--red);border-color:var(--red)}
+.pk-desc{padding:10px 16px;font-size:13.5px;color:var(--sub);line-height:1.5;border-bottom:1px solid var(--bg)}
+.pk-portion{font-weight:600;color:var(--sub);text-transform:none;letter-spacing:0;font-size:12.5px}
+.pk-fixed{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--bg);font-size:14px;color:var(--text)}
+.pk-fixed .lbl{font-size:13px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px}
+.pk-tag{font-size:11.5px;font-weight:700;color:var(--sub);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 9px;white-space:nowrap}
+.pk-tag.comp{color:#2d8a4e;border-color:#bfe3cc;background:#effaf3}
+.pk-break{padding:10px 16px;font-size:13px;color:var(--sub);line-height:1.6;background:#fffaf3;border-top:1px solid var(--border)}
+.pk-break strong{color:var(--red)}
+.pk-dep{font-size:13px;color:var(--sub);margin:-4px 0 12px}
+.pk-dep strong{color:#2d8a4e}
+
 /* ── MENU EMBED ─────────────────────────────────────── */
 .menu-wrap{position:relative;width:100%;padding-top:141%;border-radius:10px;overflow:hidden;box-shadow:0 3px 16px rgba(0,0,0,0.12);background:var(--cream)}
 .menu-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
@@ -933,9 +957,8 @@ function handleOccChange(sel){
     <div class="cat-btn" id="cat-tbiryani" onclick="goTab('tbiryani',this)">🍛 Biryani</div>
     <div class="cat-btn" id="cat-troti" onclick="goTab('troti',this)">🫓 Roti &amp; Rice</div>
     <div class="cat-btn" id="cat-tdessert" onclick="goTab('tdessert',this)">🍮 Desserts</div>
-    <div class="cat-btn" id="cat-tcatering" onclick="goTab('tcatering',this)">🎂 Catering</div>
+    <div class="cat-btn" id="cat-tcatering" onclick="goTab('tcatering',this)">🎂 Catering Packages</div>
     <div class="cat-btn" id="cat-tbengali" onclick="goTab('tbengali',this)">🐟 Bengali À La Carte</div>
-    <div class="cat-btn" id="cat-tbengpkg" onclick="goTab('tbengpkg',this)">🎁 Bengali Packages</div>
     <div class="cat-btn hero-menu-btn" onclick="goTab('tmenu', document.getElementById('menu-tab'))" id="menu-tab">📋 Full Menu</div>
   </div>
   <button class="cat-nav-arrow cat-nav-arrow-right" id="catnav-arrow-right" onclick="scrollCatNav(1)" aria-label="Scroll categories right" type="button">›</button>
@@ -1029,44 +1052,32 @@ function handleOccChange(sel){
   <div id="r-dessert"></div>
 </div>
 
-<!-- CATERING -->
+<!-- CATERING PACKAGES (dynamic builder) -->
 <div id="tcatering" class="section">
-  <div class="notice"><strong>$20 per person</strong> · Min 20 · Max 50 guests · Food-grade containers · Disposable serve ware if requested</div>
+  <div class="notice"><strong>Per-person pricing</strong> · Min 20 · Max 50 guests · Food-grade containers · Disposable serve ware if requested</div>
   <div class="stitle">Catering Packages<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
-  <div class="pcard">
-    <div class="pcard-hdr"><h3>Main Course Package</h3><span>$20/person</span></div>
-    <div class="pchoice"><label>Rice</label><select id="cp1-rice"><option>Jeera Rice</option><option>Veg Pulao</option><option>Steamed Rice</option></select></div>
-    <div class="pchoice"><label>Main Dish</label><select id="cp1-main"><option>Kadhai Chicken</option><option>Chicken Korma</option></select></div>
-    <div class="pchoice"><label>Side</label><select id="cp1-side"><option>Daal Makhni</option><option>Matar Paneer</option></select></div>
-    <div class="pchoice"><label>Starter</label><select id="cp1-snack"><option>Crispy Cutlet (Veg)</option><option>Egg Devil</option></select></div>
-    <div class="padd-row">
-      <label class="guest-label">Number of guests (20–50)</label>
-      <div class="guest-row">
-        <button class="guest-qbtn" onclick="ag('cp1',-1)">−</button>
-        <input class="guest-inp" id="cp1-guests" type="number" min="20" max="50" value="20" oninput="cg('cp1')">
-        <button class="guest-qbtn" onclick="ag('cp1',1)">+</button>
-        <span class="guest-price" id="cp1-tot">$400</span>
-      </div>
-      <button class="padd-btn" id="cp1-btn" onclick="addPkg('cp1','Main Course Package')">Add to Order</button>
-    </div>
-    <div class="pfooter">Disposable serve ware included if requested · Custom add-ons available</div>
+  <div class="pk-deals" id="pk-deals" role="tablist" aria-label="Choose a package"></div>
+  <div class="pk-diet" role="group" aria-label="Veg or non-veg">
+    <button type="button" class="pk-diet-btn on" id="pk-diet-nv" onclick="pkSetDiet('nv')">🍗 Non-Veg</button>
+    <button type="button" class="pk-diet-btn" id="pk-diet-veg" onclick="pkSetDiet('veg')">🥦 Veg</button>
   </div>
-  <div class="pcard">
-    <div class="pcard-hdr"><h3>Biryani Feast Package</h3><span>$20/person</span></div>
-    <div class="pchoice"><label>Biryani</label><select id="cp2-bir"><option>Chicken Dum Biryani</option><option>Goat Dum Biryani</option></select></div>
-    <div class="pchoice"><label>Starter</label><select id="cp2-snack"><option>Crispy Cutlet (Veg)</option><option>Egg Devil</option><option>Chicken Tandoori</option></select></div>
-    <div class="prow">Raita / Green Chutney <span class="prow-qty">75 ml</span></div>
+  <div class="pcard" id="pk-card">
+    <div class="pcard-hdr"><h3 id="pk-name"></h3><span id="pk-pp"></span></div>
+    <div class="pk-desc" id="pk-desc"></div>
+    <div id="pk-slots"></div>
+    <div class="pk-break" id="pk-break"></div>
     <div class="padd-row">
       <label class="guest-label">Number of guests (20–50)</label>
       <div class="guest-row">
-        <button class="guest-qbtn" onclick="ag('cp2',-1)">−</button>
-        <input class="guest-inp" id="cp2-guests" type="number" min="20" max="50" value="20" oninput="cg('cp2')">
-        <button class="guest-qbtn" onclick="ag('cp2',1)">+</button>
-        <span class="guest-price" id="cp2-tot">$400</span>
+        <button class="guest-qbtn" type="button" onclick="pkGuests(-1)">−</button>
+        <input class="guest-inp" id="pk-guests" type="number" min="20" max="50" value="20" onchange="pkGuestsInput()">
+        <button class="guest-qbtn" type="button" onclick="pkGuests(1)">+</button>
+        <span class="guest-price" id="pk-tot">$0</span>
       </div>
-      <button class="padd-btn" id="cp2-btn" onclick="addPkg('cp2','Biryani Feast Package')">Add to Order</button>
+      <div class="pk-dep" id="pk-dep"></div>
+      <button class="padd-btn" id="pk-btn" type="button" onclick="pkAdd()">Add to Order</button>
     </div>
-    <div class="pfooter">Disposable serve ware included if requested · Custom add-ons available</div>
+    <div class="pfooter">Portions shown are per person · Disposable serve ware included if requested · Custom add-ons available</div>
   </div>
 </div>
 
@@ -1078,52 +1089,6 @@ function handleOccChange(sel){
   <div class="ssub">🍖 Mutton & Chicken <span>Family / Jumbo</span></div><div id="r-bm"></div>
   <div class="ssub">🌿 Veg & Rice <span>Family / Jumbo</span></div><div id="r-bv"></div>
   <div class="ssub">🍮 Sweets & Accompaniments <span>Per piece / box</span></div><div id="r-bs"></div>
-</div>
-
-<!-- BENGALI PACKAGES -->
-<div id="tbengpkg" class="section">
-  <div class="notice"><strong>$20 per person</strong> · Min 20 · Max 50 guests · Food-grade containers · Disposable serve ware if requested</div>
-  <div class="stitle">Bengali Catering Package<span class="stitle-deco"> &bull;&bull;<span class="stitle-line"></span></span></div>
-  <div class="pcard">
-    <div class="pcard-hdr"><h3>Mutton Feast Package</h3><span>$20/person</span></div>
-    <div class="pchoice"><label>Rice</label><select id="bp1-rice"><option>Basanti Pulao</option><option>Steamed Rice</option></select></div>
-    <div class="pchoice"><label>Mutton Dish</label>
-      <select id="bp1-mutton"><option>Kosha Mangsho</option><option>Mutton Rezala</option></select>
-    </div>
-    <div class="pchoice"><label>Veg Side</label><select id="bp1-veg"><option>Aloo Posto</option><option>Begun Bhaja</option></select></div>
-    <div class="prow">Khejoor Chutney <span class="prow-qty">75 ml</span></div>
-    <div class="pchoice"><label>Bread / Starter</label><select id="bp1-bread"><option>Luchi</option><option>Egg Devil</option></select></div>
-    <div class="padd-row">
-      <label class="guest-label">Number of guests (20–50)</label>
-      <div class="guest-row">
-        <button class="guest-qbtn" onclick="ag('bp1',-1)">−</button>
-        <input class="guest-inp" id="bp1-guests" type="number" min="20" max="50" value="20" oninput="cg('bp1')">
-        <button class="guest-qbtn" onclick="ag('bp1',1)">+</button>
-        <span class="guest-price" id="bp1-tot">$400</span>
-      </div>
-      <button class="padd-btn" id="bp1-btn" onclick="addPkg('bp1','Bengali Mutton Feast Package')">Add to Order</button>
-    </div>
-    <div class="pfooter">Disposable serve ware included if requested · Custom add-ons available</div>
-  </div>
-  <div class="pcard">
-    <div class="pcard-hdr"><h3>Fish Feast Package</h3><span>$20/person</span></div>
-    <div class="pchoice"><label>Rice</label><select id="bp2-rice"><option>Basanti Pulao</option><option>Steamed Rice</option></select></div>
-    <div class="pchoice"><label>Fish / Prawn</label><select id="bp2-fish"><option>Macher Jhol</option><option>Doi Mach</option></select></div>
-    <div class="pchoice"><label>Veg Side</label><select id="bp2-veg"><option>Cholar Dal</option><option>Aloo Bhaja</option></select></div>
-    <div class="pchoice"><label>Chutney</label><select id="bp2-chutney"><option>Kashundi</option><option>Raita</option></select></div>
-    <div class="pchoice"><label>Bread / Starter</label><select id="bp2-bread"><option>Luchi</option><option>Egg Devil</option></select></div>
-    <div class="padd-row">
-      <label class="guest-label">Number of guests (20–50)</label>
-      <div class="guest-row">
-        <button class="guest-qbtn" onclick="ag('bp2',-1)">−</button>
-        <input class="guest-inp" id="bp2-guests" type="number" min="20" max="50" value="20" oninput="cg('bp2')">
-        <button class="guest-qbtn" onclick="ag('bp2',1)">+</button>
-        <span class="guest-price" id="bp2-tot">$400</span>
-      </div>
-      <button class="padd-btn" id="bp2-btn" onclick="addPkg('bp2','Bengali Fish Feast Package')">Add to Order</button>
-    </div>
-    <div class="pfooter">Disposable serve ware included if requested · Custom add-ons available</div>
-  </div>
 </div>
 
 <div class="del-bar">🚚 Free delivery over $100 (≤5 km) · $8 flat (5–10 km) · $1/km beyond · Free pickup Tarneit</div>
@@ -1903,50 +1868,201 @@ function upP(id){
   // Show qty for selected size
   document.getElementById('q-'+id).textContent=(cart[cartKey]&&cart[cartKey].qty)||0;
 }
-// ── PACKAGES ─────────────────────────────────────────
-function ag(id,d){
-  const inp=document.getElementById(id+'-guests');if(!inp)return;
-  let v=parseInt(inp.value)||20;
-  v=v+d;
-  if(v<20){
-    inp.value=20;
-    delete cart['pkg-'+id];
-    updBar();
-    try{localStorage.setItem('sk_cart',JSON.stringify(cart));localStorage.setItem('sk_cart_ts',Date.now());}catch(e){}
-    const t=document.getElementById(id+'-tot');
-    if(t)t.textContent='$0';
-    return;
-  }
-  v=Math.min(50,v);
-  inp.value=v;
-  const t=document.getElementById(id+'-tot');
-  if(t)t.textContent='$'+(v*20);
-  var pk='pkg-'+id;
-  if(cart[pk]){cart[pk].price=v*20;cart[pk].size='('+v+' guests)';}
+// ── CATERING PACKAGE BUILDER ─────────────────────────
+// Item = [name, per-person portion, premium $/person]. Lists are grouped for <optgroup>.
+var PK_ST_VEG = [
+  ['Gobhi Pakoda (Veg)','4 pcs',0],['Paneer Pakoda (Veg)','4 pcs',0],['Onion Bhajji (Veg)','5 pcs',0],
+  ['Corn Cheese Ball (Veg)','2 pcs',0],['HaraBhara Kebab (Veg)','1 pc',0],['Paneer Tikka (Veg)','1 skewer',0],
+  ['Spring Rolls (Veg)','1 pc',0],['Crispy Cutlet (Veg)','1 pc',0],['Puff Patties (Veg)','1 pc',0],
+  ['Punjabi Samosa','1 pc',0],['Bread Pakora','1 pc',0],['Medu Vada (Veg)','1 pc',0]
+];
+var PK_ST_NV = [
+  ['Chicken Pakoda','4 pcs',0],['Egg Devil','1 pc',0],['Spring Rolls (Chicken)','1 pc',0],
+  ['Crispy Cutlet (Chicken)','1 pc',0],['Puff Patties (Chicken)','1 pc',0],['Chicken Keema Samosa','1 pc',0],
+  ['Keema Cheese Cutlet','1 pc',0],['Chicken Tikka','1 skewer',0],['Chicken Seekh Kebab','1 skewer',0],
+  ['Chicken Reshmi Kebab','1 skewer',0],['Chicken Tandoori','2 pcs',0],['Tandoori Drummettes','2 pcs',0],
+  ['Chicken Nene Drummettes (Korean)','2 pcs',0],['Tandoori Fish Tikka','1 skewer',0],
+  ['Mutton Tikka Boti (Goat)','1 skewer',0],['Mutton Seekh Kebab (Goat)','1 skewer',0],
+  ['Chapli Kebab (Goat)','1 pc',0],['Gola Kebab (Goat)','1 skewer',0]
+];
+function pkWithout(list,names){return list.filter(function(i){return names.indexOf(i[0])<0;});}
+var PK_STARTER = {
+  nv:  [{g:'Non-Veg Starters',items:PK_ST_NV},{g:'Veg Starters',items:PK_ST_VEG}],
+  veg: [{g:'Veg Starters',items:PK_ST_VEG}]
+};
+var PK_ST_BENG_NV = pkWithout(PK_ST_NV,['Chapli Kebab (Goat)']).concat([['Fish Cutlet','1 pc',0],['Fish Fry','1 pc',0]]);
+var PK_ST_BENG_VEG = pkWithout(PK_ST_VEG,['Puff Patties (Veg)']);
+var PK_STARTER_BENG = {
+  nv:  [{g:'Non-Veg Starters',items:PK_ST_BENG_NV},{g:'Veg Starters',items:PK_ST_BENG_VEG}],
+  veg: [{g:'Veg Starters',items:PK_ST_BENG_VEG}]
+};
+var PK_BIRYANI = {
+  nv:  [{g:'Biryani',items:[['Chicken 65 Biryani','650ml',0],['Chicken Dum Biryani','650ml',2],['Goat Dum Biryani','650ml',3]]}],
+  veg: [{g:'Biryani',items:[['Veg Biryani','650ml',0]]}]
+};
+var PK_DESSERT_BASIC = [['Gulab Jamun','1 pc',0],['Ras Malai','1 pc',0],['Shahi Firni','100ml',0]];
+var PK_DESSERT_ESS = [['Gulab Jamun','1 pc',0],['Ras Malai','1 pc',0],['Shahi Firni','100ml',0],['Shahi Tukda','1 pc',0],['Sheer Khurma','100ml',0]];
+var PK_DESSERT_FULL = [['Gulab Jamun','1 pc',0],['Pantua','1 pc',0],['Ras Malai','1 pc',0],['Shahi Firni','100ml',0],
+  ['Gajar ka Halwa','100ml',0],['Shahi Tukda','1 pc',0],['Mango Delight','100ml',0],['Biscoff Delight','100ml',0],
+  ['Lab e Shireen','100ml',0],['Sheer Khurma','100ml',0]];
+function pkSame(list){return {nv:[{g:'Dessert',items:list}],veg:[{g:'Dessert',items:list}]};}
+var PK_MAIN = {
+  nv: [
+    {g:'Chicken (bone-in)',items:[['Chicken Chaap','per portion',0],['Chicken Rezala','per portion',0],['Dum ka Chicken','per portion',0],
+      ['Achari Chicken','per portion',0],['Kadhai Chicken','per portion',0],['Chicken Angara','per portion',0],['Chicken Barra','per portion',0]]},
+    {g:'Chicken (boneless)',items:[['Chicken Kofta','per portion',1],['Chicken Tikka Masala','per portion',1]]},
+    {g:'Mutton (bone-in)',items:[['Mutton Bhuna Gosht (Goat)','per portion',2],['Mutton Chaap (Goat)','per portion',2],['Mutton Korma','per portion',2],
+      ['Mutton Rogan Josh','per portion',2],['Mutton Rezala','per portion',2],['Pahadi Gosht','per portion',2]]},
+    {g:'Mutton (boneless)',items:[['Tawa Gosht (Goat)','per portion',3],['Mutton Kofta (Goat)','per portion',3]]}
+  ],
+  veg: [{g:'Veg Mains',items:[['Daal Makhni','per portion',0],['Daal Tadka','per portion',0],['Matar Paneer','per portion',0],
+    ['Kadhai Paneer','per portion',0],['Veg Diwani Handi','per portion',0],['Veg Kolhapuri','per portion',0]]}]
+};
+var PK_RICE = {
+  nv:  [{g:'Rice',items:[['Jeera Rice','650ml',0],['Peas Pulao','650ml',0],['Veg Pulao','650ml',0]]}],
+  veg: [{g:'Rice',items:[['Jeera Rice','650ml',0],['Peas Pulao','650ml',0],['Veg Pulao','650ml',0]]}]
+};
+var PK_IC_VEG_ST = [['Chilli Paneer (dry)','per portion',0],['Veg Manchurian (dry)','per portion',0],['Gobhi Manchurian (dry)','per portion',0]];
+var PK_IC_VEG_MAIN = [['Chilli Paneer','250ml',0],['Veg Manchurian','250ml',0],['Gobhi Manchurian','250ml',0]];
+var PK_DEALS = [
+  { id:'biryani', name:'Biryani Package', price:15,
+    desc:'Choice of Biryani (650ml) + 1 Starter + 1 Dessert',
+    slots:[
+      {k:'bir', label:'Biryani', opts:PK_BIRYANI},
+      {k:'st',  label:'Starter', opts:PK_STARTER},
+      {k:'ds',  label:'Dessert', opts:pkSame(PK_DESSERT_BASIC)}
+    ]},
+  { id:'ic', name:'Indo-Chinese Package', price:20,
+    desc:'1 Indo-Chinese Starter + 1 Indo-Chinese Main (250ml) + Fried Rice or Noodles (650ml) + 1 Dessert',
+    slots:[
+      {k:'st', label:'Indo-Chinese Starter', opts:{
+        nv:[{g:'Non-Veg',items:[['Chicken 65','5 pcs',0],['Chicken Lollipop','2 pcs',0],['Chilli Chicken (dry)','per portion',0],
+          ['Chicken Manchurian (dry)','per portion',0],['Chicken Majestic','per portion',0]]},{g:'Veg',items:PK_IC_VEG_ST}],
+        veg:[{g:'Veg',items:PK_IC_VEG_ST}]}},
+      {k:'mn', label:'Indo-Chinese Main', opts:{
+        nv:[{g:'Non-Veg',items:[['Chicken Manchurian','250ml',0],['Chilli Chicken','250ml',0],['Fish Chilli','250ml',0]]},{g:'Veg',items:PK_IC_VEG_MAIN}],
+        veg:[{g:'Veg',items:PK_IC_VEG_MAIN}]}},
+      {k:'rn', label:'Fried Rice / Noodles', opts:{
+        nv:[{g:'Fried Rice / Noodles',items:[['Chicken Fried Rice','650ml',0],['Hakka Noodles (Chicken)','650ml',0],['Egg Fried Rice','650ml',0],['Hakka Noodles (Egg)','650ml',0]]}],
+        veg:[{g:'Fried Rice / Noodles',items:[['Veg Fried Rice','650ml',0],['Hakka Noodles (Veg)','650ml',0],['Egg Fried Rice','650ml',0]]}]}},
+      {k:'ds', label:'Dessert', opts:pkSame(PK_DESSERT_BASIC)}
+    ]},
+  { id:'essential', name:'Essential Package', price:20,
+    desc:'1 Starter + 1 Main + 1 Rice (650ml) + 1 Dessert',
+    slots:[
+      {k:'st', label:'Starter', opts:PK_STARTER},
+      {k:'mn', label:'Main Dish', opts:PK_MAIN},
+      {k:'rc', label:'Rice', opts:PK_RICE},
+      {k:'ds', label:'Dessert', opts:pkSame(PK_DESSERT_ESS)}
+    ]},
+  { id:'bengali', name:'Bengali Package', price:23,
+    desc:'1 Starter + 1 Bengali Main (250ml) + 2 Luchi + 1 Rice (650ml) + 1 Bengali Sweet · Khejoor Chutney complimentary',
+    slots:[
+      {k:'st', label:'Starter', opts:PK_STARTER_BENG},
+      {k:'mn', label:'Bengali Main', opts:{
+        nv:[{g:'Bengali Main',items:[['Kosha Mangsho','250ml',0],['Mutton Rezala','250ml',0],['Macher Jhol','250ml',0],['Doi Mach','250ml',0],
+          ['Macher Kalia','250ml',0],['Shorshe Ilish','250ml',2],['Chingri Malai Curry','250ml',2]]}],
+        veg:[{g:'Bengali Main',items:[['Dhokar Dalna','250ml',0],['Aloo Posto','250ml',0],['Cholar Dal','250ml',0]]}]}},
+      {k:'lu', label:'Luchi', fixed:'Luchi', portion:'2 pcs'},
+      {k:'rc', label:'Rice', opts:pkSame([['Basanti Pulao','650ml',0],['Peas Pulao','650ml',0],['Steamed Rice','650ml',0],['Jeera Rice','650ml',0]])},
+      {k:'ds', label:'Bengali Sweet', opts:pkSame([['Pantua','1 pc',0],['Payesh','100ml',0],['Maal Pua','1 pc',0],['Ras Malai','1 pc',0]])},
+      {k:'kc', label:'Khejoor Chutney', fixed:'Khejoor Chutney', portion:'Complimentary', comp:true}
+    ]},
+  { id:'grand', name:'Grand Feast Package', price:25,
+    desc:'1 Starter + 1 Main + Lacchedar Paratha + Choice of Biryani (650ml) + 1 Dessert',
+    slots:[
+      {k:'st',  label:'Starter', opts:PK_STARTER},
+      {k:'mn',  label:'Main Dish', opts:PK_MAIN},
+      {k:'lp',  label:'Lacchedar Paratha', fixed:'Lacchedar Paratha', portion:'1 pc'},
+      {k:'bir', label:'Biryani', opts:PK_BIRYANI},
+      {k:'ds',  label:'Dessert', opts:pkSame(PK_DESSERT_FULL)}
+    ]}
+];
+var PK = {deal:'biryani', diet:'nv', guests:20, sel:{}};
+function pkEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function pkDeal(){for(var i=0;i<PK_DEALS.length;i++){if(PK_DEALS[i].id===PK.deal)return PK_DEALS[i];}return PK_DEALS[0];}
+function pkFlat(groups){var a=[];groups.forEach(function(g){a=a.concat(g.items);});return a;}
+function pkFind(slot,name){var l=pkFlat(slot.opts[PK.diet]);for(var i=0;i<l.length;i++){if(l[i][0]===name)return l[i];}return l[0];}
+function pkPrem(p){return p>0?' (+$'+p+')':'';}
+function pkRenderDeals(){
+  var el=document.getElementById('pk-deals');if(!el)return;
+  el.innerHTML=PK_DEALS.map(function(d){
+    return '<button type="button" role="tab" class="pk-deal'+(d.id===PK.deal?' on':'')+'" aria-selected="'+(d.id===PK.deal)+'" onclick="pkSetDeal(\''+d.id+'\')"><b>'+pkEsc(d.name.replace(' Package',''))+'</b><small>from $'+d.price+'/person</small></button>';
+  }).join('');
+}
+function pkRender(){
+  var d=pkDeal();
+  pkRenderDeals();
+  document.getElementById('pk-name').textContent=d.name;
+  document.getElementById('pk-desc').textContent=d.desc;
+  document.getElementById('pk-diet-nv').classList.toggle('on',PK.diet==='nv');
+  document.getElementById('pk-diet-veg').classList.toggle('on',PK.diet==='veg');
+  var html='';
+  d.slots.forEach(function(s){
+    if(s.fixed){
+      html+='<div class="pk-fixed"><div><span class="lbl">'+pkEsc(s.label)+'</span>'+pkEsc(s.fixed)+'</div><span class="pk-tag'+(s.comp?' comp':'')+'">'+(s.comp?'🎁 ':'🔒 ')+pkEsc(s.portion)+'</span></div>';
+      return;
+    }
+    var cur=pkFind(s,PK.sel[s.k]);PK.sel[s.k]=cur[0];
+    var groups=s.opts[PK.diet];
+    var opts=groups.map(function(g){
+      var o=g.items.map(function(i){
+        return '<option value="'+pkEsc(i[0])+'"'+(i[0]===cur[0]?' selected':'')+'>'+pkEsc(i[0])+' — '+pkEsc(i[1])+pkPrem(i[2])+'</option>';
+      }).join('');
+      return groups.length>1?'<optgroup label="'+pkEsc(g.g)+'">'+o+'</optgroup>':o;
+    }).join('');
+    var single=pkFlat(groups).length===1;
+    html+='<div class="pchoice"><label for="pk-s-'+s.k+'">'+pkEsc(s.label)+' <span class="pk-portion">· '+pkEsc(cur[1])+'</span></label>'
+      +'<select id="pk-s-'+s.k+'" onchange="pkPick(\''+s.k+'\',this.value)"'+(single?' disabled':'')+'>'+opts+'</select></div>';
+  });
+  document.getElementById('pk-slots').innerHTML=html;
+  pkPrice();
+}
+function pkCalc(){
+  var d=pkDeal(),extra=0,lines=[];
+  d.slots.forEach(function(s){
+    if(s.fixed)return;
+    var i=pkFind(s,PK.sel[s.k]);
+    if(i[2]>0){extra+=i[2];lines.push(i[0]+' +$'+i[2]);}
+  });
+  return {base:d.price,extra:extra,pp:d.price+extra,lines:lines};
+}
+function pkPrice(){
+  var c=pkCalc(),g=PK.guests,tot=c.pp*g;
+  document.getElementById('pk-pp').textContent='$'+c.pp+'/person';
+  document.getElementById('pk-break').innerHTML=c.extra
+    ? 'Base $'+c.base+' + '+c.lines.map(pkEsc).join(' + ')+' = <strong>$'+c.pp+'/person</strong>'
+    : 'Package price: <strong>$'+c.pp+'/person</strong> · no premium items selected';
+  document.getElementById('pk-tot').textContent='$'+tot;
+  document.getElementById('pk-dep').innerHTML=g+' guests × $'+c.pp+' · 40% deposit: <strong>$'+Math.round(tot*0.4)+'</strong>';
+}
+function pkSetDeal(id){PK.deal=id;pkRender();}
+function pkSetDiet(dt){PK.diet=dt;PK.sel={};pkRender();}
+function pkPick(k,v){PK.sel[k]=v;pkRender();}
+function pkGuests(dlt){PK.guests=Math.max(20,Math.min(50,PK.guests+dlt));document.getElementById('pk-guests').value=PK.guests;pkPrice();}
+function pkGuestsInput(){
+  var inp=document.getElementById('pk-guests');var v=parseInt(inp.value,10);
+  if(isNaN(v))v=20;v=Math.max(20,Math.min(50,v));PK.guests=v;inp.value=v;pkPrice();
+}
+function pkAdd(){
+  var d=pkDeal(),c=pkCalc(),parts=[];
+  d.slots.forEach(function(s){
+    if(s.fixed){parts.push(s.fixed+' ('+s.portion+')');return;}
+    var i=pkFind(s,PK.sel[s.k]);
+    parts.push(i[0]+' ('+i[1]+(i[2]>0?', +$'+i[2]:'')+')');
+  });
+  var key='pkg-'+d.id;
+  var existed=!!(cart[key]&&cart[key].qty>0);
+  cart[key]={qty:1,price:c.pp*PK.guests,
+    name:d.name+' ['+(PK.diet==='veg'?'Veg':'Non-Veg')+'] @ $'+c.pp+'/person — '+parts.join(', '),
+    size:'('+PK.guests+' guests)'};
+  var btn=document.getElementById('pk-btn');
+  if(btn){btn.textContent=existed?'Updated ✓':'Added ✓';btn.classList.add('done');setTimeout(function(){btn.textContent='Add to Order';btn.classList.remove('done');},2000);}
   updBar();
+  if(typeof updCatBadges==='function')updCatBadges();
   try{localStorage.setItem('sk_cart',JSON.stringify(cart));localStorage.setItem('sk_cart_ts',Date.now());}catch(e){}
 }
-function cg(id){
-  const inp=document.getElementById(id+'-guests');if(!inp)return;
-  let v=parseInt(inp.value)||20;
-  if(v<1)v=20;if(v>50)v=50;
-  inp.value=v;
-  const t=document.getElementById(id+'-tot');
-  if(t)t.textContent='$'+(v*20);
-}
-function addPkg(id,name){
-  const inp=document.getElementById(id+'-guests');
-  const g=inp?parseInt(inp.value):20;
-  if(g<20||g>50){alert('Guest count must be between 20 and 50.');return;}
-  const flds=['rice','main','side','snack','bir','veg','fish','chutney','bread','mutton'];
-  const choices=flds.map(f=>{const e=document.getElementById(id+'-'+f);return e?e.value:null;}).filter(Boolean);
-  const choiceStr=choices.length?' ['+choices.join(', ')+']':'';
-  cart['pkg-'+id]={qty:1,price:g*20,name:name+choiceStr,size:` (${g} guests)`};
-  const btn=document.getElementById(id+'-btn');
-  if(btn){btn.textContent='Added ✓';btn.classList.add('done');setTimeout(()=>{btn.textContent='Add to Order';btn.classList.remove('done');},2000);}
-  updBar();
-  try{localStorage.setItem('sk_cart',JSON.stringify(cart));localStorage.setItem('sk_cart_ts',Date.now());}catch(e){}
-}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',pkRender);}else{pkRender();}
 
 // ── CART BAR ─────────────────────────────────────────
 function updBar(){
@@ -4542,6 +4658,7 @@ function restoreCart(){
     Object.keys(saved).forEach(function(cartKey){
       var entry=saved[cartKey];
       if(!entry||!entry.qty||entry.qty<=0)return;
+      if(cartKey.indexOf('pkg-')===0){cart[cartKey]={qty:1,price:entry.price,name:entry.name,size:entry.size};return;}
       // cartKey may be "id" or "id-f" or "id-j" for fj items
       var baseId=cartKey.replace(/-[fj]$/,'');
       if(!items[baseId])return;
@@ -4584,9 +4701,8 @@ function updCatBadges(){
     'tbiryani': ['b1','b2','b3','b4','b5'],
     'troti':    ['r1','r2','b6','b7','b8'],
     'tdessert': ['d','bs1','bs2','bs3'],
-    'tcatering':['cp'],
-    'tbengali': ['bf','bm','bv','bs'],
-    'tbengpkg': ['bp']
+    'tcatering':['pkg-'],
+    'tbengali': ['bf','bm','bv','bs']
   };
   Object.keys(catMap).forEach(function(tab){
     var btn = document.getElementById('cat-'+tab);
