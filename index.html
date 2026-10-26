@@ -1950,23 +1950,34 @@ var PK_ST_NV = [
   ['Crispy Cutlet (Chicken)','1 pc',0],['Puff Patties (Chicken)','1 pc',0],['Chicken Keema Samosa','1 pc',0],
   ['Keema Cheese Cutlet','1 pc',0],['Chicken Tikka','1 skewer',0],['Chicken Seekh Kebab','1 skewer',0],
   ['Chicken Reshmi Kebab','1 skewer',0],['Chicken Tandoori','2 pcs',0],['Tandoori Drummettes','2 pcs',0],
-  ['Chicken Nene Drummettes (Korean)','2 pcs',0],['Tandoori Fish Tikka','1 skewer',0],
-  ['Mutton Tikka Boti (Goat)','1 skewer',0],['Mutton Seekh Kebab (Goat)','1 skewer',0],
-  ['Chapli Kebab (Goat)','1 pc',0],['Gola Kebab (Goat)','1 skewer',0]
+  ['Chicken Nene Drummettes (Korean)','2 pcs',0],['Tandoori Fish Tikka','1 skewer',2],
+  ['Mutton Tikka Boti (Goat)','1 skewer',1],['Mutton Seekh Kebab (Goat)','1 skewer',1],
+  ['Chapli Kebab (Goat)','1 pc',1],['Gola Kebab (Goat)','1 skewer',1]
 ];
 function pkWithout(list,names){return list.filter(function(i){return names.indexOf(i[0])<0;});}
 var PK_STARTER = {
   nv:  [{g:'Non-Veg Starters',items:PK_ST_NV},{g:'Veg Starters',items:PK_ST_VEG}],
   veg: [{g:'Veg Starters',items:PK_ST_VEG}]
 };
-var PK_ST_BENG_NV = pkWithout(PK_ST_NV,['Chapli Kebab (Goat)']).concat([['Fish Cutlet','1 pc',0],['Fish Fry','1 pc',0]]);
+var PK_ST_15_NV = pkWithout(PK_ST_NV,['Mutton Tikka Boti (Goat)','Mutton Seekh Kebab (Goat)','Chapli Kebab (Goat)','Gola Kebab (Goat)',
+  'Spring Rolls (Chicken)','Puff Patties (Chicken)','Tandoori Fish Tikka']);
+var PK_ST_15_VEG = pkWithout(PK_ST_VEG,['Spring Rolls (Veg)','Puff Patties (Veg)','Punjabi Samosa','Bread Pakora','Medu Vada (Veg)']);
+var PK_STARTER_15 = {
+  nv:  [{g:'Non-Veg Starters',items:PK_ST_15_NV},{g:'Veg Starters',items:PK_ST_15_VEG}],
+  veg: [{g:'Veg Starters',items:PK_ST_15_VEG}]
+};
+var PK_ST_BENG_NV = pkWithout(PK_ST_NV,['Chapli Kebab (Goat)']).concat([['Fish Cutlet','1 pc',2],['Fish Fry','1 pc',2]]);
 var PK_ST_BENG_VEG = pkWithout(PK_ST_VEG,['Puff Patties (Veg)']);
 var PK_STARTER_BENG = {
   nv:  [{g:'Non-Veg Starters',items:PK_ST_BENG_NV},{g:'Veg Starters',items:PK_ST_BENG_VEG}],
   veg: [{g:'Veg Starters',items:PK_ST_BENG_VEG}]
 };
 var PK_BIRYANI = {
-  nv:  [{g:'Biryani',items:[['Chicken 65 Biryani','650ml',0],['Chicken Dum Biryani','650ml',2],['Goat Dum Biryani','650ml',3]]}],
+  nv:  [{g:'Biryani',items:[['Chicken Dum Biryani','650ml',0],['Chicken 65 Biryani','650ml',2],['Goat Dum Biryani','650ml',3]]}],
+  veg: [{g:'Biryani',items:[['Veg Biryani','650ml',0]]}]
+};
+var PK_BIRYANI_15 = {
+  nv:  [{g:'Biryani',items:[['Chicken Dum Biryani','650ml',0],['Chicken 65 Biryani','650ml',2],['Goat Dum Biryani','650ml',3]]}],
   veg: [{g:'Biryani',items:[['Veg Biryani','650ml',0]]}]
 };
 var PK_DESSERT_BASIC = [['Gulab Jamun','1 pc',0],['Ras Malai','1 pc',0],['Shahi Firni','100ml',0]];
@@ -1977,46 +1988,47 @@ var PK_DESSERT_FULL = [['Gulab Jamun','1 pc',0],['Pantua','1 pc',0],['Ras Malai'
 function pkSame(list){return {nv:[{g:'Dessert',items:list}],veg:[{g:'Dessert',items:list}]};}
 var PK_MAIN = {
   nv: [
-    {g:'Chicken (bone-in)',items:[['Chicken Chaap','per portion',0],['Chicken Rezala','per portion',0],['Dum ka Chicken','per portion',0],
-      ['Achari Chicken','per portion',0],['Kadhai Chicken','per portion',0],['Chicken Angara','per portion',0],['Chicken Barra','per portion',0]]},
-    {g:'Chicken (boneless)',items:[['Chicken Kofta','per portion',1],['Chicken Tikka Masala','per portion',1]]},
-    {g:'Mutton (bone-in)',items:[['Mutton Bhuna Gosht (Goat)','per portion',2],['Mutton Chaap (Goat)','per portion',2],['Mutton Korma','per portion',2],
-      ['Mutton Rogan Josh','per portion',2],['Mutton Rezala','per portion',2],['Pahadi Gosht','per portion',2]]},
-    {g:'Mutton (boneless)',items:[['Tawa Gosht (Goat)','per portion',3],['Mutton Kofta (Goat)','per portion',3]]}
+    {g:'Chicken (bone-in)',items:[['Chicken Chaap','250ml',0],['Chicken Rezala','250ml',0],['Dum ka Chicken','250ml',0],
+      ['Achari Chicken','250ml',0],['Kadhai Chicken','250ml',0],['Chicken Angara','250ml',0],['Chicken Barra','250ml',0]]},
+    {g:'Chicken (boneless)',items:[['Chicken Kofta','250ml',1],['Chicken Tikka Masala','250ml',1]]},
+    {g:'Mutton (bone-in)',items:[['Mutton Bhuna Gosht (Goat)','250ml',2],['Mutton Chaap (Goat)','250ml',2],['Mutton Korma','250ml',2],
+      ['Mutton Rogan Josh','250ml',2],['Mutton Rezala','250ml',2],['Pahadi Gosht','250ml',2]]},
+    {g:'Mutton (boneless)',items:[['Tawa Gosht (Goat)','250ml',3],['Mutton Kofta (Goat)','250ml',3]]}
   ],
-  veg: [{g:'Veg Mains',items:[['Daal Makhni','per portion',0],['Daal Tadka','per portion',0],['Matar Paneer','per portion',0],
-    ['Kadhai Paneer','per portion',0],['Veg Diwani Handi','per portion',0],['Veg Kolhapuri','per portion',0]]}]
+  veg: [{g:'Veg Mains',items:[['Daal Makhni','250ml',0],['Daal Tadka','250ml',0],['Matar Paneer','250ml',0],
+    ['Kadhai Paneer','250ml',0],['Veg Diwani Handi','250ml',0],['Veg Kolhapuri','250ml',0]]}]
 };
 var PK_RICE = {
   nv:  [{g:'Rice',items:[['Jeera Rice','650ml',0],['Peas Pulao','650ml',0],['Veg Pulao','650ml',0]]}],
   veg: [{g:'Rice',items:[['Jeera Rice','650ml',0],['Peas Pulao','650ml',0],['Veg Pulao','650ml',0]]}]
 };
-var PK_IC_VEG_ST = [['Chilli Paneer (dry)','per portion',0],['Veg Manchurian (dry)','per portion',0],['Gobhi Manchurian (dry)','per portion',0]];
+var PK_IC_VEG_ST = [['Chilli Paneer (dry)','5 pcs',0],['Veg Manchurian (dry)','5 pcs',0],['Gobhi Manchurian (dry)','5 pcs',0]];
 var PK_IC_VEG_MAIN = [['Chilli Paneer','250ml',0],['Veg Manchurian','250ml',0],['Gobhi Manchurian','250ml',0]];
 var PK_DEALS = [
   { id:'biryani', name:'Biryani Package', price:15,
     desc:'Choice of Biryani (650ml) + 1 Starter + 1 Dessert',
     slots:[
-      {k:'bir', label:'Biryani', opts:PK_BIRYANI},
-      {k:'st',  label:'Starter', opts:PK_STARTER},
+      {k:'bir', label:'Biryani', opts:PK_BIRYANI_15},
+      {k:'st',  label:'Starter', opts:PK_STARTER_15},
       {k:'ds',  label:'Dessert', opts:pkSame(PK_DESSERT_BASIC)}
     ]},
   { id:'ic', name:'Indo-Chinese Package', price:20,
     desc:'1 Indo-Chinese Starter + 1 Indo-Chinese Main (250ml) + Fried Rice or Noodles (650ml) + 1 Dessert',
     slots:[
       {k:'st', label:'Indo-Chinese Starter', opts:{
-        nv:[{g:'Non-Veg',items:[['Chicken 65','5 pcs',0],['Chicken Lollipop','2 pcs',0],['Chilli Chicken (dry)','per portion',0],
-          ['Chicken Manchurian (dry)','per portion',0],['Chicken Majestic','per portion',0]]},{g:'Veg',items:PK_IC_VEG_ST}],
+        nv:[{g:'Non-Veg',items:[['Chicken 65','5 pcs',0],['Chicken Lollipop','2 pcs',0],['Chilli Chicken (dry)','5 pcs',0],
+          ['Chicken Manchurian (dry)','5 pcs',0],['Chicken Majestic','5 pcs',0]]},{g:'Veg',items:PK_IC_VEG_ST}],
         veg:[{g:'Veg',items:PK_IC_VEG_ST}]}},
       {k:'mn', label:'Indo-Chinese Main', opts:{
         nv:[{g:'Non-Veg',items:[['Chicken Manchurian','250ml',0],['Chilli Chicken','250ml',0],['Fish Chilli','250ml',0]]},{g:'Veg',items:PK_IC_VEG_MAIN}],
         veg:[{g:'Veg',items:PK_IC_VEG_MAIN}]}},
       {k:'rn', label:'Fried Rice / Noodles', opts:{
-        nv:[{g:'Fried Rice / Noodles',items:[['Chicken Fried Rice','650ml',0],['Hakka Noodles (Chicken)','650ml',0],['Egg Fried Rice','650ml',0],['Hakka Noodles (Egg)','650ml',0]]}],
+        nv:[{g:'Non-Veg',items:[['Chicken Fried Rice','650ml',0],['Hakka Noodles (Chicken)','650ml',0],['Egg Fried Rice','650ml',0],['Hakka Noodles (Egg)','650ml',0]]},
+            {g:'Veg',items:[['Veg Fried Rice','650ml',0],['Hakka Noodles (Veg)','650ml',0]]}],
         veg:[{g:'Fried Rice / Noodles',items:[['Veg Fried Rice','650ml',0],['Hakka Noodles (Veg)','650ml',0],['Egg Fried Rice','650ml',0]]}]}},
       {k:'ds', label:'Dessert', opts:pkSame(PK_DESSERT_BASIC)}
     ]},
-  { id:'essential', name:'Essential Package', price:20,
+  { id:'essential', name:'Dawat Package', price:20,
     desc:'1 Starter + 1 Main + 1 Rice (650ml) + 1 Dessert',
     slots:[
       {k:'st', label:'Starter', opts:PK_STARTER},
